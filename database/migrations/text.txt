@@ -1,0 +1,1 @@
+# Scripts para cambios posteriores (versionados)
