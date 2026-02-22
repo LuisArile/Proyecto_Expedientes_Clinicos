@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  nombreUsuario String @unique
+  correo     String   @unique
+  clave      String
+  rol       String
+  activo    Boolean
+  createdAt DateTime @default(now())
+
+  auditorias auditoria[]
+}
+
+model auditoria {
+  id          Int   @id @default(autoincrement())
+  usuarioId   Int 
+  accion      String
+  fecha       DateTime @default(now())
+
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
+
+}
