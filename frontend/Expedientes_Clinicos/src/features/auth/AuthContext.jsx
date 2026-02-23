@@ -1,33 +1,62 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
+const mockUsers = {
+  recepcionista: {
+    user: { id: "1", username: "recepcionista", name: "María González", role: "recepcionista" },
+  },
+  enfermero: {
+    user: { id: "2", username: "enfermero", name: "Carlos Ramírez", role: "enfermero" },
+  },
+  doctor: {
+    user: { id: "3", username: "doctor", name: "Dr. Juan Pérez", role: "doctor" },
+  },
+  admin: {
+    user: { id: "4", username: "admin", name: "Ana Martínez", role: "administrador" },
+  },
+};
+
 export function AuthProvider({ children }) {
-  
-  const [user, setUser] = useState({
-    id: 1,
-    name: "Ana Martínez",
-    username: "admin",
-    role: "administrador", 
+  // Intentamos cargar el usuario guardado o empezamos como null
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
   });
 
-  // Función estática para cerrar sesión
+  // SIMULACIÓN PARA DESARROLLO: 
+  // Si no hay usuario, logueamos al admin por defecto para que no veas la pantalla en blanco
+  useEffect(() => {
+    if (!user) {
+      const defaultUser = mockUsers.recepcionista.user; 
+      setUser(defaultUser);
+      localStorage.setItem("user", JSON.stringify(defaultUser));
+    }
+  }, [user]);
+
+  const login = async (username) => {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const data = mockUsers[username];
+    if (data) {
+      setUser(data.user);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      return true;
+    }
+    return false;
+  };
+
   const logout = () => {
-    console.log("Cerrando sesión estática...");
     setUser(null);
+    localStorage.removeItem("user");
   };
 
   return (
-    <AuthContext.Provider value={{ user, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth debe usarse dentro de un AuthProvider");
-  }
-  return context;
+  return useContext(AuthContext);
 }

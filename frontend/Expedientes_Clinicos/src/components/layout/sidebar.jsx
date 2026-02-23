@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
-import { useAuth } from "../../features/auth/authContext";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/features/auth/authContext";
+import { ROLE_STRATEGIES } from "@/constants/roles"
+
 
 import {
   Hospital,
@@ -116,34 +117,9 @@ export function Sidebar({ currentView, onNavigate  }) {
     item.roles.includes(user.role)
   );
 
-  const getRoleBadgeColor = (role) => {
-    switch (role) {
-      case "recepcionista":
-        return "bg-blue-100 text-blue-800 border-blue-300";
-      case "enfermero":
-        return "bg-green-100 text-green-800 border-green-300";
-      case "doctor":
-        return "bg-purple-100 text-purple-800 border-purple-300";
-      case "administrador":
-        return "bg-red-100 text-red-800 border-red-300";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
-    }
-  };
-
-  const getRoleLabel = (role) => {
-    switch (role) {
-      case "recepcionista":
-        return "Recepcionista";
-      case "enfermero":
-        return "Enfermero";
-      case "doctor":
-        return "Doctor";
-      case "administrador":
-        return "Administrador";
-      default:
-        return role;
-    }
+  const roleConfig = ROLE_STRATEGIES[user?.role] || { 
+    label: user?.role, 
+    color: "bg-gray-100 text-gray-800" 
   };
 
   return (
@@ -180,9 +156,9 @@ export function Sidebar({ currentView, onNavigate  }) {
         </div>
         <Badge
           variant="outline"
-          className={`text-xs px-2 py-1 ${getRoleBadgeColor(user.role)}`}
+          className={`text-xs px-2 py-1 ${roleConfig.color}`}
         >
-          {getRoleLabel(user.role)}
+          {roleConfig.label}
         </Badge>
       </div>
 
@@ -231,12 +207,12 @@ export function Sidebar({ currentView, onNavigate  }) {
 
       {/* Footer */}
       <div className="p-4 text-center bg-gray-50 border-t border-gray-200">
-        <p className="text-xs text-gray-500">
+        <span className="text-xs text-gray-500">
           <span className="inline-flex items-center gap-1">
             <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
             Sesión activa
           </span>
-        </p>
+        </span>
       </div>
     </div>
   );

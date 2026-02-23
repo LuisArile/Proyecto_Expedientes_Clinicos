@@ -1,14 +1,14 @@
-import { useRecepcionistaDashboard } from "../hooks/useRecepcionistaDashboard";
+import { useDoctorDashboard } from "../hooks/useDoctorDashboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Calendar, Clock, FileText } from "lucide-react";
+import { Stethoscope, Calendar, TestTube, Clock } from "lucide-react";
 
 import { useAuth } from "@/features/auth/authContext";
 
 
-export function DashboardRecepcionista() {
+export function DashboardDoctor() {
   const { user } = useAuth();
   
-  const { estadisticas, registro, loading } = useRecepcionistaDashboard();
+  const { estadisticas, consulta, loading } = useDoctorDashboard();
 
   if (loading) return <p className="p-6">Cargando datos maestros...</p>;
 
@@ -19,75 +19,75 @@ export function DashboardRecepcionista() {
         <h1 className="text-2xl font-bold text-gray-900">
           Bienvenida, {user?.name}
         </h1>
-        <p className="text-gray-600">Panel Recepcionista- Registro y Citas</p>
+        <p className="text-gray-600">Panel Médico - Consultas y Diagnóstico</p>
       </div>
 
-      {/* Banner de Turno (Azul) */}
-      <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white border-none">
+      {/* Banner de Turno (Morado) */}
+      <Card className="bg-gradient-to-r from-puple-600 to-purple-700 text-white border-none">
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm">Turno actual</p>
-              <h2 className="text-2xl font-bold">Lunes, 23 de Febrero 2026</h2>
-              <p className="text-blue-100 mt-1">
+              <p className="text-purple-100 text-sm">Turno actual</p>
+              <h2 className="text-2xl font-bold">Sábado, 21 de Febrero 2026</h2>
+              <p className="text-purple-100 mt-1">
                 Inicio: {estadisticas.horaInicio} • Duración: 8 horas  
               </p>
             </div>
-            <Clock className="h-12 w-12 text-blue-200" />
+            <Clock className="h-12 w-12 text-purple-200" />
           </div>
         </CardContent>
       </Card>
 
-      {/* Estadísticas del día*/}
+      {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatsCard 
-          titulo="Pacientes atendidos" 
-          valor={estadisticas.pacientesAtendidos} 
-          icon={<Users className="h-5 w-5 text-blue-600"  />} 
-          border="border-blue-100" 
-          textColor="text-blue-900"
-          pieDeFoto={"Hoy"}
-        />
-        <StatsCard 
-          titulo="Citas Agendadas" 
-          valor={estadisticas.citasAgendadas} 
-          icon={<Calendar className="h-5 w-5 text-green-600" />} 
-          border="border-green-100" 
-          textColor="text-green-900"
-          pieDeFoto={"Pendientes"}
-        />
-        <StatsCard 
-          titulo="Expedientes Creados" 
-          valor={estadisticas.expedientesCreados} 
-          icon={<FileText className="h-5 w-5 text-purple-600" />} 
+          titulo="Consultas Realizadas" 
+          valor={estadisticas.consultasRealizadas} 
+          icon={<Stethoscope className="h-5 w-5 text-purple-600" />} 
           border="border-purple-100" 
           textColor="text-purple-900"
           pieDeFoto={"Hoy"}
         />
+        <StatsCard 
+          titulo="Consultas Pendientes" 
+          valor={estadisticas.consultasPendientes} 
+          icon={<Calendar className="h-5 w-5 text-blue-600" />} 
+          border="border-blue-100" 
+          textColor="text-blue-900"
+          pieDeFoto={"Programadas"}
+        />
+        <StatsCard 
+          titulo="Exámenes Ordenados" 
+          valor={estadisticas.examenesOrdenados} 
+          icon={<TestTube className="h-5 w-5 text-teal-600" />} 
+          border="border-teal-100" 
+          textColor="text-teal-900"
+          pieDeFoto={"Hoy"}
+        />
       </div>
 
-      {/* Información adicional - Pacientes Recientes */}
+      {/* Próximas consultas */}
       <Card>
         <CardHeader>
-          <CardTitle>Pacientes Recientes</CardTitle>
-          <CardDescription>Últimos expedientes creados hoy</CardDescription>
+          <CardTitle>Próximas Consultas</CardTitle>
+          <CardDescription>Pacientes programados para hoy</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {registro.map((paciente, index) => (
+            {consulta.map((evento, index) => (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Clock className="h-5 w-5 text-blue-600" />
+                  <div className="h-10 w-10 bg-purple-100 rounded-full flex items-center justify-center">
+                    <Clock className="h-5 w-5 text-red-600" />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{paciente.nombre}</p>
-                    <p className="text-xs text-gray-500">{paciente.id}</p>
+                    <p className="font-medium text-gray-900">{evento.nombre}</p>
+                    <p className="text-xs text-gray-500">{evento.tipo}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-600">{paciente.hora}</p>
-                  <p className="text-xs text-gray-400">Creado</p>
+                  <p className="text-sm text-gray-900">{evento.hora}</p>
+                  <p className="text-xs text-gray-500">Programada</p>
                 </div>
               </div>
             ))}

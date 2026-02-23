@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   obtenerEstadisticasAdmin,
   obtenerActividadReciente,
-} from "../services/dashboardService";
+} from "../services/dashboardServiceAdmin";
 
 export function useAdminDashboard() {
   const [estadisticas, setEstadisticas] = useState(null);

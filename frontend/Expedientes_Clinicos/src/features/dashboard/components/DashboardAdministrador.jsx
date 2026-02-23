@@ -11,7 +11,7 @@ export function DashboardAdministrador() {
   if (loading) return <p className="p-6">Cargando datos maestros...</p>;
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div className="p-6 space-y-6 ">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
@@ -42,6 +42,7 @@ export function DashboardAdministrador() {
           icon={<Users className="text-blue-600" />} 
           border="border-blue-100" 
           textColor="text-blue-900"
+          pieDeFoto={"Total en sistema"}
         />
         <StatsCard 
           titulo="Eventos Hoy" 
@@ -49,6 +50,7 @@ export function DashboardAdministrador() {
           icon={<BarChart3 className="text-purple-600" />} 
           border="border-purple-100" 
           textColor="text-purple-900"
+          pieDeFoto={"Hoy"}
         />
         <StatsCard 
           titulo="Medicamentos" 
@@ -56,6 +58,7 @@ export function DashboardAdministrador() {
           icon={<Pill className="text-green-600" />} 
           border="border-green-100" 
           textColor="text-green-900"
+          pieDeFoto={"En catálogo"}          
         />
         <StatsCard 
           titulo="Tipos de Examen" 
@@ -63,6 +66,7 @@ export function DashboardAdministrador() {
           icon={<TestTube className="text-teal-600" />} 
           border="border-teal-100" 
           textColor="text-teal-900"
+          pieDeFoto={"Disponibles"}
         />
       </div>
 {/* Acceso rápido a módulos administrativos */}
@@ -135,15 +139,18 @@ export function DashboardAdministrador() {
 }
 
 // Componente auxiliar para las tarjetas de arriba
-function StatsCard({ titulo, valor, icon, border, textColor }) {
+function StatsCard({ titulo, valor, icon, border, textColor, pieDeFoto }) {
   return (
     <Card className={`hover:shadow-md transition-shadow ${border}`}>
-      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+      <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium text-gray-600">{titulo}</CardTitle>
         {icon}
       </CardHeader>
       <CardContent>
         <div className={`text-3xl font-bold ${textColor}`}>{valor}</div>
+        <p className="text-xs text-gray-500 mt-1 font-medium">
+            {pieDeFoto}
+        </p>
       </CardContent>
     </Card>
   );
