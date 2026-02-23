@@ -1,4 +1,4 @@
-# Utilizamos la imagen oficial de sql 2025
+# Utilizamos la imagen oficial de sql 2022
 FROM mcr.microsoft.com/mssql/server:2022-latest
 
 # Aceptamos la licencia

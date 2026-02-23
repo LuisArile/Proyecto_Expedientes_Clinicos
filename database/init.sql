@@ -1,8 +1,8 @@
-SET ANSI_NULLS ON;
-SET ANSI_PADDING ON;
-SET ANSI_WARNINGS ON;
-SET ARITHABORT ON;
-SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON; -- Comparaciones lógicas estrictas
+SET ANSI_PADDING ON; -- Respeta espacios y ceros
+SET ANSI_WARNINGS ON; -- Detiene procesos ante errores de datos
+SET ARITHABORT ON; -- Corta la ejecución en errores matemáticos
+SET QUOTED_IDENTIFIER ON; -- Diferencia nombres de objetos de textos
 GO
 
 IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'BD_EXPEDIENTES_CLINICOS')
