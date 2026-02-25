@@ -4,8 +4,9 @@ import { Users, Calendar, Clock, FileText } from "lucide-react";
 
 import { useAuth } from "@/features/auth/authContext";
 
+import { FormularioExpediente } from "@/features/expedientes/components/FormularioExpediente";
 
-export function DashboardRecepcionista() {
+export function DashboardRecepcionista(/*{ currentView }*/) {
   const { user } = useAuth();
   
   const { estadisticas, registro, loading } = useRecepcionistaDashboard();

@@ -6,36 +6,55 @@ import { useAuth } from "../features/auth/authContext";
 import { DashboardAdministrador } from "../features/dashboard/components/DashboardAdministrador";
 import { DashboardDoctor } from "../features/dashboard/components/DashboardDoctor";
 import { DashboardRecepcionista } from "../features/dashboard/components/DashboardRecepcionista";
+import { DashboardEnfermero } from "../features/dashboard/components/DashboardEnfermero";
+
+import { FormularioExpediente } from "../features/expedientes/components/FormularioExpediente";
 
 
-// Aquí podríamos agregar más dashboards para otros roles como enfermería, recepción, etc.
+const DASHBOARD_COMPONENTS = {
+  administrador: DashboardAdministrador,
+  doctor: DashboardDoctor,
+  recepcionista: DashboardRecepcionista,
+  enfermero: DashboardEnfermero,
+};
+
 export function Dashboard() {
   const { user, loading } = useAuth();
   const [currentView, setCurrentView] = useState("inicio");
 
-  // Strategy pattern
-  const panelPorRol = {
-    administrador: <DashboardAdministrador currentView={currentView} />,
-    doctor: <DashboardDoctor currentView={currentView} />,
+  if (loading) return <p>Cargando...</p>;
 
-    enfermero: <div className="p-6"><h2>Panel de Enfermería</h2><p>Bienvenido, {user?.name}</p></div>,
+  const renderContent = () => {
+    // Si el usuario hizo clic en "Crear Paciente"
+    if (currentView === "crear-expediente") {
+
+      if (["recepcionista", "administrador"].includes(user?.role)) {
+        return <FormularioExpediente onCancel={() => setCurrentView("inicio")} />;
+      }
+      return <div className="p-10 text-red-500">No tienes permiso para crear expedientes.</div>;
+    }
+
+    // dashboard según el rol
+    const RoleDashboard = DASHBOARD_COMPONENTS[user?.role];
     
-    recepcionista: <DashboardRecepcionista currentView={currentView} />,
-  };
+    if (RoleDashboard) {
+      return <RoleDashboard currentView={currentView} user={user} />;
+    }
+
+    return (
+      <div className="p-10 text-center">
+        <h2 className="text-xl font-bold text-red-600">Acceso Restringido</h2>
+        <p>El rol "{user?.role}" no tiene un panel configurado.</p>
+      </div>
+    );
+  };  
 
   return (
     <DashboardLayout
       currentView={currentView}
       onNavigate={(view) => setCurrentView(view)}
     >
-      {panelPorRol[user?.role] 
-      || 
-      (
-          <div className="p-10 text-center">
-          <h2 className="text-xl font-bold text-red-600">Acceso Restringido</h2>
-          <p className="text-gray-500">El rol "{user?.role}" no tiene un panel configurado.</p>
-        </div>
-      )}
+      {renderContent()}
     </DashboardLayout>
   );
 }
