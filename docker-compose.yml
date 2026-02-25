@@ -2,14 +2,16 @@ version: "3.9"
 
 services:
   database:
-    build: 
-      context: ./database
+    # build: 
+      # context: ./database
+    image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sql-clinica
     env_file:
-      - ./backend/.env
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=${DB_PASSWORD}
+      # - ./backend/.env
+      - .env.docker
+    # environment:
+    #   - ACCEPT_EULA=Y
+    #   - SA_PASSWORD=${DB_PASSWORD}
     ports:
       - "1433:1433"
     volumes:
@@ -18,4 +20,4 @@ services:
 
 volumes:
   sql_data_clinica:
-    driver: local
+    # driver: local

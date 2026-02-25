@@ -1,8 +1,8 @@
-#!/bin/bash
-# entrypoint.sh
+# #!/bin/bash
+# # entrypoint.sh
 
-# Inicia SQL Server en background
-/opt/mssql/bin/sqlservr &
+# # Inicia SQL Server en background
+# /opt/mssql/bin/sqlservr &
 
 # # Espera a que SQL Server esté listo
 # echo "Esperando a que SQL Server esté listo..."
