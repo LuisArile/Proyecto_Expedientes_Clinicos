@@ -1,89 +1,40 @@
-
-const bcrypt= require("bcrypt");
-const jwt= require("jsonwebtoken");
-const { usuario } = require("../config/prisma");
-const {controlarEventos}= require('../config/roles')
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { eventos } = require('../config/roles');
 
 class inicioSesionService {
-    constructor(usuarioRepositoy) {
-        this.usuarioRepositoy=usuarioRepositoy;
-        
+    constructor(usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
     }
 
+   async inicioSesion(nombreUsuario, clave) {
 
-    async inicioSesion(nombreUsuario,clave){
+    if (!nombreUsuario || !clave) {
+        throw new Error('Credenciales incorrectas');
+    }
 
-        if (!nombreUsuario) {
-            throw new Error (`credenciales incorrectas : ${error.message}`)
-        }
+    const usuario = await this.usuarioRepository.filtrarNombreUsuario(nombreUsuario);
+    
+    if (!usuario) {
+        throw new Error('Credenciales incorrectas');
+    }
 
-        if (!clave) {
-            throw new Error (`credenciales incorrectas : ${error.message}`)
-        }
+    const claveValida = await bcrypt.compare(clave, usuario.clave);
 
-        //Busqueda de usuario , ya con la clase correcta
-        const usuario= await this.usuarioRepositoy.filtrarNombreUsuario(nombreUsuario);
+    if (!claveValida) {
+        console.log('❌ Contraseña incorrecta');
+        throw new Error('Credenciales incorrectas');
+    }
 
-        if (!usuario) {
-            throw new Error (`usuario no encontrado : ${error.message}`)
-        }
+}
 
-
-        console.log(`usuario encontrado : ${usuario.nombreUsuario} (${usuario.rol})`);
-
-        //verificar clave
-        const claveValida= await bcrypt.compare(clave,usuario.clave);
-
-        if (!Validarclave) {
-            throw new Error (`clave  invalida : ${error.message}`)
-        }
-
-
-        //Actualizar ultimo acceso
-        await this.usuarioRepositoy.actualizarUltimoAcceso(usuario.id);
-
-        //registro de inicio exitoso
-        await this.usuarioRepositoy.registrarAccionUsuario(
-            usuario.id,
-            controlarEventos.loginExitoso
-        )
-
-
-        //Creacion de Token
-
-
-        const accesoMenu={
-            menu:usuario.getMenu(),
-            permisos:usuario.getPermisos()
-
-        };
-
-        
-            const token= jwt.sign(
-                {id:usuario.id, 
-                nombreUsuario:usuario.nombreUsuario,
-                rol: usuario.rol
-            }, process.env.JWT_SECRET,
-            {expiresIn: "1h"}
-
+    async cierreSesion(usuarioId) {
+        await this.usuarioRepository.registrarAccionUsuario(
+            usuarioId,
+            eventos.logout
         );
-
-
-return {token,
-        usuario:{id: usuario.toJSON(),
-        accesoMenu,
-        bienvenida: usuario.getBienvenida()
-        }};
-
-        }
-
-        async  cierreSesion(usuarioId) {
-            await this.usuarioRepositoy.registrarAccionUsuario(
-                usuarioId,
-                controlarEventos.cierreLogin
-            );
-            return {message: 'sesion Cerrada exitosamente'}
-        }
+        return { message: 'Sesión cerrada exitosamente' };
     }
+}
 
-module.exports =inicioSesionService;
+module.exports = inicioSesionService;

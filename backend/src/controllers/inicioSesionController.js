@@ -1,38 +1,26 @@
-
 class inicioSesionController {
-
-    constructor(inicioSesionService){
-        this.inicioSesionService=inicioSesionService;
+    constructor(inicioSesionService) {
+        this.inicioSesionService = inicioSesionService;
     }
 
-async  inicioSesion(req,res) {
-        
+    async inicioSesion(req, res) {
         try {
-        const {nombreUsuario, clave }=req.body;
-    
-        const respuestaLogin= await this.inicioSesionService.inicioSesion(nombreUsuario,clave);
-        res.json({data: respuestaLogin});
-            
+            const { nombreUsuario, clave } = req.body;
+            const resultado = await this.inicioSesionService.inicioSesion(nombreUsuario, clave);
+            res.json({ success: true, data: resultado });
         } catch (error) {
-            res.status(401).json({error: error.message});
+            res.status(401).json({ success: false, error: error.message });
         }
     }
 
-    
-        async  cierreSesion(req,res) {
-                
-                try {
-                //asumiendo que viene de milddleware de autenticacion
-                const respuestaLogin= await this.inicioSesionService.cierreSesion(
-                    req.usuario.id); res.json({data:respuestaLogin})
-
-            } catch (error){
-                res.status(400).json({
-                    error:error.message
-                });
-            }
+    async cierreSesion(req, res) {
+        try {
+            const resultado = await this.inicioSesionService.cierreSesion(req.usuario?.id);
+            res.json({ success: true, data: resultado });
+        } catch (error) {
+            res.status(400).json({ success: false, error: error.message });
+        }
     }
 }
 
-
-module.exports =inicioSesionController;
+module.exports = inicioSesionController;

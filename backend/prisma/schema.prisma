@@ -11,17 +11,14 @@ model Usuario {
     id             Int      @id @default(autoincrement())
     nombre         String
     apellido       String
-    email          String   @unique
-    username       String   @unique
-    password       String
-    rol            String   // ADMINISTRADOR, DOCTOR, PACIENTE, RECEPCIONISTA
+    correo          String   @unique
+    nombreUsuario       String   @unique
+    clave       String
+    rol            String   
     activo         Boolean  @default(true)
     
     // Campos específicos
-    especialidad   String?
-    prevision      String?
-    turno          String?
-    
+    especialidad   String?    
     ultimoAcceso   DateTime?
     createdAt      DateTime @default(now())
     updatedAt      DateTime @updatedAt
@@ -36,8 +33,6 @@ model Auditoria {
     
     accion         String
     detalles       String?
-    ip             String?
-    userAgent      String?
     
     fecha          DateTime @default(now())
 }

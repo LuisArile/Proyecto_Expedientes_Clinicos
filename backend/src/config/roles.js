@@ -1,17 +1,18 @@
 
 module.exports={
-roles:{
-    admin:'admistrador',
-    medico:'medico',
-    recepcionista: 'recepcionista',
-    paciente: 'paciente',
-    enfermero: 'enfermero'
-},
+    roles:{
+        admin:'ADMINISTRADOR',
+        medico:'MEDICO',
+        recepcionista: 'RECEPCIONISTA',
+        paciente: 'PACIENTE',
+        enfermero: 'ENFERMERO'
+    },
 
-controlarEventos:{
+    eventos:{
 
-    loginExitoso: 'login_exitoso',
-    loginCierre: 'cierre de sesion'
-}
+        loginExitoso: 'LOGIN_EXITOSO',
+        loginCierre: 'CIERRE_SESION',
+        usuarioCreado: 'USUARIO_CREADO'
+    }
 
 }

@@ -3,14 +3,12 @@ const Usuario = require('./Usuario');
 class Administrador extends Usuario {
     constructor(data={}) {
         super(data);
-        this.rol='administrador';
+        this.rol='ADMINISTRADOR';
     }
 
-    getNombre(){
-        return `administrador ${this.nombre}`;
-    }
+   
 
-    getMenuUsuario(){
+    getMenu(){
         return [
             {id:'ventanaPrincipal' , nombre:'ventanaPrincipal', ruta:'ventanaPrincipal/'},
             {id:'usuarios' , nombre:'Usuarios', ruta:'/usuarios/'},
@@ -20,16 +18,20 @@ class Administrador extends Usuario {
         ];
     }
 
+    getNombre(){
+        return `administrador ${this.nombre}`;
+    }
+
 
     getPermisos(){
         return['*'];
     }
 
     getBienvenida(){
-        return `Bienvenido Admin ${this.nombre}`;
+        return `Bienvenido Administrador ${this.nombre}`;
     }
 
 
 }
 
-module.exports='Administrador';
+module.exports=Administrador;

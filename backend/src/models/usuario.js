@@ -3,12 +3,12 @@ class Usuario {
         this.id=data.id;
         this.nombre=data.nombre;
         this.apellido=data.apellido;
+        this.correo=data.correo;
         this.nombreUsuario=data.nombreUsuario;
         this.clave=data.clave;
         this.rol=data.rol;
         this.activo=data.activo !==undefined ?data.activo:true;
         this.ultimoAcesso=data.ultimoAcesso;
-        this.especialidad=data.especialidad;
     }
 
 
@@ -20,7 +20,7 @@ class Usuario {
     return this.nombre;
     }
 
-    getMenuUsuario(){
+    getMenu(){
         return [];
     }
 

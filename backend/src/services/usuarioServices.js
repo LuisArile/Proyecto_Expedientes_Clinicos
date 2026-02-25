@@ -1,4 +1,5 @@
 const bcrypt=require('bcrypt');
+const Encriptador= require('../utils/encritador');
 
 
 class usuarioService{
@@ -16,24 +17,20 @@ class usuarioService{
 
           //encriptacion
 
-        const salt= await bcrypt.genSalt(8);
-        data.clave=await bcrypt.hash(data.clave,salt);
+         data.clave= await Encriptador.encriptar(data.clave);
+
 
 
         const usuario= await this.usuarioRepository.crear(data);
-        console.log('Usuario creado con ID:', usuario.Id);
 
         if(usuario&&usuario.Id){
             //registrar accion 
-        await this.usuarioRepository.registrarAccionUsuario(usuario.Id,'USUARIO CREADO')
-        }else{
-            console.log('Usuario creado pero sin ID:', usuario)
-        }
+        await this.usuarioRepository.registrarAccionUsuario(usuario.Id,'USUARIO_CREADO',
+            {rol:data.rol}
+        );
+    }
 
-        
-        const {clave,...usuarioSinClave}=usuario;
-        return usuarioSinClave;
-
+        return usuario.toJSON();
 
         } catch (error) {
             throw new Error (error.message)
@@ -41,14 +38,13 @@ class usuarioService{
 
     }
 
-   async  obtenerTodos() {
-
+  async obtenerTodos() {
         try {
-            return await this.usuarioRepository.obtenerTodos();
+            const usuarios = await this.usuarioRepository.obtenerTodos();
+            return usuarios.map(u => u.toJSON());
         } catch (error) {
-            throw new Error (`Error al obtener usuarios : ${error.message}`)
+            throw new Error(`Error al obtener usuarios: ${error.message}`);
         }
-
     }
     
 }

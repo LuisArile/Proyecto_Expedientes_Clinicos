@@ -2,7 +2,6 @@ const bcrypt=require('bcrypt');
 
 
 class Encriptador {
-  
 
     static async encriptar(nombreUsuario) {
         const salt=await bcrypt(bcrypt.genSalt(8));

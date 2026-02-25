@@ -3,9 +3,11 @@ const Usuario = require('./Usuario');
 class Medico extends Usuario {
     constructor(data={}) {
         super(data);
-        this.rol='medico';
+        this.rol='MEDICO';
         this.especialidad=data.especialidad || 'medicina general';
     }
+
+    
 
     getNombre(){
         return `administrador ${this.nombre}`;
@@ -26,6 +28,13 @@ class Medico extends Usuario {
 
     getBienvenida(){
         return `Bienvenido Admin ${this.nombre}`;
+    }
+
+    toJSON(){
+        return {
+            ...super.toJSON(),
+            especialidad:this.especialidad
+        };
     }
 
 
