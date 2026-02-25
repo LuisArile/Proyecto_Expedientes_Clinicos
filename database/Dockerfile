@@ -4,7 +4,7 @@ FROM mcr.microsoft.com/mssql/server:2022-latest
 # Aceptamos la licencia
 ENV ACCEPT_EULA=Y
 # contraseña creadas en .env
-ENV SA_PASSWORD={DB_PASSWORD}
+ENV SA_PASSWORD=${DB_PASSWORD}
 
 # Establecemos el directorio de trabajo
 WORKDIR /app
