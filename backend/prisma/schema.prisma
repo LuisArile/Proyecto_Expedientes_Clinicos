@@ -16,10 +16,10 @@ model Usuario {
   activo    Boolean
   createdAt DateTime @default(now())
 
-  auditorias auditoria[]
+  auditorias Auditoria[]
 }
 
-model auditoria {
+model Auditoria {
   id          Int   @id @default(autoincrement())
   usuarioId   Int 
   accion      String
@@ -28,3 +28,35 @@ model auditoria {
   usuario     Usuario  @relation(fields: [usuarioId], references: [id])
 
 }
+
+model Paciente {
+  idPaciente      Int          @id @default(autoincrement())
+  dni             String       @db.NVarChar(20)
+  nombre          String       @db.NVarChar(50)
+  apellido        String       @db.NVarChar(50)
+  correo          String?      @db.NVarChar(100)
+  telefono        String?      @db.NVarChar(20)
+  fechaNacimiento DateTime     @db.Date
+  genero          String       @db.NVarChar(50)
+  idResidencia    Int
+
+  expedientes     Expediente[] 
+
+  @@map("Paciente") 
+
+} 
+
+model Expediente {
+  idExpediente       Int      @id @default(autoincrement())
+  idPaciente         Int      @unique
+  numeroExpediente   String   @unique @db.NVarChar(50)
+  estado             Int      @db.TinyInt
+  fechaCreacion      DateTime @default(now()) @db.Date
+  fechaActualizacion DateTime @default(now()) @updatedAt
+  observaciones      String?  @db.NVarChar(100)
+
+  paciente           Paciente @relation(fields: [idPaciente], references: [idPaciente])
+
+  @@map("Expediente")
+
+} 
