@@ -13,5 +13,6 @@ const inicioSesionService = new InicioSesionService(usuarioRepository);
 const inicioSesionController = new InicioSesionController(inicioSesionService);
 
 router.post("/", (req,res)=> inicioSesionController.inicioSesion(req,res));
+router.post("/", (req,res)=> inicioSesionController.cierreSesion(req,res));
 
 module.exports=router;

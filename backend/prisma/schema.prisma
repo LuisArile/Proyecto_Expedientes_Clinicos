@@ -1,30 +1,43 @@
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlserver"
-  url      = env("DATABASE_URL")
+    provider = "sqlserver"
+    url      = env("DATABASE_URL")
 }
 
 model Usuario {
-  id        Int      @id @default(autoincrement())
-  nombreUsuario String @unique
-  correo     String   @unique
-  clave      String
-  rol       String
-  activo    Boolean
-  createdAt DateTime @default(now())
+    id             Int      @id @default(autoincrement())
+    nombre         String
+    apellido       String
+    email          String   @unique
+    username       String   @unique
+    password       String
+    rol            String   // ADMINISTRADOR, DOCTOR, PACIENTE, RECEPCIONISTA
+    activo         Boolean  @default(true)
+    
+    // Campos específicos
+    especialidad   String?
+    prevision      String?
+    turno          String?
+    
+    ultimoAcceso   DateTime?
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
 
-  auditorias auditoria[]
+    auditorias     Auditoria[]
 }
 
-model auditoria {
-  id          Int   @id @default(autoincrement())
-  usuarioId   Int 
-  accion      String
-  fecha       DateTime @default(now())
-
-  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
-
+model Auditoria {
+    id             Int      @id @default(autoincrement())
+    usuarioId      Int?
+    usuario        Usuario? @relation(fields: [usuarioId], references: [id])
+    
+    accion         String
+    detalles       String?
+    ip             String?
+    userAgent      String?
+    
+    fecha          DateTime @default(now())
 }

@@ -1,4 +1,5 @@
 const express= require("express");
+const prisma = require('./config/prisma')
 const cors= require("cors");
 
 const usuarioRouters = require("./routes/usuarioRoute")
@@ -17,6 +18,8 @@ app.use(express.json());
 app.use("/api/usuarios", usuarioRouters); //creacion de usuarios
 app.use("/api/obtenerUsuarios", usuarioRouters); //obtener todos los usuarios
 
-app.use("/api/login", inicioSesionRouters);
+
+app.use("/api/login", inicioSesionRouters); ////inicioSesion
+app.use("/api/cierreSesion", inicioSesionRouters);// cierre de sesion
 
 module.exports=app;

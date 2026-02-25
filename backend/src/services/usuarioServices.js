@@ -1,5 +1,6 @@
 const bcrypt=require('bcrypt');
 
+
 class usuarioService{
     constructor(usuarioRepository){
         this.usuarioRepository=usuarioRepository;

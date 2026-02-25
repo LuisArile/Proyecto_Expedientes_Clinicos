@@ -1,12 +1,13 @@
-const { connect } = require("../app");
+
 const { usuario } = require("../config/prisma");
+const UsuarioBase= require('../facturyMet/usuarioBaseFact');
 
 class usuarioRepository{
     constructor(prisma){
         this.prisma=prisma;
     }
 
-//creacion de nuevo usuario
+/*
     async crear(data){
         try {
             return await this.prisma.usuario.create({
@@ -23,6 +24,7 @@ class usuarioRepository{
         }
     }
 
+    */
     async obtenerTodos(){
 
         try {
@@ -36,46 +38,29 @@ class usuarioRepository{
     
     async filtrarNombreUsuario(nombreUsuario){
 
-        try {
-            return await this.prisma.usuario.findUnique({where:{nombreUsuario}});
-        } catch (error) {
-            throw new Error(`Error al obtener usuarios:${error.message} `);
-            
-        }
+            const data= await this.prisma.usuario.findUnique({
+                where:{nombreUsuario}});
+
+                return data ? UsuarioBase.crearUsuario(data) : null;
     }
     
 
-    async registrarAccionUsuario(usuarioId, accion){
+    async registrarAccionUsuario(usuarioId, accion,detalles={}){
 
-        try {
-            console.log('intentando registrar accion:',{usuarioId, accion});
+        return await this.prisma.auditoria.create({
+            data: {
 
-            if(!usuarioId){
-                throw new Error('ID de usuario no proporcionado')
-            }
-            const id= Number(usuarioId);
-            console.log('ID convertido:', id);
-
-
-            if(isNaN(id)){
-                throw new Error(`ID no valido: ${usuarioId}` );
+                usuarioId: usuarioId ? Number (usuarioId) : null, detalles: JSON.stringify(detalles),fecha: new Date()
             }
 
-            const usuarioExiste= await this.prisma.usuario.findUnique({where: {id:id}})
-            console.log('Usuario existe: ', usuarioExiste);
+        });
+    }
 
-            if(!usuarioExiste){
-                throw new Error(`Usuario con ID ${id} no encontrado`);
-            }
-           
-            const auditoria= await this.prisma.auditoria.create({data:{usuarioId: id ,accion:accion}});
-            console.log('Auditoria creada:', auditoria)
-            return auditoria;
-
-        } catch (error) {
-            throw new Error(`Error al registrar accion:${error.message} `);
-            
-        }
+    async actualizarUltimoAcceso(id){
+        return await this.prisma.usuario.update({
+            where: {id:Number(id)},
+            data: {ultimiAcceso : new Date}
+        });
     }
 
     
