@@ -27,6 +27,7 @@ class inicioSesionService {
         throw new Error('Credenciales incorrectas');
     }
 
+    return usuario;
 }
 
     async cierreSesion(usuarioId) {
