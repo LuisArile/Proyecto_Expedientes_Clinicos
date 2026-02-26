@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const prisma = require('../config/prisma');
 const UsuarioBase = require('../factoryMet/usuarioBaseFact');
 
@@ -6,13 +7,17 @@ class usuarioRepository {
     
     async crear(data) {
     try {
+        // Encriptar la clave antes de guardar
+        const saltRounds = 10;
+        const claveEncriptada = await bcrypt.hash(data.clave, saltRounds);
+
         const resultado = await prisma.usuario.create({
             data: {
                 nombre: data.nombre,
                 apellido: data.apellido,
                 correo: data.correo,
                 nombreUsuario: data.nombreUsuario,
-                clave: data.clave,
+                clave: claveEncriptada,
                 rol: data.rol,
                 activo: true
             }

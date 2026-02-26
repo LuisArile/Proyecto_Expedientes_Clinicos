@@ -7,6 +7,7 @@ class inicioSesionController {
     }
 
     async inicioSesion(req, res) {
+        console.log("Datos recibidos:", req.body);
         try {
             const { nombreUsuario, clave } = req.body;
             // const resultado = await this.inicioSesionService.inicioSesion(nombreUsuario, clave);
