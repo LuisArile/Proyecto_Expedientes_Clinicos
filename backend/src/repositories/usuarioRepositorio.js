@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt');
 const prisma = require('../config/prisma');
 const UsuarioBase = require('../factoryMet/usuarioBaseFact');
-const bcrypt = require('bcrypt');
 
 class UsuarioRepository {
 

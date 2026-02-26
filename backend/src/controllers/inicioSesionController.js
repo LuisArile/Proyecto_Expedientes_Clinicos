@@ -10,13 +10,13 @@ class inicioSesionController {
         console.log("Datos recibidos:", req.body);
         try {
             const { nombreUsuario, clave } = req.body;
-            // const resultado = await this.inicioSesionService.inicioSesion(nombreUsuario, clave);
-            const usuario = await this.inicioSesionService.inicioSesion(nombreUsuario, clave);
+            const resultado = await this.inicioSesionService.inicioSesion(nombreUsuario, clave);
+            // const usuario = await this.inicioSesionService.inicioSesion(nombreUsuario, clave);
 
             const payload = {
-                id: usuario.id,
-                nombre: usuario.nombre,
-                rol: usuario.rol
+                id: resultado.id,
+                nombre: resultado.nombre,
+                rol: resultado.rol
             };
 
             const token = jwt.sign(payload, process.env.JWT_SECRET || 'tu_clave_secreta', { 

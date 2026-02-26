@@ -14,9 +14,11 @@ const inicioSesionService = new InicioSesionService(usuarioRepository);
 const inicioSesionController = new InicioSesionController(inicioSesionService);
 
 //crear Usuario
-router.post("/login", (req, res) =>
-  inicioSesionController.inicioSesion(req, res)
-);
+// router.post("/login", (req, res) =>
+//   inicioSesionController.inicioSesion(req, res)
+// );
+router.post("/", (req, res) => 
+    inicioSesionController.inicioSesion(req, res));
 
 router.post("/logout", (req, res) =>
   inicioSesionController.cierreSesion(req, res)
