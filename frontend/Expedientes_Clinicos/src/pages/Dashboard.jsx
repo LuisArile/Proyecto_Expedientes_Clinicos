@@ -8,7 +8,7 @@ import { DashboardRecepcionista } from "../features/dashboard/components/Dashboa
 import { DashboardEnfermero } from "../features/dashboard/components/DashboardEnfermero";
 
 import { FormularioExpediente } from "../features/expedientes/components/FormularioExpediente";
-import { Changepassword } from "./Changepassword";
+import { Changepassword } from "../features/dashboard/components/Changepassword";
 
 const DASHBOARD_COMPONENTS = {
   ADMINISTRADOR: DashboardAdministrador,

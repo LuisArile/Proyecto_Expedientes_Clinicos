@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthProvider, useAuth } from "./features/auth/AuthContext";
 import { Dashboard } from "./pages/Dashboard";
 import { Login } from "./pages/Login";
-import { Changepassword } from "./pages/Changepassword";
+import { Changepassword } from "./features/dashboard/components/Changepassword";
 
 
 

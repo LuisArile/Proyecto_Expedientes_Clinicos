@@ -92,7 +92,7 @@ export function Changepassword() {
                 type="text"
                 value={user?.nombreUsuario || ""}
                 disabled
-                className="w-full pl-10 py-2 rounded-lg border border-gray-300 bg-gray-100 text-gray-700 text-sm"
+                className="w-full pl-10 py-2 rounded-lg border border-gray-300 bg-gray-100 text-gray-400 text-sm"
               />
             </div>
           </div>

@@ -117,8 +117,7 @@ export function Sidebar({ currentView, onNavigate  }) {
                     text-red-600 font-medium
                     hover:bg-red-500 hover:text-white
                     hover:border-red-500
-                    transition-all duration-200
-                    shadow-sm hover:shadow-md"
+                    transition-all duration-200"
         >
           <LogOut className="h-4 w-4" />
           Cerrar Sesión
