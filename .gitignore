@@ -6,6 +6,7 @@ build/
 # Variables de entorno
 .env
 .env.local
+.env.docker
 
 # Archivos de log
 npm-debug.log*
