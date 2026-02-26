@@ -365,6 +365,15 @@ END;
 --       accion NVARCHAR(100) NOT NULL,
 --       fecha DATETIME DEFAULT GETDATE(),
 --       tablaAfectada VARCHAR(100),
+<<<<<<< HEAD
+=======
+
+--       CONSTRAINT PK_Historico PRIMARY KEY (idHistorico),
+--       CONSTRAINT FK_H_Usuario FOREIGN KEY (idUsuario) REFERENCES Clinica.Usuario(idUsuario) 
+--   );
+-- END
+-- GO
+>>>>>>> feat-db-y-login
 
 --       CONSTRAINT PK_Historico PRIMARY KEY (idHistorico),
 --       CONSTRAINT FK_H_Usuario FOREIGN KEY (idUsuario) REFERENCES Clinica.Usuario(idUsuario) 

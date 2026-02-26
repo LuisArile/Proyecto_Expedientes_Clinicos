@@ -22,4 +22,3 @@ class usuarioController {
 }
 
 module.exports = usuarioController;
-
