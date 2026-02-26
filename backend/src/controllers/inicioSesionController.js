@@ -1,4 +1,5 @@
 class inicioSesionController {
+<<<<<<< HEAD
     constructor(inicioSesionService) {
         this.inicioSesionService = inicioSesionService;
     }
@@ -8,6 +9,17 @@ class inicioSesionController {
             const { nombreUsuario, clave } = req.body;
             const resultado = await this.inicioSesionService.inicioSesion(nombreUsuario, clave);
             res.json({ success: true, data: resultado });
+=======
+    constructor(inicioSesionService){
+        this.inicioSesionService=inicioSesionService;
+    }
+
+async  inicioSesion(req,res) { 
+        try {
+            const {nombreUsuario, clave }=req.body;
+            const respuestaLogin= await this.inicioSesionService.autenticacion(nombreUsuario,clave);
+            res.json({ success: true, data: resultado }); 
+>>>>>>> feat-db-y-login
         } catch (error) {
             res.status(401).json({ success: false, error: error.message });
         }

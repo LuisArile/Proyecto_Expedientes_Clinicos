@@ -18,4 +18,3 @@ const validarToken =(req,res,siguiente)=>{
 };
 
 module.exports=validarToken;
-

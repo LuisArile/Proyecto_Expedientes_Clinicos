@@ -51,4 +51,3 @@ class usuarioService{
     
 module.exports=usuarioService;
 
-

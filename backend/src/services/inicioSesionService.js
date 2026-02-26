@@ -22,7 +22,11 @@ class inicioSesionService {
     const claveValida = await bcrypt.compare(clave, usuario.clave);
 
     if (!claveValida) {
+<<<<<<< HEAD
         console.log('❌ Contraseña incorrecta');
+=======
+        console.log('Contraseña incorrecta');
+>>>>>>> feat-db-y-login
         throw new Error('Credenciales incorrectas');
     }
 
