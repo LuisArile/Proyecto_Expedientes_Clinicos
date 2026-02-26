@@ -9,10 +9,10 @@ export function Login() {
   const navigate = useNavigate();
 
   const [nombreUsuario, setNombreUsuario] = useState("");
-  const [password, setPassword] = useState("");
+  const [clave, setClave] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showClave, setShowClave] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,8 +20,13 @@ export function Login() {
     setLoading(true);
 
     try {
-      await login(nombreUsuario, password);
-      navigate("/dashboard");
+      const result = await login(nombreUsuario, clave);
+      if(result && result.success){
+        console.log("Login exitoso, redirigiendo...");
+        navigate("/dashboard");
+      } else {
+        setError(result.error || "Credenciales incorrectas");
+      }
     } catch (err) {
       setError("Credenciales incorrectas");
     } finally {
@@ -77,15 +82,15 @@ export function Login() {
             <div className="relative">
               <Lock className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
               <input
-                type={showPassword ? "text" : "password"}
+                type={showClave ? "text" : "password"}
                 placeholder="Ingrese su contraseña"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={clave}
+                onChange={(e) => setClave(e.target.value)}
                 className="text-gray-800 w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                 required
               />
               <Eye
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowClave(!showClave)}
                 className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
               />
             </div>

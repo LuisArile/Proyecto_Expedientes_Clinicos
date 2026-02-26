@@ -13,13 +13,15 @@ export function AuthProvider({ children }) {
 
   const login = async (nombreUsuario, clave) => {
     try {
-      const response = await fetch("http://localhost:3000/api/login", {
+      const response = await fetch("http://localhost:3000/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombreUsuario, clave }),
       });
 
       const result = await response.json();
+
+      console.log("EL SERVIDOR RESPONDIÓ ESTO:", result);
 
       if (result.success) {
         // Estructura del backend: { id, nombre, rol }

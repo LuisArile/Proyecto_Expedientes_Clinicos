@@ -14,11 +14,11 @@ export function Sidebar({ currentView, onNavigate  }) {
 
   if (!user) return null;
 
-  const roleKey = user.rol?.toLowerCase();
+  const roleKey = user.rol?.toUpperCase();
   const menuItems = MENU_STRATEGIES[roleKey] || [];
 
-  const roleConfig = ROLE_STRATEGIES[user?.rol] || { 
-    label: user?.rol, 
+  const roleConfig = ROLE_STRATEGIES[roleKey] || { 
+    label: roleKey, 
     color: "bg-gray-100 text-gray-800" 
   };
 

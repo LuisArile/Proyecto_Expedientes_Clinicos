@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./features/auth/AuthContext";
+// import { AuthProvider, useAuth } from "./features/auth/AuthContext";
+import { useAuth } from "./features/auth/AuthContext";
 import { Dashboard } from "./pages/Dashboard";
 import { Login } from "./pages/Login";
 import { Changepassword } from "./pages/Changepassword";
@@ -7,7 +8,7 @@ import { Changepassword } from "./pages/Changepassword";
 
 
 // Roles permitidos para acceder al dashboard
-const allowedRoles = ["RECEPCIONISTA", "ENFERMERA", "DOCTOR", "ADMINISTRADOR"];
+const allowedRoles = ["RECEPCIONISTA", "ENFERMERA", "MEDICO", "ADMINISTRADOR"];
 
 function PrivateRoute({ children, allowedRoles }) {
   const { user } = useAuth();
@@ -27,7 +28,7 @@ function PrivateRoute({ children, allowedRoles }) {
 
 function App() {
   return (
-    <AuthProvider>
+    // <AuthProvider>
       <Router>
         <Routes>
 
@@ -38,7 +39,8 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <PrivateRoute allowedRoles={allowedRoles}>
+              // <PrivateRoute allowedRoles={allowedRoles}>
+              <PrivateRoute allowedRoles={["RECEPCIONISTA", "ENFERMERO", "MEDICO", "ADMINISTRADOR"]}>  
                 <Dashboard />
               </PrivateRoute>
             }
@@ -57,7 +59,7 @@ function App() {
 
         </Routes>
       </Router>
-    </AuthProvider>
+    // </AuthProvider>
   );
 }
 
