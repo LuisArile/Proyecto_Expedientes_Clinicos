@@ -15,7 +15,7 @@ app.use(express.json());
 
 
 
-app.use("/api/usuarios", usuarioRouters); //creacion de usuarios
+app.use("/api/crear", usuarioRouters); //creacion de usuarios
 app.use("/api/obtenerUsuarios", usuarioRouters); //obtener todos los usuarios
 
 
