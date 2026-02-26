@@ -1,40 +1,42 @@
 const bcrypt = require('bcrypt');
 const prisma = require('../config/prisma');
 const UsuarioBase = require('../factoryMet/usuarioBaseFact');
+const bcrypt = require('bcrypt');
 
-class usuarioRepository {
-    
-    
+class UsuarioRepository {
+
     async crear(data) {
-    try {
-        // Encriptar la clave antes de guardar
-        const saltRounds = 10;
-        const claveEncriptada = await bcrypt.hash(data.clave, saltRounds);
+        try {
 
-        const resultado = await prisma.usuario.create({
-            data: {
-                nombre: data.nombre,
-                apellido: data.apellido,
-                correo: data.correo,
-                nombreUsuario: data.nombreUsuario,
-                clave: claveEncriptada,
-                rol: data.rol,
-                activo: true
-            }
-        });
-        return UsuarioBase.crearUsuario(resultado);
-    } catch (error) {
-        throw new Error(`Error al crear usuario: ${error.message}`);
+            const hashedPassword = await bcrypt.hash(data.clave, 10);
+
+            const resultado = await prisma.usuario.create({
+                data: {
+                    nombre: data.nombre,
+                    apellido: data.apellido,
+                    correo: data.correo,
+                    nombreUsuario: data.nombreUsuario,
+                    clave: hashedPassword,
+                    rol: data.rol,
+                    activo: true
+                }
+            });
+
+            return UsuarioBase.crearUsuario(resultado);
+
+        } catch (error) {
+            throw new Error(`Error al crear usuario: ${error.message}`);
+        }
     }
-}
-    
-    
+
     async obtenerTodos() {
         try {
             const resultados = await prisma.usuario.findMany({
                 include: { auditorias: true }
             });
+
             return UsuarioBase.crearUsuarios(resultados);
+
         } catch (error) {
             throw new Error(`Error al obtener usuarios: ${error.message}`);
         }
@@ -45,7 +47,9 @@ class usuarioRepository {
             const data = await prisma.usuario.findUnique({
                 where: { nombreUsuario }
             });
+
             return data ? UsuarioBase.crearUsuario(data) : null;
+
         } catch (error) {
             throw new Error(`Error al buscar usuario: ${error.message}`);
         }
@@ -57,6 +61,7 @@ class usuarioRepository {
                 where: { id: Number(id) },
                 data: { ultimoAcceso: new Date() }
             });
+
         } catch (error) {
             throw new Error('Error al actualizar acceso');
         }
@@ -72,10 +77,11 @@ class usuarioRepository {
                     fecha: new Date()
                 }
             });
+
         } catch (error) {
             console.error('Error al registrar auditoría:', error);
         }
     }
 }
 
-module.exports = usuarioRepository;
+module.exports = UsuarioRepository;

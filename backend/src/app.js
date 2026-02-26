@@ -21,7 +21,6 @@ app.use("/api/usuarios", usuarioRouters); //creacion de usuarios
 app.use("/api/obtenerUsuarios", usuarioRouters); //obtener todos los usuarios
 
 
-app.use("/api/login", inicioSesionRouters); ////inicioSesion
-app.use("/api/cierreSesion", inicioSesionRouters);// cierre de sesion
+app.use("/api/auth", inicioSesionRouters); //inicio y cierre de sesion
 
 module.exports=app;

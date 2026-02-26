@@ -17,7 +17,7 @@ export function DashboardEnfermero() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
-          Bienvenido, {user?.name}
+          Bienvenido/a, {user?.nombre} {user.apellido}
         </h1>
         <p className="text-gray-600">Panel de Enfermería - Registro Preclínico</p>
       </div>
