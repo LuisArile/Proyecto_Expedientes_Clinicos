@@ -27,7 +27,7 @@ class Medico extends Usuario {
     }
 
     getBienvenida(){
-        return `Bienvenido Admin ${this.nombre}`;
+        return `Bienvenido Doctor ${this.nombre}`;
     }
 
     toJSON(){

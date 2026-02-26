@@ -19,10 +19,11 @@ class inicioSesionService {
         throw new Error('Credenciales incorrectas');
     }
 
+    //se encontro usuario
+
     const claveValida = await bcrypt.compare(clave, usuario.clave);
 
     if (!claveValida) {
-        console.log('Contraseña incorrecta');
         throw new Error('Credenciales incorrectas');
     }
 

@@ -2,6 +2,28 @@ const prisma = require('../config/prisma');
 const UsuarioBase = require('../factoryMet/usuarioBaseFact');
 
 class usuarioRepository {
+    
+    
+    async crear(data) {
+    try {
+        const resultado = await prisma.usuario.create({
+            data: {
+                nombre: data.nombre,
+                apellido: data.apellido,
+                correo: data.correo,
+                nombreUsuario: data.nombreUsuario,
+                clave: data.clave,
+                rol: data.rol,
+                activo: true
+            }
+        });
+        return UsuarioBase.crearUsuario(resultado);
+    } catch (error) {
+        throw new Error(`Error al crear usuario: ${error.message}`);
+    }
+}
+    
+    
     async obtenerTodos() {
         try {
             const resultados = await prisma.usuario.findMany({
