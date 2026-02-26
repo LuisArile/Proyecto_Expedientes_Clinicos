@@ -16,7 +16,7 @@ Este documento explica cómo levantar, configurar y manejar el contenedor de SQL
         |    └──.env # Variables de entorno, ej: DB_PASSWORD=SuContraseñaSegura123!
         |
         ├── database/
-        |    ├── ockerfile # Imagen de SQL Server + init
+        |    ├── dockerfile # Imagen de SQL Server + init
         |    ├── entrypoint.sh # Ejecuta init.sql y migraciones al iniciar
         |    ├── init.sql # Script de creación de DB, esquemas y tablas
         |    ├── seed.sql  # datos de prueba
