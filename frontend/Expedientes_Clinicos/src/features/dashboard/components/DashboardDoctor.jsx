@@ -2,7 +2,7 @@ import { useDoctorDashboard } from "../hooks/useDoctorDashboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Stethoscope, Calendar, TestTube, Clock } from "lucide-react";
 
-import { useAuth } from "@/features/auth/authContext";
+import { useAuth } from "@/features/auth/AuthContext";
 
 
 export function DashboardDoctor() {

@@ -2,7 +2,7 @@ import { useRecepcionistaDashboard } from "../hooks/useRecepcionistaDashboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Calendar, Clock, FileText } from "lucide-react";
 
-import { useAuth } from "@/features/auth/authContext";
+import { useAuth } from "@/features/auth/AuthContext";
 
 import { FormularioExpediente } from "@/features/expedientes/components/FormularioExpediente";
 

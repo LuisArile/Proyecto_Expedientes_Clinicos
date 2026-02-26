@@ -1,5 +1,5 @@
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
-import { useAuth } from "../../auth/authContext";
+import { useAuth } from "@/features/auth/AuthContext";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Users, BarChart3, Pill, TestTube, Clock } from "lucide-react";

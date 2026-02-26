@@ -2,7 +2,7 @@ import { useEnfermeroDashboard } from "../hooks/useEnfermeroDashboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Users, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/features/auth/authContext";
+import { useAuth } from "@/features/auth/AuthContext";
 
 
 export function DashboardEnfermero() {

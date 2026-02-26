@@ -1,17 +1,17 @@
 export const ROLE_STRATEGIES = {
-  recepcionista: {
+  RECEPCIONISTA: {
     label: "Recepcionista",
     color: "bg-blue-100 text-blue-800 border-blue-300"
   },
-  enfermero: {
+  ENFERMERO: {
     label: "Enfermero",
     color: "bg-green-100 text-green-800 border-green-300"
   },
-  doctor: {
+  MEDICO: {
     label: "Doctor",
     color: "bg-purple-100 text-purple-800 border-purple-300"
   },
-  administrador: {
+  ADMINISTRADOR: {
     label: "Administrador",
     color: "bg-red-100 text-red-800 border-red-300"
   }
