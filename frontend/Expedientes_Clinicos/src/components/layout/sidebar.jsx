@@ -14,10 +14,11 @@ export function Sidebar({ currentView, onNavigate  }) {
 
   if (!user) return null;
 
-  const menuItems = MENU_STRATEGIES[user.role] || [];
+  const roleKey = user.rol?.toLowerCase();
+  const menuItems = MENU_STRATEGIES[roleKey] || [];
 
-  const roleConfig = ROLE_STRATEGIES[user?.role] || { 
-    label: user?.role, 
+  const roleConfig = ROLE_STRATEGIES[user?.rol] || { 
+    label: user?.rol, 
     color: "bg-gray-100 text-gray-800" 
   };
 
@@ -41,16 +42,16 @@ export function Sidebar({ currentView, onNavigate  }) {
         <div className="flex items-center gap-3 mb-2">
           <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
             <span className="text-blue-700 font-semibold text-sm">
-              {user.name
-                .split(" ")
+              {user.nombre
+                ?.split(" ")
                 .map((n) => n[0])
                 .join("")
                 .substring(0, 2)}
             </span>
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-            <p className="text-xs text-gray-500">@{user.username}</p>
+            <p className="text-sm font-semibold text-gray-900">{user.nombre} {user.apellido}</p>
+            <p className="text-xs text-gray-500">@{user.nombreUsuario}</p>
           </div>
         </div>
         <Badge

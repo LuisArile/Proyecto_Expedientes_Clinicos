@@ -8,19 +8,23 @@ export function AuthProvider({ children }) {
     return saved ? JSON.parse(saved) : null;
   });
 
-  const login = async (email, password) => {
-    const response = await fetch("http://localhost:4000/api/login", {
+  const login = async (nombreUsuario, clave) => {
+    const response = await fetch("http://localhost:3000/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ nombreUsuario, clave }),
     });
 
-    if (!response.ok) throw new Error("Correo o contraseña incorrectos");
+    const result = await response.json();
 
-    const data = await response.json(); // { id, name, role, email, token }
-    setUser(data);
-    localStorage.setItem("user", JSON.stringify(data));
-    return data;
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "Credenciales incorrectas");
+    }
+
+    setUser(result.data);
+    localStorage.setItem("user", JSON.stringify(result.data));
+
+    return result.data;
   };
 
   const logout = () => {
@@ -28,13 +32,22 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("user");
   };
 
-  // Opcional: mantener sesión si el token expira
+  // Opcional: aquí podrías validar token al cargar la app
   useEffect(() => {
-    // Aquí se puede agregar verificación de token con backend
+    if (user && user.token) {
+      // futura validación de token si deseas
+    }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        isAuthenticated: !!user,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

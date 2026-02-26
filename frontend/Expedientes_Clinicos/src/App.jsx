@@ -7,7 +7,7 @@ import { Changepassword } from "./pages/Changepassword";
 
 
 // Roles permitidos para acceder al dashboard
-const allowedRoles = ["recepcionista", "enfermera", "doctor", "administrador"];
+const allowedRoles = ["RECEPCIONISTA", "ENFERMERA", "DOCTOR", "ADMINISTRADOR"];
 
 function PrivateRoute({ children, allowedRoles }) {
   const { user } = useAuth();
@@ -17,7 +17,7 @@ function PrivateRoute({ children, allowedRoles }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && !allowedRoles.includes(user.rol?.toUpperCase())) {
     // Rol no permitido → login o página de acceso denegado
     return <Navigate to="/login" replace />;
   }

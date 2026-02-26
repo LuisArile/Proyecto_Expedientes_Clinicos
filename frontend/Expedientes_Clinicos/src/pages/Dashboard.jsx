@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { DashboardLayout } from "../components/layout/dashboardLayout";
-import { useAuth } from "../features/auth/authContext";
+import { useAuth } from "../features/auth/AuthContext";
 
-// Importar los dashboards específicos de cada rol
 import { DashboardAdministrador } from "../features/dashboard/components/DashboardAdministrador";
 import { DashboardDoctor } from "../features/dashboard/components/DashboardDoctor";
 import { DashboardRecepcionista } from "../features/dashboard/components/DashboardRecepcionista";
@@ -10,44 +9,53 @@ import { DashboardEnfermero } from "../features/dashboard/components/DashboardEn
 
 import { FormularioExpediente } from "../features/expedientes/components/FormularioExpediente";
 
-
 const DASHBOARD_COMPONENTS = {
-  administrador: DashboardAdministrador,
-  doctor: DashboardDoctor,
-  recepcionista: DashboardRecepcionista,
-  enfermero: DashboardEnfermero,
+  ADMINISTRADOR: DashboardAdministrador,
+  DOCTOR: DashboardDoctor,
+  RECEPCIONISTA: DashboardRecepcionista,
+  ENFERMERO: DashboardEnfermero,
 };
 
 export function Dashboard() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const [currentView, setCurrentView] = useState("inicio");
 
-  if (loading) return <p>Cargando...</p>;
+  if (!user) return <p>Cargando...</p>;
 
   const renderContent = () => {
-    // Si el usuario hizo clic en "Crear Paciente"
+
     if (currentView === "crear-expediente") {
 
-      if (["recepcionista", "administrador"].includes(user?.role)) {
-        return <FormularioExpediente onCancel={() => setCurrentView("inicio")} />;
+      if (["RECEPCIONISTA", "ADMINISTRADOR"].includes(user?.rol)) {
+        return (
+          <FormularioExpediente
+            onCancel={() => setCurrentView("inicio")}
+          />
+        );
       }
-      return <div className="p-10 text-red-500">No tienes permiso para crear expedientes.</div>;
+
+      return (
+        <div className="p-10 text-red-500">
+          No tienes permiso para crear expedientes.
+        </div>
+      );
     }
 
-    // dashboard según el rol
-    const RoleDashboard = DASHBOARD_COMPONENTS[user?.role];
-    
+    const RoleDashboard = DASHBOARD_COMPONENTS[user?.rol];
+
     if (RoleDashboard) {
       return <RoleDashboard currentView={currentView} user={user} />;
     }
 
     return (
       <div className="p-10 text-center">
-        <h2 className="text-xl font-bold text-red-600">Acceso Restringido</h2>
-        <p>El rol "{user?.role}" no tiene un panel configurado.</p>
+        <h2 className="text-xl font-bold text-red-600">
+          Acceso Restringido
+        </h2>
+        <p>El rol "{user?.rol}" no tiene un panel configurado.</p>
       </div>
     );
-  };  
+  };
 
   return (
     <DashboardLayout

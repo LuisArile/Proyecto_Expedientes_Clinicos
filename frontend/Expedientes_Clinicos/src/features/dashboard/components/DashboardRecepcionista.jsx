@@ -18,7 +18,7 @@ export function DashboardRecepcionista(/*{ currentView }*/) {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
-          Bienvenida, {user?.name}
+          Bienvenido/a, {user?.nombre} {user.apellido}
         </h1>
         <p className="text-gray-600">Panel Recepcionista- Registro y Citas</p>
       </div>

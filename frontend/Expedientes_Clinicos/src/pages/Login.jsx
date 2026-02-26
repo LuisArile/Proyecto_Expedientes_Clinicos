@@ -8,7 +8,7 @@ export function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [nombreUsuario, setNombreUsuario] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,7 @@ export function Login() {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login(nombreUsuario, password);
       navigate("/dashboard");
     } catch (err) {
       setError("Credenciales incorrectas");
@@ -59,10 +59,10 @@ export function Login() {
             <div className="relative">
               <Mail className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
               <input
-                type="email"
+                type="text"
                 placeholder="Ingrese su usuario"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={nombreUsuario}
+                onChange={(e) => setNombreUsuario(e.target.value)}
                 className="text-gray-800 w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                 required
               />
