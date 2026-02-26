@@ -10,7 +10,7 @@ export const MENU_STRATEGIES = {
         { id: "buscar-paciente", label: "Buscar Paciente", icon: Search, description: "" },
         { id: "preclinica", label: "Registro Preclínico", icon: Activity, description: "Signos vitales y evaluación inicial" },
     ],
-    DOCTOR: [
+    MEDICO: [
         { id: "buscar-paciente", label: "Buscar Paciente", icon: Search,description: "" },
         { id: "consulta-medica", label: "Consulta Médica", icon: Stethoscope, description: "Registro de consulta" },
         { id: "solicitud-examen", label: "Solicitud de Examen", icon: TestTube, description: "Solicitar estudios médicos"},

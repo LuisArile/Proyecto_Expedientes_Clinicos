@@ -1,4 +1,4 @@
-import { AuthProvider } from "./features/auth/authContext";
+import { AuthProvider } from "./features/auth/AuthContext";
 import { Dashboard } from "./pages/Dashboard";
 
 function App() {
