@@ -13,9 +13,4 @@ class usuarioController {
     }
 }
 
-<<<<<<< HEAD
 module.exports = usuarioController;
-
-=======
-module.exports = usuarioController;
->>>>>>> feat-db-y-login
