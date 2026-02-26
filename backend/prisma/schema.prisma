@@ -8,25 +8,33 @@ datasource db {
 }
 
 model Usuario {
-  id        Int      @id @default(autoincrement())
-  nombreUsuario String @unique
-  correo     String   @unique
-  clave      String
-  rol       String
-  activo    Boolean
-  createdAt DateTime @default(now())
+    id             Int      @id @default(autoincrement())
+    nombre         String
+    apellido       String
+    correo          String   @unique
+    nombreUsuario       String   @unique
+    clave       String
+    rol            String   
+    activo         Boolean  @default(true)
+    
+    // Campos específicos
+    especialidad   String?    
+    ultimoAcceso   DateTime?
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
 
-  auditorias Auditoria[]
+    auditorias     Auditoria[]
 }
 
 model Auditoria {
-  id          Int   @id @default(autoincrement())
-  usuarioId   Int 
-  accion      String
-  fecha       DateTime @default(now())
-
-  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
-
+    id             Int      @id @default(autoincrement())
+    usuarioId      Int?
+    usuario        Usuario? @relation(fields: [usuarioId], references: [id])
+    
+    accion         String
+    detalles       String?
+    
+    fecha          DateTime @default(now())
 }
 
 model Paciente {

@@ -1,87 +1,54 @@
-const { connect } = require("../app");
-const { usuario } = require("../config/prisma");
+const prisma = require('../config/prisma');
+const UsuarioBase = require('../factoryMet/usuarioBaseFact');
 
-class usuarioRepository{
-    constructor(prisma){
-        this.prisma=prisma;
+class usuarioRepository {
+    async obtenerTodos() {
+        try {
+            const resultados = await prisma.usuario.findMany({
+                include: { auditorias: true }
+            });
+            return UsuarioBase.crearUsuarios(resultados);
+        } catch (error) {
+            throw new Error(`Error al obtener usuarios: ${error.message}`);
+        }
     }
 
-//creacion de nuevo usuario
-    async crear(data){
+    async filtrarNombreUsuario(nombreUsuario) {
         try {
-            return await this.prisma.usuario.create({
+            const data = await prisma.usuario.findUnique({
+                where: { nombreUsuario }
+            });
+            return data ? UsuarioBase.crearUsuario(data) : null;
+        } catch (error) {
+            throw new Error(`Error al buscar usuario: ${error.message}`);
+        }
+    }
+
+    async actualizarUltimoAcceso(id) {
+        try {
+            return await prisma.usuario.update({
+                where: { id: Number(id) },
+                data: { ultimoAcceso: new Date() }
+            });
+        } catch (error) {
+            throw new Error('Error al actualizar acceso');
+        }
+    }
+
+    async registrarAccionUsuario(usuarioId, accion, detalles = {}) {
+        try {
+            return await prisma.auditoria.create({
                 data: {
-                    nombreUsuario: data.nombreUsuario,
-                    correo:data.correo,
-                    clave: data.clave,
-                    rol:data.rol,
-                    activo:data.activo !==undefined ? data.activo:true
-                }});
-
+                    usuarioId: usuarioId ? Number(usuarioId) : null,
+                    accion: accion,
+                    detalles: JSON.stringify(detalles),
+                    fecha: new Date()
+                }
+            });
         } catch (error) {
-            throw  new Error (`Error al crear usuario : ${error.message}`);
+            console.error('Error al registrar auditoría:', error);
         }
     }
-
-    async obtenerTodos(){
-
-        try {
-            return await this.prisma.usuario.findMany({include:{auditorias:true}});
-        } catch (error) {
-            throw new Error(`Error al obtener usuarios:${error.message} `);
-            
-        }
-    }
-
-    
-    async filtrarNombreUsuario(nombreUsuario){
-
-        try {
-            return await this.prisma.usuario.findUnique({where:{nombreUsuario}});
-        } catch (error) {
-            throw new Error(`Error al obtener usuarios:${error.message} `);
-            
-        }
-    }
-    
-
-    async registrarAccionUsuario(usuarioId, accion){
-
-        try {
-            console.log('intentando registrar accion:',{usuarioId, accion});
-
-            if(!usuarioId){
-                throw new Error('ID de usuario no proporcionado')
-            }
-            const id= Number(usuarioId);
-            console.log('ID convertido:', id);
-
-
-            if(isNaN(id)){
-                throw new Error(`ID no valido: ${usuarioId}` );
-            }
-
-            const usuarioExiste= await this.prisma.usuario.findUnique({where: {id:id}})
-            console.log('Usuario existe: ', usuarioExiste);
-
-            if(!usuarioExiste){
-                throw new Error(`Usuario con ID ${id} no encontrado`);
-            }
-           
-            const auditoria= await this.prisma.auditoria.create({data:{usuarioId: id ,accion:accion}});
-            console.log('Auditoria creada:', auditoria)
-            return auditoria;
-
-        } catch (error) {
-            throw new Error(`Error al registrar accion:${error.message} `);
-            
-        }
-    }
-
-    
 }
 
-
-
-
-module.exports=usuarioRepository;
+module.exports = usuarioRepository;
