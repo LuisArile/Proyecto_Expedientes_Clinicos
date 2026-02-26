@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, Activity } from "lucide-react";
 import { useAuth } from "../features/auth/AuthContext";
-import { Link } from "react-router-dom";
 
 export function Login() {
   const { login } = useAuth();
@@ -107,16 +106,6 @@ export function Login() {
           >
             {loading ? "Validando..." : "Iniciar sesión"}
           </button>
-
-          {/* Link */}
-          <div className="text-center mt-3">
-                <Link
-                    to="/cambiar-password"
-                    className="text-blue-600 text-sm hover:underline"
-                >
-                    ¿Necesita cambiar su contraseña?
-                </Link>
-            </div>
 
           <div className="border-t pt-4 mt-4 text-center text-xs text-gray-400">
             Para soporte técnico, contacte al administrador del sistema

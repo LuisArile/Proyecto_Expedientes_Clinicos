@@ -90,7 +90,7 @@ export function Changepassword() {
               <User className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                value={user?.email || ""}
+                value={user?.nombreUsuario || ""}
                 disabled
                 className="w-full pl-10 py-2 rounded-lg border border-gray-300 bg-gray-100 text-gray-700 text-sm"
               />
