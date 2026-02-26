@@ -75,7 +75,7 @@ Este documento explica cómo levantar, configurar y manejar el contenedor de SQL
 
     Abrir una sesión interactiva dentro del contenedor, para probar integridad, y hacer consultas sobre tablas:
 
-        docker exec -it sql-clinica /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P sucontraseña -C
+        docker exec -it sql-clinica /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P SuContraseñaSegura123! -C
 
     Prueba de conexión:
 
@@ -105,6 +105,9 @@ Este documento explica cómo levantar, configurar y manejar el contenedor de SQL
     - Ejecutar un script SQL manualmente:
 
             docker exec -it sql-clinica /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $DB_PASSWORD -i /app/database/migrations/001_create_roles.sql -C
+
+    - Verifica cómo se llama el contenedor
+            docker ps -a
 
 1. Recomendaciones importantes
     1. Esperar a que SQL Server esté listo:
