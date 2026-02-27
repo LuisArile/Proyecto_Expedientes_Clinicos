@@ -1,5 +1,5 @@
-const bcrypt=require('bcrypt');
-const Encriptador= require('../utils/encritador');
+const bcrypt = require('bcrypt');
+const Encriptador= require('../utils/encritaptador');
 
 
 class usuarioService{
@@ -12,7 +12,7 @@ class usuarioService{
         try {
           const existeNombre=await this.usuarioRepository.filtrarNombreUsuario(data.nombreUsuario);
           if(existeNombre){
-            throw new Error (`El nombre de usuario ya esta registrado : ${error.message}`)
+            throw new Error ('El usuario ya esta registrado');
           }
 
           //encriptacion
@@ -23,9 +23,9 @@ class usuarioService{
 
         const usuario= await this.usuarioRepository.crear(data);
 
-        if(usuario&&usuario.Id){
+        if(usuario&&usuario.id){
             //registrar accion 
-        await this.usuarioRepository.registrarAccionUsuario(usuario.Id,'USUARIO_CREADO',
+        await this.usuarioRepository.registrarAccionUsuario(usuario.id,'USUARIO_CREADO',
             {rol:data.rol}
         );
     }
@@ -38,10 +38,6 @@ class usuarioService{
 
     }
 
-     async crear(data) {  
-        const usuario = await this.usuarioRepository.crear(data);
-        return usuario;
-    }
 
   async obtenerTodos() {
         try {

@@ -15,7 +15,7 @@ const inicioSesionController = new InicioSesionController(inicioSesionService);
 
 
 
-router.post("/", (req,res)=> inicioSesionController.inicioSesion(req,res));
+router.post("/login", (req,res)=> inicioSesionController.inicioSesion(req,res));
 router.post("/", (req,res)=> inicioSesionController.cierreSesion(req,res));
 
 module.exports=router;
