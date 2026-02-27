@@ -22,5 +22,6 @@ export const MENU_STRATEGIES = {
         { id: "auditoria", label: "Auditoría", icon: BarChart3, description: "Registro de eventos del sistema" },
         { id: "catalogo-medicamentos", label: "Catálogo de Medicamentos", icon: Pill, description: "Gestionar medicamentos" },
         { id: "catalogo-examenes", label: "Catálogo de Exámenes", icon: TestTube, description: "Gestionar tipos de examen" },
+        { id: "crear-expediente", label: "Crear Expediente", icon: UserPlus, description: "Registrar nuevo paciente" }
     ],
 };
