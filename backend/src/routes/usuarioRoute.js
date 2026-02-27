@@ -14,6 +14,7 @@ const usuarioService    = new  UsuarioService(usuarioRepository);
 const usuarioController = new  UsuarioController(usuarioService);
 
 
+
 //RUTAS USUARIOS
 router.post("/", (req,res)=> usuarioController.crear(req,res));
 router.get("/", (req,res)=> usuarioController.obtenerTodos(req,res));
