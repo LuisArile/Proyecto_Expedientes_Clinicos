@@ -1,14 +1,56 @@
 const prisma = require('../config/prisma');
 
+// Mapeo de estados: string a booleano (true = activo, false = inactivo)
+const ESTADOS_MAP = {
+    'activo': true,
+    'inactivo': false,
+    'true': true,
+    'false': false,
+    '1': true,
+    '0': false
+};
+
 class expedienteRepository {
+    
+    // Convertir estado de string a booleano
+    _mapearEstado(estado) {
+        if (typeof estado === 'string') {
+            const estadoBooleano = ESTADOS_MAP[estado.toLowerCase()];
+            if (estadoBooleano === undefined) {
+                throw new Error(`Estado inválido: ${estado}. Estados válidos: activo (1/true) o inactivo (0/false)`);
+            }
+            return estadoBooleano;
+        }
+        // Si ya es booleano o número, convertir a booleano
+        return Boolean(estado);
+    }
     
     async crear(data) {
         try {
+            // Generar numeroExpediente con formato EXP-YYYY-NNNNN
+            const anioActual = new Date().getFullYear();
+            
+            // Contar los expedientes del año actual
+            const expedientesDelAnio = await prisma.expediente.count({
+                where: {
+                    numeroExpediente: {
+                        startsWith: `EXP-${anioActual}`
+                    }
+                }
+            });
+            
+            // Generar el número incremental (01, 02, 03, etc)
+            const numeroIncremental = String(expedientesDelAnio + 1).padStart(5, '0');
+            const numeroExpediente = `EXP-${anioActual}-${numeroIncremental}`;
+            
+            // Mapear estado de string a número
+            const estadoNumerico = this._mapearEstado(data.estado);
+            
             const resultado = await prisma.expediente.create({
                 data: {
                     idPaciente: data.idPaciente,
-                    numeroExpediente: data.numeroExpediente,
-                    estado: data.estado,
+                    numeroExpediente: numeroExpediente,
+                    estado: estadoNumerico,
                     observaciones: data.observaciones || null,
                     fechaCreacion: new Date(),
                     fechaActualizacion: new Date()
@@ -70,13 +112,19 @@ class expedienteRepository {
 
     async actualizar(idExpediente, data) {
         try {
+            const datosActualizar = {
+                observaciones: data.observaciones || undefined,
+                fechaActualizacion: new Date()
+            };
+            
+            // Si se proporciona estado, mapearlo
+            if (data.estado !== undefined) {
+                datosActualizar.estado = this._mapearEstado(data.estado);
+            }
+            
             return await prisma.expediente.update({
                 where: { idExpediente: Number(idExpediente) },
-                data: {
-                    estado: data.estado || undefined,
-                    observaciones: data.observaciones || undefined,
-                    fechaActualizacion: new Date()
-                },
+                data: datosActualizar,
                 include: { paciente: true }
             });
         } catch (error) {

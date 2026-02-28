@@ -12,8 +12,8 @@ class pacienteRepository {
                     correo: data.correo || null,
                     telefono: data.telefono || null,
                     fechaNacimiento: new Date(data.fechaNacimiento),
-                    genero: data.genero,
-                    idResidencia: data.idResidencia
+                    sexo: data.sexo || null,
+                    direccion: data.direccion || null
                 }
             });
             return resultado;
@@ -68,8 +68,8 @@ class pacienteRepository {
                     correo: data.correo || undefined,
                     telefono: data.telefono || undefined,
                     fechaNacimiento: data.fechaNacimiento ? new Date(data.fechaNacimiento) : undefined,
-                    genero: data.genero || undefined,
-                    idResidencia: data.idResidencia || undefined
+                    sexo: data.sexo || undefined,
+                    direccion: data.direccion || undefined
                 }
             });
         } catch (error) {
