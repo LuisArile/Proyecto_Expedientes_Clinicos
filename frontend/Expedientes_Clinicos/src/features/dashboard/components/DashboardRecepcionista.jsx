@@ -5,6 +5,7 @@ import { Users, Calendar, Clock, FileText } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 
 import { FormularioExpediente } from "@/features/expedientes/components/FormularioExpediente";
+import { obtenerFechaActual } from "@/utils/dateFormatter";
 
 export function DashboardRecepcionista(/*{ currentView }*/) {
   const { user } = useAuth();
@@ -20,7 +21,7 @@ export function DashboardRecepcionista(/*{ currentView }*/) {
         <h1 className="text-2xl font-bold text-gray-900">
           Bienvenido/a, {user?.nombre} {user.apellido}
         </h1>
-        <p className="text-gray-600">Panel Recepcionista- Registro y Citas</p>
+        <p className="text-gray-600">Panel Recepcionista - Registro y Citas</p>
       </div>
 
       {/* Banner de Turno (Azul) */}
@@ -29,7 +30,7 @@ export function DashboardRecepcionista(/*{ currentView }*/) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-100 text-sm">Turno actual</p>
-              <h2 className="text-2xl font-bold">Lunes, 23 de Febrero 2026</h2>
+              <h2 className="text-2xl font-bold">{obtenerFechaActual()}</h2>
               <p className="text-blue-100 mt-1">
                 Inicio: {estadisticas.horaInicio} • Duración: 8 horas  
               </p>
@@ -82,7 +83,7 @@ export function DashboardRecepcionista(/*{ currentView }*/) {
                     <Clock className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{paciente.nombre}</p>
+                    <p className="font-medium text-gray-900">{paciente.nombre} {paciente.apellido}</p>
                     <p className="text-xs text-gray-500">{paciente.id}</p>
                   </div>
                 </div>

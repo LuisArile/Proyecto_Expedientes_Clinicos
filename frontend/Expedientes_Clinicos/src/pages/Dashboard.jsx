@@ -37,7 +37,12 @@ export function Dashboard() {
     // Lógica para el expediente
     if (currentView === "crear-expediente") {
       if (["RECEPCIONISTA", "ADMINISTRADOR"].includes(userRole)) {
-        return <FormularioExpediente onCancel={() => setCurrentView("inicio")} />;
+        return (
+          <FormularioExpediente 
+            onSuccess={() => setCurrentView("inicio")}
+            onCancel={() => setCurrentView("inicio")} 
+          />
+        );
       }
       return (
         <div className="p-10 text-red-500 font-bold">

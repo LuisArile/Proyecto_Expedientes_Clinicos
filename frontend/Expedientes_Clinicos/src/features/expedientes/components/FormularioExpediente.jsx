@@ -7,11 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { FileText, User, Calendar, Phone, Mail, MapPin, IdCard, AlertCircle, CheckCircle2 } from "lucide-react";
+import { FileText, User, Calendar, Phone, Mail, MapPin, IdCard, AlertCircle, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
-
-// Simulación de IDs existentes en el sistema
-const idsExistentes = ["001-2023-001", "001-2023-002", "001-2024-015"];
+import { crearExpediente, validarIdentidadDuplicada } from "../services/expedienteService";
 
 export function FormularioExpediente({ onSuccess, onCancel }) {
   const {
@@ -19,56 +17,116 @@ export function FormularioExpediente({ onSuccess, onCancel }) {
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
   } = useForm();
 
   const [generoSeleccionado, setGeneroSeleccionado] = useState("");
   const [idDuplicado, setIdDuplicado] = useState(false);
   const [guardandoExpediente, setGuardandoExpediente] = useState(false);
-  
-  // Observar el campo de identidad para validaciones en tiempo real
-  const numeroIdentidad = watch("numeroIdentidad");
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const [resultadoRegistro, setResultadoRegistro] = useState({
+    success: false,
+    mensaje: "",
+    numeroExpediente: null,
+  });
+
+  const obtenerMensajeError = (error) => {
+    const mensajeBase =
+      error?.message ||
+      error?.error ||
+      "Ocurrió un error al crear el expediente";
+
+    if (mensajeBase.includes("\n")) {
+      return mensajeBase.split("\n")[0].trim();
+    }
+
+    return mensajeBase;
+  };
 
   // Validar si el ID ya existe
-  const validarIdDuplicado = (id) => {
-    if (!id) return false;
-    const existe = idsExistentes.includes(id);
-    setIdDuplicado(existe);
-    return existe;
+  const validarIdDuplicado = async (id) => {
+    if (!id) {
+      setIdDuplicado(false);
+      return false;
+    }
+    try {
+      const existe = await validarIdentidadDuplicada(id);
+      setIdDuplicado(existe);
+      return existe;
+    } catch (error) {
+      console.error("Error validando identidad:", error);
+      setIdDuplicado(false);
+      return false;
+    }
   };
 
   const onSubmit = async (data) => {
+    console.log("Formulario enviado con datos:", data);
+    
     // Validar ID duplicado antes de guardar
-    if (validarIdDuplicado(data.numeroIdentidad)) {
+    const existe = await validarIdDuplicado(data.numeroIdentidad);
+    if (existe) {
       toast.error("El número de identidad ya existe en el sistema");
       return;
     }
 
     setGuardandoExpediente(true);
 
-    // Simular guardado asíncrono
-    setTimeout(() => {
-      const idExpediente = `EXP-${Date.now()}`;
-      
-      console.log("Expediente creado con éxito:", {
-        idExpediente,
-        ...data,
-        genero: generoSeleccionado,
-      });
+    try {
+      // Preparar datos del paciente
+      const pacienteData = {
+        nombre: data.nombre,
+        apellido: data.apellido,
+        dni: data.numeroIdentidad,
+        correo: data.correo || null,
+        fechaNacimiento: data.fechaNacimiento,
+        sexo: generoSeleccionado,
+        direccion: data.direccion,
+        telefono: data.telefono,
+      };
+
+      // Preparar datos del expediente
+      const expedienteData = {
+        estado: "activo",
+        observaciones: "",
+      };
+
+      console.log("Enviando a API:", { pacienteData, expedienteData });
+
+      // Llamar al API para crear el expediente
+      const response = await crearExpediente(pacienteData, expedienteData);
+
+      console.log("Respuesta del servidor:", response);
 
       setGuardandoExpediente(false);
-      
-      toast.success(`Expediente creado exitosamente`, {
-        description: `ID: ${idExpediente}`,
-        duration: 5000,
-      });
 
-      // Redirigir o limpiar vista después del éxito
-      setTimeout(() => {
-        if (onSuccess) onSuccess();
-        if (onCancel) onCancel();
-      }, 2000);
-    }, 1500);
+      if (response.success) {
+        const numeroExpediente = response.data?.expediente?.numeroExpediente || "N/A";
+        
+        setResultadoRegistro({
+          success: true,
+          mensaje: `Expediente creado exitosamente. ${numeroExpediente}`,
+          numeroExpediente: numeroExpediente,
+        });
+        setMostrarModal(true);
+      } else {
+        setResultadoRegistro({
+          success: false,
+          mensaje: response.error || "Error desconocido al crear el expediente",
+          numeroExpediente: null,
+        });
+        setMostrarModal(true);
+      }
+    } catch (error) {
+      setGuardandoExpediente(false);
+      console.error("❌ Error:", error);
+      
+      setResultadoRegistro({
+        success: false,
+        mensaje: obtenerMensajeError(error),
+        numeroExpediente: null,
+      });
+      setMostrarModal(true);
+    }
   };
 
   return (
@@ -90,26 +148,49 @@ export function FormularioExpediente({ onSuccess, onCancel }) {
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           
-          {/* Nombre Completo */}
-          <div className="space-y-2">
-            <Label htmlFor="nombreCompleto" className="text-gray-700 flex items-center gap-2">
-              <User className="h-4 w-4 text-blue-600" />
-              Nombre Completo <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="nombreCompleto"
-              placeholder="Ej: Juan Pérez"
-              {...register("nombreCompleto", {
-                required: "El nombre es obligatorio",
-                minLength: { value: 3, message: "Mínimo 3 caracteres" }
-              })}
-              className={errors.nombreCompleto ? "border-red-500" : "border-gray-300"}
-            />
-            {errors.nombreCompleto && (
-              <p className="text-xs text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" /> {errors.nombreCompleto.message}
-              </p>
-            )}
+          {/* Nombre y Apellido */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="nombre" className="text-gray-700 flex items-center gap-2">
+                <User className="h-4 w-4 text-blue-600" />
+                Nombres <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="nombre"
+                placeholder="Ej: Juan Carlos"
+                {...register("nombre", {
+                  required: "El nombre es obligatorio",
+                  minLength: { value: 2, message: "Mínimo 2 caracteres" }
+                })}
+                className={errors.nombre ? "border-red-500" : "border-gray-300"}
+              />
+              {errors.nombre && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" /> {errors.nombre.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="apellido" className="text-gray-700 flex items-center gap-2">
+                <User className="h-4 w-4 text-blue-600" />
+                Apellidos <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="apellido"
+                placeholder="Ej: Pérez Gómez"
+                {...register("apellido", {
+                  required: "El apellido es obligatorio",
+                  minLength: { value: 2, message: "Mínimo 2 caracteres" }
+                })}
+                className={errors.apellido ? "border-red-500" : "border-gray-300"}
+              />
+              {errors.apellido && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" /> {errors.apellido.message}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Número de Identidad con validación de duplicados */}
@@ -131,6 +212,11 @@ export function FormularioExpediente({ onSuccess, onCancel }) {
               onBlur={(e) => validarIdDuplicado(e.target.value)}
               className={errors.numeroIdentidad || idDuplicado ? "border-red-500" : "border-gray-300"}
             />
+            {errors.numeroIdentidad && (
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" /> {errors.numeroIdentidad.message}
+              </p>
+            )}
             {idDuplicado && (
               <p className="text-xs text-red-500 font-medium">Esta identidad ya está registrada.</p>
             )}
@@ -140,49 +226,93 @@ export function FormularioExpediente({ onSuccess, onCancel }) {
             {/* Fecha de Nacimiento */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-blue-600" /> Fecha Nacimiento
+                <Calendar className="h-4 w-4 text-blue-600" /> Fecha Nacimiento <span className="text-red-500">*</span>
               </Label>
               <Input
                 type="date"
                 {...register("fechaNacimiento", { required: "Campo obligatorio" })}
                 className={errors.fechaNacimiento ? "border-red-500" : ""}
               />
+              {errors.fechaNacimiento && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" /> {errors.fechaNacimiento.message}
+                </p>
+              )}
             </div>
 
             {/* Género (Select de UI compatible con React Hook Form) */}
             <div className="space-y-2">
-              <Label className="flex items-center gap-2">Género</Label>
+              <Label className="flex items-center gap-2">Sexo <span className="text-red-500">*</span></Label>
               <Select
                 onValueChange={(val) => {
                   setGeneroSeleccionado(val);
-                  setValue("genero", val);
+                  setValue("sexo", val);
                 }}
               >
-                <SelectTrigger className={errors.genero ? "border-red-500" : ""}>
+                <SelectTrigger className={errors.sexo ? "border-red-500" : ""}>
                   <SelectValue placeholder="Seleccionar..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="masculino">Masculino</SelectItem>
-                  <SelectItem value="femenino">Femenino</SelectItem>
+                  <SelectItem value="masculino">Hombre</SelectItem>
+                  <SelectItem value="femenino">Mujer</SelectItem>
                 </SelectContent>
               </Select>
-              <input type="hidden" {...register("genero", { required: "Seleccione género" })} />
+              <input type="hidden" {...register("sexo", { required: "Seleccione sexo" })} />
+              {errors.sexo && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" /> {errors.sexo.message}
+                </p>
+              )}
             </div>
+          </div>
+
+          {/* Correo */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2"><Mail className="h-4 w-4 text-blue-600" /> Correo</Label>
+            <Input 
+              type="email"
+              {...register("correo", {
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Correo inválido"
+                }
+              })} 
+              placeholder="correo@ejemplo.com"
+              className={errors.correo ? "border-red-500" : ""}
+            />
+            {errors.correo && (
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" /> {errors.correo.message}
+              </p>
+            )}
           </div>
 
           {/* Dirección */}
           <div className="space-y-2">
-            <Label className="flex items-center gap-2"><MapPin className="h-4 w-4 text-blue-600" /> Dirección</Label>
+            <Label className="flex items-center gap-2"><MapPin className="h-4 w-4 text-blue-600" /> Dirección <span className="text-red-500">*</span></Label>
             <Textarea
               {...register("direccion", { required: "Dirección requerida" })}
-              className="resize-none"
+              className={errors.direccion ? "border-red-500 resize-none" : "resize-none"}
             />
+            {errors.direccion && (
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" /> {errors.direccion.message}
+              </p>
+            )}
           </div>
 
           {/* Teléfono */}
           <div className="space-y-2">
-            <Label className="flex items-center gap-2"><Phone className="h-4 w-4 text-blue-600" /> Teléfono</Label>
-            <Input {...register("telefono", { required: "Teléfono requerido" })} />
+            <Label className="flex items-center gap-2"><Phone className="h-4 w-4 text-blue-600" /> Teléfono <span className="text-red-500">*</span></Label>
+            <Input 
+              {...register("telefono", { required: "Teléfono requerido" })} 
+              className={errors.telefono ? "border-red-500" : ""}
+            />
+            {errors.telefono && (
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" /> {errors.telefono.message}
+              </p>
+            )}
           </div>
 
           {/* Botones */}
@@ -204,6 +334,46 @@ export function FormularioExpediente({ onSuccess, onCancel }) {
             </Button>
           </div>
         </form>
+
+        {/* Modal de Resultado */}
+        {mostrarModal && (
+          <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
+            <Card className="w-full max-w-md shadow-2xl">
+              <CardHeader className={`${resultadoRegistro.success ? 'bg-green-50' : 'bg-red-50'} border-b`}>
+                <div className="flex items-center gap-3">
+                  {resultadoRegistro.success ? (
+                    <CheckCircle2 className="h-8 w-8 text-green-600" />
+                  ) : (
+                    <XCircle className="h-8 w-8 text-red-600" />
+                  )}
+                  <CardTitle className={resultadoRegistro.success ? 'text-green-900' : 'text-red-900'}>
+                    {resultadoRegistro.success ? '¡Registro Exitoso!' : 'Error en el Registro'}
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6 space-y-4">
+                {resultadoRegistro.success && (
+                  <div className="bg-blue-50 p-3 rounded border border-blue-200">
+                    <p className="text-sm text-blue-900">
+                      <strong>Número de Expediente:</strong> {resultadoRegistro.numeroExpediente}
+                    </p>
+                  </div>
+                )}
+                <Button
+                  onClick={() => {
+                    setMostrarModal(false);
+                    if (resultadoRegistro.success) {
+                      if (onSuccess) onSuccess();
+                    }
+                  }}
+                  className={`w-full ${resultadoRegistro.success ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
+                >
+                  Aceptar
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
