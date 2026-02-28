@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { DashboardLayout } from "../components/layout/dashboardLayout";
-import { useAuth } from "../features/auth/AuthContext"; // Verifica que la "A" sea mayúscula si así se llama el archivo
-
+import { useAuth } from "../features/auth/AuthContext";
 // Importar los dashboards específicos
 import { DashboardAdministrador } from "../features/dashboard/components/DashboardAdministrador";
 import { DashboardDoctor } from "../features/dashboard/components/DashboardDoctor";
@@ -9,7 +8,9 @@ import { DashboardRecepcionista } from "../features/dashboard/components/Dashboa
 import { DashboardEnfermero } from "../features/dashboard/components/DashboardEnfermero";
 import { FormularioExpediente } from "../features/expedientes/components/FormularioExpediente";
 
-// 1. Mapeo de componentes (Asegúrate de que coincidan con los strings que manda el Backend)
+import { BuscarPaciente } from "../features/expedientes/components/BuscarPaciente";
+
+// Mapeo de componentes
 const DASHBOARD_COMPONENTS = {
   ADMINISTRADOR: DashboardAdministrador,
   MEDICO: DashboardDoctor,
@@ -21,7 +22,7 @@ export function Dashboard() {
   const { user } = useAuth();
   const [currentView, setCurrentView] = useState("inicio");
 
-  // 2. Si no hay usuario todavía, mostramos carga para evitar errores de undefined
+  // Si no hay usuario todavía, mostramos carga para evitar errores de undefined
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -31,7 +32,7 @@ export function Dashboard() {
   }
 
   const renderContent = () => {
-    // 3. Normalizamos el rol a Mayúsculas para evitar errores de "Administrador" vs "ADMINISTRADOR"
+    // Normalizamos el rol a Mayúsculas para evitar errores de "Administrador" vs "ADMINISTRADOR"
     const userRole = user.rol?.toUpperCase();
 
     // Lógica para el expediente
@@ -51,14 +52,23 @@ export function Dashboard() {
       );
     }
 
-    // 4. Seleccionar el Dashboard según el rol
+    // Buscar Paciente
+    if (currentView === "buscar-paciente") {
+      return (
+        <BuscarPaciente 
+          onVolver={() => setCurrentView("inicio")} 
+          onVerExpediente={(paciente) => console.log("Abriendo:", paciente.codigo)}
+        />
+      )
+    }
+
+    // Seleccionar el Dashboard según el rol
     const RoleDashboard = DASHBOARD_COMPONENTS[userRole];
-    
     if (RoleDashboard) {
       return <RoleDashboard currentView={currentView} user={user} />;
     }
 
-    // 5. Caso de error: El rol no existe en nuestro objeto
+    // Caso de error: El rol no existe en nuestro objeto
     return (
       <div className="p-10 text-center">
         <h2 className="text-xl font-bold text-red-600">Acceso Restringido</h2>

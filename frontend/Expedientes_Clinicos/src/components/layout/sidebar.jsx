@@ -6,7 +6,8 @@ import { MENU_STRATEGIES } from "@/constants/menuStrategies";
 
 import {
   Hospital,
-  LogOut
+  LogOut,
+  KeyRound
 } from "lucide-react";
 
 export function Sidebar({ currentView, onNavigate  }) {
@@ -94,22 +95,45 @@ export function Sidebar({ currentView, onNavigate  }) {
       </div>
 
       {/* Logout Button */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-5 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+        
+        <button
+          onClick={() => onNavigate("changepassword")}
+          className="w-full flex items-center gap-3 px-3 py-2.5 mb-3 rounded-lg 
+                    text-gray-700 bg-gray-50 
+                    hover:bg-blue-50 hover:text-blue-700 
+                    transition-all duration-200"
+        >
+          <KeyRound className="h-5 w-5 text-gray-500 group-hover:text-blue-600" />
+          <span className="text-sm font-medium">
+            Cambiar contraseña
+          </span>
+        </button>
+
         <Button
           variant="outline"
           onClick={logout}
-          className="w-full border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800"
+          className="w-full flex items-center justify-center gap-2
+                    rounded-xl border border-red-400
+                    text-red-600 font-medium
+                    hover:bg-red-500 hover:text-white
+                    hover:border-red-500
+                    transition-all duration-200"
         >
+        
           <LogOut className="mr-2 h-4 w-4" />
           Cerrar Sesión
         </Button>
       </div>
 
       {/* Footer */}
-      <div className="p-4 text-center bg-gray-50 border-t border-gray-200">
-        <span className="text-xs text-gray-500">
-          <span className="inline-flex items-center gap-1">
-            <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+      <div className="p-4 text-center bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200">
+        <span className="text-base font-medium text-gray-600">
+          <span className="inline-flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
             Sesión activa
           </span>
         </span>

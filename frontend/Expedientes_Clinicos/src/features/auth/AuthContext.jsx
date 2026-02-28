@@ -1,27 +1,25 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  // Inicializamos el estado desde localStorage para persistencia
+  
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user");
     const savedToken = localStorage.getItem("token");
-    // Solo restauramos si existen ambos
+    
     return (savedUser && savedToken) ? JSON.parse(savedUser) : null;
   });
 
   const login = async (nombreUsuario, clave) => {
     try {
-      const response = await fetch("http://localhost:3000/api/auth", {
+      const response = await fetch("http://localhost:3000/api", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombreUsuario, clave }),
       });
 
       const result = await response.json();
-
-      console.log("EL SERVIDOR RESPONDIÓ ESTO:", result);
 
       if (result.success) {
         // Estructura del backend: { id, nombre, rol }
@@ -34,7 +32,6 @@ export function AuthProvider({ children }) {
 
         return { success: true };
       } else {
-        // Retornamos el error específico del backend (ej: "Credenciales incorrectas")
         return { success: false, error: result.error };
       }
     } catch (error) {
@@ -43,15 +40,41 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+  const logout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Token enviado al logout:", token);
+      
+      await fetch("http://localhost:3000/api/logout", {
+        method: "POST",
+        headers: { 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json" 
+        },
+      });
+    } catch (error) {
+      console.error("Error al registrar cierre de sesión en bitácora:", error);
+    } finally {
+      setUser(null);
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+    }
   };
 
+  useEffect(() => {
+    if (user && user.token) {
+      // futura validación de token
+    }
+  }, []);
+
   return (
-    // 'isAuthenticated' ahora es una validación real basada en el estado 'user'
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider 
+    value={{ 
+      user,
+      login,
+      logout,
+      isAuthenticated: !!user }}
+    >
       {children}
     </AuthContext.Provider>
   );

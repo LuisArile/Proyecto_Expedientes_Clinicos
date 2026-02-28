@@ -38,11 +38,6 @@ class usuarioService{
 
     }
 
-     async crear(data) {  
-        const usuario = await this.usuarioRepository.crear(data);
-        return usuario;
-    }
-
   async obtenerTodos() {
         try {
             const usuarios = await this.usuarioRepository.obtenerTodos();

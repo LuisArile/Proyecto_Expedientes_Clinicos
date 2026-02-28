@@ -7,11 +7,16 @@ class inicioSesionController {
     }
 
     async inicioSesion(req, res) {
-        console.log("Datos recibidos:", req.body);
         try {
             const { nombreUsuario, clave } = req.body;
             const resultado = await this.inicioSesionService.inicioSesion(nombreUsuario, clave);
-            // const usuario = await this.inicioSesionService.inicioSesion(nombreUsuario, clave);
+            
+            await this.inicioSesionService.registrarAuditoria(
+                resultado.id, 
+                "INICIO_SESION", 
+                `Usuario ${nombreUsuario} 
+                accedió al sistema`
+            );
 
             const payload = {
                 id: resultado.id,
@@ -28,7 +33,6 @@ class inicioSesionController {
                 token: token,
                 data: payload 
             });
-            // res.json({ success: true, data: resultado });
         } catch (error) {
             res.status(401).json({ success: false, error: error.message });
         }
@@ -36,7 +40,18 @@ class inicioSesionController {
 
     async cierreSesion(req, res) {
         try {
+            const usuarioId = req.usuario?.id;
+            if (!usuarioId) {
+                return res.status(401).json({ success: false, error: "No se encontró usuario para cerrar sesión" });
+            }
             const resultado = await this.inicioSesionService.cierreSesion(req.usuario?.id);
+            
+            await this.inicioSesionService.registrarAuditoria(
+                req.usuario.id, 
+                "CIERRE_SESION", 
+                "El usuario cerró su sesión"
+            );
+
             res.json({ success: true, data: resultado });
         } catch (error) {
             res.status(400).json({ success: false, error: error.message });
