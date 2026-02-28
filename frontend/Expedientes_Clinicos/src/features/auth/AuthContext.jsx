@@ -1,13 +1,13 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  // Inicializamos el estado desde localStorage para persistencia
+  
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user");
     const savedToken = localStorage.getItem("token");
-    // Solo restauramos si existen ambos
+    
     return (savedUser && savedToken) ? JSON.parse(savedUser) : null;
   });
 
@@ -21,8 +21,6 @@ export function AuthProvider({ children }) {
 
       const result = await response.json();
 
-      console.log("EL SERVIDOR RESPONDIÓ ESTO:", result);
-
       if (result.success) {
         // Estructura del backend: { id, nombre, rol }
         const userData = result.data; 
@@ -34,7 +32,6 @@ export function AuthProvider({ children }) {
 
         return { success: true };
       } else {
-        // Retornamos el error específico del backend (ej: "Credenciales incorrectas")
         return { success: false, error: result.error };
       }
     } catch (error) {
@@ -49,9 +46,21 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("token");
   };
 
+  // Opcional: aquí podrías validar token al cargar la app
+  useEffect(() => {
+    if (user && user.token) {
+      // futura validación de token
+    }
+  }, []);
+
   return (
-    // 'isAuthenticated' ahora es una validación real basada en el estado 'user'
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider 
+    value={{ 
+      user,
+      login,
+      logout,
+      isAuthenticated: !!user }}
+    >
       {children}
     </AuthContext.Provider>
   );
