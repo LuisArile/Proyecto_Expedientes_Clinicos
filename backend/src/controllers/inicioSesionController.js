@@ -40,6 +40,10 @@ class inicioSesionController {
 
     async cierreSesion(req, res) {
         try {
+            const usuarioId = req.usuario?.id;
+            if (!usuarioId) {
+                return res.status(401).json({ success: false, error: "No se encontró usuario para cerrar sesión" });
+            }
             const resultado = await this.inicioSesionService.cierreSesion(req.usuario?.id);
             
             await this.inicioSesionService.registrarAuditoria(

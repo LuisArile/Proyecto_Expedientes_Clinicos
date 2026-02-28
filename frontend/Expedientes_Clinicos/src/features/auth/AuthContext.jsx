@@ -40,13 +40,27 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+  const logout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Token enviado al logout:", token);
+      
+      await fetch("http://localhost:3000/api/logout", {
+        method: "POST",
+        headers: { 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json" 
+        },
+      });
+    } catch (error) {
+      console.error("Error al registrar cierre de sesión en bitácora:", error);
+    } finally {
+      setUser(null);
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+    }
   };
 
-  // Opcional: aquí podrías validar token al cargar la app
   useEffect(() => {
     if (user && user.token) {
       // futura validación de token
