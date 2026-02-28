@@ -45,8 +45,8 @@ model Paciente {
   correo          String?      @db.NVarChar(100)
   telefono        String?      @db.NVarChar(20)
   fechaNacimiento DateTime     @db.Date
-  genero          String       @db.NVarChar(50)
-  idResidencia    Int
+  sexo            String?       @db.NVarChar(50)
+  direccion       String?      @db.NVarChar(100)
 
   expedientes     Expediente[] 
 
@@ -57,9 +57,9 @@ model Paciente {
 model Expediente {
   idExpediente       Int      @id @default(autoincrement())
   idPaciente         Int      @unique
-  numeroExpediente   String   @unique @db.NVarChar(50)
-  estado             Int      @db.TinyInt
-  fechaCreacion      DateTime @default(now()) @db.Date
+  numeroExpediente   String   @unique @default(cuid()) @db.NVarChar(50)
+  estado             Boolean  @db.Bit
+  fechaCreacion      DateTime @default(now()) @db.DateTime2
   fechaActualizacion DateTime @default(now()) @updatedAt
   observaciones      String?  @db.NVarChar(100)
 
