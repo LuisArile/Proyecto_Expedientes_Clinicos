@@ -8,13 +8,15 @@ class auditoriaRepository{
         try {
             return await this.prisma.auditoria.create({
                 data: {
-                    usuarioID: data.usuarioID,
-                    accion:data.accion
-
-                }, include:{usuario:true}});
+                    usuarioId: data.usuarioId,
+                    accion: data.accion,
+                    detalles: data.detalles || null
+                }, 
+                include: { usuario: true }
+            });
 
         } catch (error) {
-            throw  new Error (`Error al crear usuario : ${error.message}`);
+            throw new Error(`Error al crear registro de auditoría: ${error.message}`);
         }
     }
 

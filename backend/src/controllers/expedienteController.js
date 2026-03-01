@@ -29,7 +29,10 @@ class expedienteController {
                 });
             }
 
-            const resultado = await this.expedienteService.crearConPaciente(paciente, expediente);
+            // Obtener el ID del usuario logueado desde el token (agregado por el middleware)
+            const usuarioId = req.usuario ? req.usuario.id : null;
+
+            const resultado = await this.expedienteService.crearConPaciente(paciente, expediente, usuarioId);
             res.status(201).json({ 
                 success: true, 
                 data: resultado,

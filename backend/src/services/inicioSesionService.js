@@ -4,9 +4,9 @@ const { eventos } = require('../config/roles');
 
 class InicioSesionService {
 
-    constructor(usuarioRepository, prisma) {
+    constructor(usuarioRepository, auditoriaService) {
         this.usuarioRepository = usuarioRepository;
-        this.prisma = prisma;
+        this.auditoriaService = auditoriaService;
     }
 
     async inicioSesion(nombreUsuario, clave) {
@@ -58,18 +58,12 @@ class InicioSesionService {
         return { message: 'Sesión cerrada exitosamente' };
     }
 
+    /**
+     * Registra la auditoría en una sesión (inicio o cierre)
+     * @deprecated - Usar auditoriaService.registrarSesion() directamente desde el controlador
+     */
     async registrarAuditoria(usuarioId, accion, detalles) {
-        try {
-            return await this.prisma.auditoria.create({
-                data: {
-                    usuarioId: usuarioId,
-                    accion: accion,
-                    detalles: detalles,
-                }
-            });
-        } catch (error) {
-            console.error("Error al registrar auditoría:", error);
-        }
+        return await this.auditoriaService.registrar(usuarioId, accion, detalles);
     }
 }
 

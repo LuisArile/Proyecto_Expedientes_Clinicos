@@ -1,10 +1,11 @@
 class expedienteService {
-    constructor(expedienteRepository, pacienteRepository) {
+    constructor(expedienteRepository, pacienteRepository, auditoriaService) {
         this.expedienteRepository = expedienteRepository;
         this.pacienteRepository = pacienteRepository;
+        this.auditoriaService = auditoriaService;
     }
 
-    async crearConPaciente(dataPaciente, dataExpediente) {
+    async crearConPaciente(dataPaciente, dataExpediente, usuarioId) {
         try {
             // Validar que el DNI no exista
             const pacienteExistente = await this.pacienteRepository.obtenerPorDni(dataPaciente.dni);
@@ -26,6 +27,11 @@ class expedienteService {
             // Crear expediente
             dataExpediente.idPaciente = pacienteCreado.idPaciente;
             const expedienteCreado = await this.expedienteRepository.crear(dataExpediente);
+
+            // Registrar en auditoría
+            if (usuarioId && this.auditoriaService) {
+                await this.auditoriaService.registrarExpediente(usuarioId, "Creacion", expedienteCreado.idExpediente);
+            }
 
             return {
                 paciente: pacienteCreado,

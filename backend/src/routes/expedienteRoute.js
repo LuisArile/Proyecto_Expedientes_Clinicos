@@ -3,18 +3,23 @@ const prisma = require("../config/prisma");
 
 const PacienteRepository = require("../repositories/pacienteRepositorio");
 const ExpedienteRepository = require("../repositories/expedienteRepository");
+const AuditoriaRepository = require("../repositories/auditoriaRepositorio");
+const AuditoriaService = require("../services/auditoriaService");
 const ExpedienteService = require("../services/expedienteService");
 const ExpedienteController = require("../controllers/expedienteController");
+const validarToken = require("../middlewares/inicioSesionMiddleware");
 
 const router = express.Router();
 
 const pacienteRepository = new PacienteRepository(prisma);
 const expedienteRepository = new ExpedienteRepository(prisma);
-const expedienteService = new ExpedienteService(expedienteRepository, pacienteRepository);
+const auditoriaRepository = new AuditoriaRepository(prisma);
+const auditoriaService = new AuditoriaService(auditoriaRepository);
+const expedienteService = new ExpedienteService(expedienteRepository, pacienteRepository, auditoriaService);
 const expedienteController = new ExpedienteController(expedienteService);
 
 // Crear expediente junto con datos del paciente (único endpoint de creación)
-router.post("/", (req, res) => expedienteController.crearConPaciente(req, res));
+router.post("/", validarToken, (req, res) => expedienteController.crearConPaciente(req, res));
 
 // Obtener todos los expedientes
 router.get("/", (req, res) => expedienteController.obtenerTodos(req, res));
