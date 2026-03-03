@@ -43,7 +43,7 @@ class Usuario {
             nombreUsuario:this.nombreUsuario,
             rol:this.rol,
             activo:this.activo,
-            ultimoAcesso:this.ultimoAcesso
+            ultimoAccesso:this.ultimoAccesso
         };
     
     }

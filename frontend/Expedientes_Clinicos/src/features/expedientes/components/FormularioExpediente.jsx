@@ -118,7 +118,7 @@ export function FormularioExpediente({ onSuccess, onCancel }) {
       }
     } catch (error) {
       setGuardandoExpediente(false);
-      console.error("❌ Error:", error);
+      console.error("Error:", error);
       
       setResultadoRegistro({
         success: false,

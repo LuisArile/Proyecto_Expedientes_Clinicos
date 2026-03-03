@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cva } from "class-variance-authority";
+import { cva } from "class-variance-authority"; //gestionar las variantes de diseño (colores, tamaños) de forma limpia
 import { cn } from "./utils";
 
 const buttonVariants = cva(

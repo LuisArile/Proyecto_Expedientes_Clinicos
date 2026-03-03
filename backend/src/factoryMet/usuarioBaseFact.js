@@ -1,7 +1,7 @@
 
 const Usuario=require('../models/Usuario');
-const Medico=require('../models/Medico');
-const Administrador=require('../models/Administrador');
+const Medico=require('../models/medico');
+const Administrador=require('../models/administrador');
 const {roles}= require('../config/roles')
 
 

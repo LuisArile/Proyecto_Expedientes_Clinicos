@@ -8,7 +8,7 @@ import { Changepassword } from "./pages/Changepassword";
 
 
 // Roles permitidos para acceder al dashboard
-const allowedRoles = ["RECEPCIONISTA", "ENFERMERA", "MEDICO", "ADMINISTRADOR"];
+const allowedRoles = ["RECEPCIONISTA", "ENFERMERO", "MEDICO", "ADMINISTRADOR"];
 
 function PrivateRoute({ children, allowedRoles }) {
   const { user } = useAuth();

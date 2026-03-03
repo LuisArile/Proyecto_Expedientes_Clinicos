@@ -10,7 +10,7 @@ class Medico extends Usuario {
     
 
     getNombre(){
-        return `administrador ${this.nombre}`;
+        return `medico ${this.nombre}`;
     }
 
     getMenuUsuario(){
