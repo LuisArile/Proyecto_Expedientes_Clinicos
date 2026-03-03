@@ -19,20 +19,19 @@ class inicioSesionController {
                 nombreUsuario
             );
 
-            const payload = {
+            const tokendPayload = {
                 id: resultado.id,
-                nombre: resultado.nombre,
                 rol: resultado.rol
             };
 
-            const token = jwt.sign(payload, process.env.JWT_SECRET || 'tu_clave_secreta', { 
+            const token = jwt.sign(tokendPayload, process.env.JWT_SECRET || 'tu_clave_secreta', { 
                 expiresIn: '8h' 
             });
 
             res.json({ 
                 success: true, 
                 token: token,
-                data: payload 
+                data: resultado 
             });
         } catch (error) {
             res.status(401).json({ success: false, error: error.message });

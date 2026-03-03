@@ -19,8 +19,11 @@ export function Login() {
     setError("");
     setLoading(true);
 
+    const usuarioLimpio = nombreUsuario.trim();
+    const claveLimpia = clave.trim();
+
     try {
-      const result = await login(nombreUsuario, clave);
+      const result = await login(usuarioLimpio, claveLimpia);
       if(result && result.success){
         console.log("Login exitoso, redirigiendo...");
         navigate("/dashboard");
@@ -115,13 +118,13 @@ export function Login() {
 
           {/* Link */}
           <div className="text-center mt-3">
-                <Link
-                    to="/cambiar-password"
-                    className="text-blue-600 text-sm hover:underline"
-                >
-                    ¿Necesita cambiar su contraseña?
-                </Link>
-            </div>
+            <Link
+                to="/cambiar-password"
+                className="text-blue-600 text-sm hover:underline"
+            >
+                ¿Necesita cambiar su contraseña?
+            </Link>
+          </div>
 
           <div className="border-t pt-4 mt-4 text-center text-xs text-gray-400">
             Para soporte técnico, contacte al administrador del sistema

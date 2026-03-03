@@ -9,6 +9,7 @@ import { DashboardEnfermero } from "../features/dashboard/components/DashboardEn
 import { FormularioExpediente } from "../features/expedientes/components/FormularioExpediente";
 
 import { BuscarPaciente } from "../features/expedientes/components/BuscarPaciente";
+import { Changepassword } from "../features/dashboard/components/Changepassword";
 
 // Mapeo de componentes
 const DASHBOARD_COMPONENTS = {
@@ -60,6 +61,11 @@ export function Dashboard() {
           onVerExpediente={(paciente) => console.log("Abriendo:", paciente.codigo)}
         />
       )
+    }
+
+    //cambiar contraseña
+    if (currentView === "changepassword") {
+      return <Changepassword />;
     }
 
     // Seleccionar el Dashboard según el rol

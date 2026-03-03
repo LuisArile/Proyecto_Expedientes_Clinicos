@@ -3,6 +3,7 @@ import { useAuth } from "@/features/auth/AuthContext";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Users, BarChart3, Pill, TestTube, Clock } from "lucide-react";
+import { obtenerFechaActual } from "@/utils/dateFormatter";
 
 export function DashboardAdministrador() {
   const { user } = useAuth();
@@ -15,7 +16,7 @@ export function DashboardAdministrador() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
-          Bienvenido/a, {user?.nombre} {user.apellido}
+          Bienvenido/a, {user?.nombre} {user?.apellido}
         </h1>
         <p className="text-gray-600">Panel de Administración - Control del Sistema Clínico</p>
       </div>

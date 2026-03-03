@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Activity, Users, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/features/auth/AuthContext";
+import { obtenerFechaActual } from "@/utils/dateFormatter";
 
 
 export function DashboardEnfermero() {
@@ -28,7 +29,7 @@ export function DashboardEnfermero() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-100 text-sm">Jornada actual</p>
-              <h2 className="text-2xl font-bold">Martes, 24 de Febrero 2026</h2>
+              <h2 className="text-2xl font-bold">{obtenerFechaActual()}</h2>
               <p className="text-green-100 mt-1">
                 Inicio: {estadisticasHoy.horaInicio} • Duración: 8 horas  
               </p>

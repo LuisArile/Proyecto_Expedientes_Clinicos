@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Stethoscope, Calendar, TestTube, Clock } from "lucide-react";
 
 import { useAuth } from "@/features/auth/AuthContext";
+import { obtenerFechaActual } from "@/utils/dateFormatter";
 
 
 export function DashboardDoctor() {
@@ -23,12 +24,12 @@ export function DashboardDoctor() {
       </div>
 
       {/* Banner de Turno (Morado) */}
-      <Card className="bg-gradient-to-r from-puple-600 to-purple-700 text-white border-none">
+      <Card className="bg-gradient-to-r from-purple-600 to-purple-700 text-white border-none">
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-purple-100 text-sm">Turno actual</p>
-              <h2 className="text-2xl font-bold">Sábado, 21 de Febrero 2026</h2>
+              <h2 className="text-2xl font-bold">{obtenerFechaActual()}</h2>
               <p className="text-purple-100 mt-1">
                 Inicio: {estadisticas.horaInicio} • Duración: 8 horas  
               </p>
