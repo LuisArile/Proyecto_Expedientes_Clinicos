@@ -23,7 +23,7 @@ export function DashboardDoctor() {
       </div>
 
       {/* Banner de Turno (Morado) */}
-      <Card className="bg-gradient-to-r from-puple-600 to-purple-700 text-white border-none">
+      <Card className="bg-gradient-to-r from-purple-600 to-purple-700 text-white border-none">
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
             <div>

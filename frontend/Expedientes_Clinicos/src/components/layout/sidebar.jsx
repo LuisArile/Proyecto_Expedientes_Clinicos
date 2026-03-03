@@ -97,18 +97,20 @@ export function Sidebar({ currentView, onNavigate  }) {
 
       {/* Logout Button */}
       <div className="p-5 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-        <button
+        <Button
           onClick={() => onNavigate("changepassword")}
-          className="w-full flex items-center gap-3 px-3 py-2.5 mb-3 rounded-lg 
+          className="w-full flex items-center gap-2  mb-3 rounded-xl 
+                    border border-blue-200
                     text-gray-700 bg-gray-50 
-                    hover:bg-blue-50 hover:text-blue-700 
+                    hover:bg-blue-50 hover:text-blue-700
+                    hover:border-blue-600 
                     transition-all duration-200"
         >
           <KeyRound className="h-5 w-5 text-gray-500 group-hover:text-blue-600" />
           <span className="text-sm font-medium">
             Cambiar contraseña
           </span>
-        </button>
+        </Button>
         <Button
           variant="outline"
           onClick={logout}

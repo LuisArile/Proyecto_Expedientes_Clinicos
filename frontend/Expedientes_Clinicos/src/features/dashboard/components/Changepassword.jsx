@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, User, Eye } from "lucide-react";
+import { Lock, User, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 
 export function Changepassword() {
@@ -10,6 +10,10 @@ export function Changepassword() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -102,14 +106,27 @@ export function Changepassword() {
             <label className="block text-sm text-gray-600 mb-1">
               Contraseña actual
             </label>
-            <input
-              type="password"
+            <div className="relative">
+              <input
+              type={showCurrent ? "text" : "password"}
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Ingrese su contraseña actual"
               className="w-full py-2 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-900"
               required
             />
+            {showCurrent ? (
+              <EyeOff
+                onClick={() => setShowCurrent(false)}
+                className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+              />
+            ) : (
+              <Eye
+                onClick={() => setShowCurrent(true)}
+                className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+              />
+            )}
+            </div>
           </div>
 
           {/* Nueva contraseña */}
@@ -117,14 +134,27 @@ export function Changepassword() {
             <label className="block text-sm text-gray-600 mb-1">
               Nueva contraseña
             </label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Ingrese su nueva contraseña"
-              className="w-full py-2 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-900"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showNew ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Ingrese su nueva contraseña"
+                className="w-full py-2 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-900"
+                required
+              />
+              {showNew ? (
+                <EyeOff
+                  onClick={() => setShowNew(false)}
+                  className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+                />
+              ) : (
+                <Eye
+                  onClick={() => setShowNew(true)}
+                  className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+                />
+              )}
+            </div>
           </div>
 
           {/* Confirmar */}
@@ -132,14 +162,27 @@ export function Changepassword() {
             <label className="block text-sm text-gray-600 mb-1">
               Confirmar nueva contraseña
             </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirme su nueva contraseña"
-              className="w-full py-2 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-900"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showConfirm ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirme su nueva contraseña"
+                className="w-full py-2 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-900"
+                required
+              />
+              {showConfirm ? (
+                <EyeOff
+                  onClick={() => setShowConfirm(false)}
+                  className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+                />
+              ) : (
+                <Eye
+                  onClick={() => setShowConfirm(true)}
+                  className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+                />
+              )}
+            </div>
           </div>
 
           {error && (

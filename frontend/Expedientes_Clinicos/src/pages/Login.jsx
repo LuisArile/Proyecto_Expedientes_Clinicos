@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, Eye, Activity } from "lucide-react";
+import { User, Lock, Eye, Activity } from "lucide-react";
 import { useAuth } from "../features/auth/AuthContext";
 
 export function Login() {
@@ -56,7 +56,7 @@ export function Login() {
               Usuario
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+              <User className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Ingrese su usuario"
