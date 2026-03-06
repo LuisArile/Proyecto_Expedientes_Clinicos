@@ -7,7 +7,7 @@ const validarToken =(req,res,siguiente)=>{
     const token = authHeader && authHeader.split(" ")[1];
 
     if (!token){
-        res.status(401).json({error: "Token requerido"});
+        return res.status(401).json({error: "Token requerido"});
     }
 
     try {

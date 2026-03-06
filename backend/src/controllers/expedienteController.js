@@ -1,3 +1,4 @@
+const BusquedaGlobalDTO = require('../dtos/BusquedaPacienteDTO');
 class expedienteController {
     constructor(expedienteService) {
         this.expedienteService = expedienteService;
@@ -123,6 +124,34 @@ class expedienteController {
             res.json({ 
                 success: true, 
                 message: 'Expediente eliminado exitosamente'
+            });
+        } catch (error) {
+            res.status(400).json({ 
+                success: false, 
+                error: error.message 
+            });
+        }
+    }
+
+    async buscarGlobal(req, res) {
+        try {
+
+            const filtroDto = new BusquedaGlobalDTO(req.query);
+
+            const usuarioId = req.usuario ? req.usuario.id : null;
+
+            const resultados = await this.expedienteService.buscarGlobal(filtroDto, usuarioId);
+            
+            // if( !filtroDto.termino ) {
+            //     return res.status(400).json({
+            //         success: false,
+            //         error: 'Debe proporcioanr un término de búsqueda'
+            //     });
+            // }
+
+            res.json({ 
+                success: true, 
+                data: resultados 
             });
         } catch (error) {
             res.status(400).json({ 

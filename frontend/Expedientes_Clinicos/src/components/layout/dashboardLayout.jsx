@@ -1,6 +1,6 @@
 import { Sidebar } from "./sidebar";
 
-export function DashboardLayout({ children, currentView, onNavigate }) {
+export function DashboardLayout({ children, currentView, onNavigate, user }) {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100">
       
