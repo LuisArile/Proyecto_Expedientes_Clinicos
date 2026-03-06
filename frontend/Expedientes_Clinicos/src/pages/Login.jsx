@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, Eye, Activity } from "lucide-react";
+import { User, Lock, Eye, Activity, EyeOff } from "lucide-react";
 import { useAuth } from "../features/auth/AuthContext";
-import { Link } from "react-router-dom";
 
 export function Login() {
   const { login } = useAuth();
@@ -59,13 +58,13 @@ export function Login() {
         {/* Formulario */}
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Email */}
+          {/* Usuario */}
           <div>
             <label className="block text-sm text-gray-600 mb-1">
               Usuario
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+              <User className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Ingrese su usuario"
@@ -92,10 +91,17 @@ export function Login() {
                 className="text-gray-800 w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                 required
               />
-              <Eye
-                onClick={() => setShowClave(!showClave)}
+            {showClave ? (
+              <EyeOff
+                onClick={() => setShowClave(false)}
                 className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
               />
+            ) : (
+              <Eye
+                onClick={() => setShowClave(true)}
+                className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+              />
+            )}
             </div>
           </div>
 
