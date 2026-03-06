@@ -6,6 +6,7 @@ build/
 # Variables de entorno
 .env
 .env.local
+.env.docker
 
 # Archivos de log
 npm-debug.log*
@@ -15,3 +16,12 @@ yarn-error.log*
 # Archivos del sistema operativo
 # .DS_Store
 # Thumbs.db
+
+# Google Drive específicos
+**/Icon?
+**/desktop.ini
+**/~*
+
+Carpetas temporales de sincronización de Drive
+**/.tmp.drivedownload/
+**/.tmp.driveupload/
