@@ -24,16 +24,24 @@ router.post("/", validarToken, (req, res) => expedienteController.crearConPacien
 // Obtener todos los expedientes
 router.get("/", (req, res) => expedienteController.obtenerTodos(req, res));
 
-// Obtener expediente por ID
-router.get("/:idExpediente", (req, res) => expedienteController.obtenerPorId(req, res));
+// Búsqueda global (DNI, Nombre, Apellido)
+router.get('/buscar', 
+    validarToken, 
+    (req, res) => expedienteController.buscarGlobal(req, res)
+);
 
 // Obtener expediente de un paciente específico
 router.get("/paciente/:idPaciente", (req, res) => expedienteController.obtenerPorPaciente(req, res));
+
+// Obtener expediente por ID
+router.get("/:idExpediente", (req, res) => expedienteController.obtenerPorId(req, res));
 
 // Actualizar expediente
 router.put("/:idExpediente", (req, res) => expedienteController.actualizar(req, res));
 
 // Eliminar expediente
 router.delete("/:idExpediente", (req, res) => expedienteController.eliminar(req, res));
+
+// router.get('/:id', expedienteController.obtenerPorId);
 
 module.exports = router;

@@ -25,28 +25,36 @@ class expedienteRepository {
         return Boolean(estado);
     }
     
-    async crear(data) {
+    /**
+     * Crea un expediente.
+     * @param {Object} data - Datos del expediente.
+     * @param {Object} [tx] - Cliente de transacción (opcional).
+     */
+    async crear(data, tx = null) {
+        const client = tx || prisma;
         try {
-            // Generar numeroExpediente con formato EXP-YYYY-NNNNN
-            const anioActual = new Date().getFullYear();
+            // El numeroExpediente ya viene generado o validado desde el Service
+
+            // // Generar numeroExpediente con formato EXP-YYYY-NNNNN
+            // const anioActual = new Date().getFullYear();
             
-            // Contar los expedientes del año actual
-            const expedientesDelAnio = await prisma.expediente.count({
-                where: {
-                    numeroExpediente: {
-                        startsWith: `EXP-${anioActual}`
-                    }
-                }
-            });
+            // // Contar los expedientes del año actual
+            // const expedientesDelAnio = await prisma.expediente.count({
+            //     where: {
+            //         numeroExpediente: {
+            //             startsWith: `EXP-${anioActual}`
+            //         }
+            //     }
+            // });
             
-            // Generar el número incremental (01, 02, 03, etc)
-            const numeroIncremental = String(expedientesDelAnio + 1).padStart(5, '0');
-            const numeroExpediente = `EXP-${anioActual}-${numeroIncremental}`;
+            // // Generar el número incremental (01, 02, 03, etc)
+            // const numeroIncremental = String(expedientesDelAnio + 1).padStart(5, '0');
+            // const numeroExpediente = `EXP-${anioActual}-${numeroIncremental}`;
             
             // Mapear estado de string a número
-            const estadoNumerico = this._mapearEstado(data.estado);
+            const estadoNumerico = this._mapearEstado(data.estado || 'activo');
             
-            const resultado = await prisma.expediente.create({
+            const resultado = await client.expediente.create({
                 data: {
                     idPaciente: data.idPaciente,
                     numeroExpediente: numeroExpediente,
@@ -74,8 +82,21 @@ class expedienteRepository {
         }
     }
 
+    /**
+     * Busca un expediente por su número único.
+     * @param {number} idExpediente 
+     */
     async obtenerPorId(idExpediente) {
         try {
+
+            const id = Number(idExpediente);
+
+            if (isNaN(id)) {
+                throw new Error("El ID proporcionado no es un formato válido (debe ser numérico)");
+            }
+            
+            if (!idExpediente) throw new Error("ID de expediente no proporcionado");
+
             const data = await prisma.expediente.findUnique({
                 where: { idExpediente: Number(idExpediente) },
                 include: { paciente: true }
@@ -86,6 +107,10 @@ class expedienteRepository {
         }
     }
 
+    /**
+     * Busca un expediente por su número único.
+     * @param {number} idPaciente 
+     */
     async obtenerPorPaciente(idPaciente) {
         try {
             const data = await prisma.expediente.findUnique({
@@ -98,6 +123,10 @@ class expedienteRepository {
         }
     }
 
+    /**
+     * Busca un expediente por su número único.
+     * @param {string} numeroExpediente 
+     */
     async obtenerPorNumero(numeroExpediente) {
         try {
             const data = await prisma.expediente.findUnique({
@@ -110,7 +139,9 @@ class expedienteRepository {
         }
     }
 
-    async actualizar(idExpediente, data) {
+    async actualizar(idExpediente, data, tx = null) {
+        const client = tx || prisma;
+        
         try {
             const datosActualizar = {
                 observaciones: data.observaciones || undefined,
@@ -122,7 +153,7 @@ class expedienteRepository {
                 datosActualizar.estado = this._mapearEstado(data.estado);
             }
             
-            return await prisma.expediente.update({
+            return await client.expediente.update({
                 where: { idExpediente: Number(idExpediente) },
                 data: datosActualizar,
                 include: { paciente: true }

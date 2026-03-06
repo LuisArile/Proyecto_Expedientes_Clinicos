@@ -1,10 +1,21 @@
 const prisma = require('../config/prisma');
 
+/**
+ * @typedef {Object} PacienteData
+ */
+
 class pacienteRepository {
     
-    async crear(data) {
+    /**
+     * Crea un nuevo registro de paciente.
+     * @param {PacienteData} data - Objeto con la información del paciente.
+     * @param {Object} [tx] - Cliente de transacción de Prisma.
+     * @returns {Promise<Object>} El registro del paciente creado.
+     */
+    async crear(data, tx = null) {
+        const client = tx || prisma;
         try {
-            const resultado = await prisma.paciente.create({
+            const resultado = await client.paciente.create({
                 data: {
                     dni: data.dni,
                     nombre: data.nombre,
@@ -22,6 +33,10 @@ class pacienteRepository {
         }
     }
 
+    /**
+     * Recupera todos los pacientes registrados, incluyendo sus expedientes asociados.
+     * @returns {Promise<Array<Object>>} Lista de todos los pacientes.
+     */
     async obtenerTodos() {
         try {
             const resultados = await prisma.paciente.findMany({
@@ -33,6 +48,11 @@ class pacienteRepository {
         }
     }
 
+    /**
+     * Busca un paciente específico por su ID único.
+     * @param {number} idPaciente - El ID numérico del paciente.
+     * @returns {Promise<Object|null>} El objeto del paciente o null si no se encuentra.
+     */
     async obtenerPorId(idPaciente) {
         try {
             const data = await prisma.paciente.findUnique({
@@ -45,6 +65,11 @@ class pacienteRepository {
         }
     }
 
+    /**
+     * Busca un paciente utilizando su número de DNI.
+     * @param {string} dni - El número de identidad a buscar.
+     * @returns {Promise<Object|null>} El primer paciente que coincida con el DNI.
+     */
     async obtenerPorDni(dni) {
         try {
             const data = await prisma.paciente.findFirst({
@@ -57,6 +82,12 @@ class pacienteRepository {
         }
     }
 
+    /**
+     * Actualiza los datos de un paciente existente.
+     * @param {number} idPaciente - ID único del paciente.
+     * @param {Partial<PacienteData>} data - Objeto con los campos parciales a actualizar.
+     * @returns {Promise<Object>} El registro del paciente actualizado.
+     */
     async actualizar(idPaciente, data) {
         try {
             return await prisma.paciente.update({
@@ -74,6 +105,57 @@ class pacienteRepository {
             });
         } catch (error) {
             throw new Error(`Error al actualizar paciente: ${error.message}`);
+        }
+    }
+
+    /**
+     * Busca pacientes por coincidencia en DNI, nombre o apellido.
+     * @param {string} termino - El texto a buscar (parcial o completo).
+     * @param {number} limite - Cuántos registros traer.
+     * @param {number} skip - Cuántos registros saltar.
+     * @returns {Promise<Array<Object>>} Lista de hasta 10 pacientes que coincidan con el término.
+     */
+    async buscarPaciente(termino, limite = 10, skip = 0){
+        try {
+            return await prisma.paciente.findMany({
+                where: {
+                    OR: [
+                        { dni: { contains: termino } },
+                        { nombre: { contains: termino } },
+                        { apellido: { contains: termino } },
+                        // { fechaNacimiento: { contains: termino, mode: 'insensitive' } },
+                    
+                        {
+                            expedientes: {
+                                numeroExpediente: { contains: termino }
+                            }
+                        }
+                    ],
+                },
+                include: 
+                { expedientes: true },
+                take: limite,
+                skip: skip,
+                orderBy: { nombre: 'asc' }
+            })
+        } catch (error) {
+            throw new Error(`Error en búsqueda de pacientes: ${error.message}`);
+        }
+    }
+
+    async contarBusqueda(termino) {
+        try {
+            return await prisma.paciente.count({
+                where: {
+                    OR: [
+                        { dni: { contains: termino } },
+                        { nombre: { contains: termino } },
+                        { apellido: { contains: termino } },
+                    ]
+                }
+            });
+        } catch (error) {
+            throw new Error(`Error al contar resultados de búsqueda: ${error.message}`);
         }
     }
 }

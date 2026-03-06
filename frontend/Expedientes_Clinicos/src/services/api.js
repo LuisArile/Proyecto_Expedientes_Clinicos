@@ -75,4 +75,9 @@ export const expedienteAPI = {
     apiCall(`/expedientes/${idExpediente}`, {
       method: "DELETE",
     }),
+  
+  buscar: (termino, pagina = 1, filtro = "") =>
+    apiCall(`/expedientes/buscar?q=${encodeURIComponent(termino)}&page=${pagina}&filter=${filtro}`, {
+      method: "GET",
+    }),
 };
