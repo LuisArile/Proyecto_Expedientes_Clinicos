@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id            Int         @id @default(autoincrement())
+  nombreUsuario String      @unique
+  correo        String      @unique
+  clave         String
+  rol           String
+  activo        Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  apellido      String
+  especialidad  String?
+  nombre        String
+  ultimoAcceso  DateTime?
+  updatedAt     DateTime    @updatedAt
+  auditorias    Auditoria[]
+}
+
+model Auditoria {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int?
+  accion    String
+  detalles  String?
+  fecha     DateTime @default(now())
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id])
+}
+
+model Paciente {
+  idPaciente      Int         @id @default(autoincrement())
+  dni             String      @db.NVarChar(20)
+  nombre          String      @db.NVarChar(50)
+  apellido        String      @db.NVarChar(50)
+  correo          String?     @db.NVarChar(100)
+  telefono        String?     @db.NVarChar(20)
+  fechaNacimiento DateTime    @db.Date
+  direccion       String?     @db.NVarChar(100)
+  sexo            String?     @db.NVarChar(50)
+  expedientes     Expediente?
+
+  @@map("Paciente")
+}
+
+model Expediente {
+  idExpediente       Int      @id @default(autoincrement())
+  idPaciente         Int      @unique
+  numeroExpediente   String   @unique @default(cuid()) @db.NVarChar(50)
+  estado             Boolean
+  fechaCreacion      DateTime @default(now())
+  fechaActualizacion DateTime @default(now()) @updatedAt
+  observaciones      String?  @db.NVarChar(100)
+  paciente           Paciente @relation(fields: [idPaciente], references: [idPaciente])
+
+  @@map("Expediente")
+}
