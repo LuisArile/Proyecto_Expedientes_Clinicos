@@ -8,7 +8,8 @@ import { MemoryRouter } from "react-router-dom";
 const mockLogout = vi.fn();
 const mockNavigate = vi.fn();
 
-vi.mock("@/features/auth/authContext", () => ({
+/* Mock correcto del AuthContext */
+vi.mock("@/features/auth/AuthContext", () => ({
   useAuth: () => ({
     user: {
       nombre: "Carlos",
