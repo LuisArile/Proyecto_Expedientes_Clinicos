@@ -81,3 +81,61 @@ export const expedienteAPI = {
       method: "GET",
     }),
 };
+
+/**
+ * Métodos para consumir endpoints de roles
+ */
+export const rolAPI = {
+  obtenerTodos: () =>
+    apiCall("/roles", { method: "GET" }),
+
+  obtenerPorId: (idRol) =>
+    apiCall(`/roles/${idRol}`, { method: "GET" }),
+
+  crear: (data) =>
+    apiCall("/roles", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  actualizar: (idRol, data) =>
+    apiCall(`/roles/${idRol}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  eliminar: (idRol) =>
+    apiCall(`/roles/${idRol}`, { method: "DELETE" }),
+
+  obtenerPermisos: (idRol) =>
+    apiCall(`/roles/${idRol}/permisos`, { method: "GET" }),
+
+  asignarPermisos: (idRol, permisos) =>
+    apiCall(`/roles/${idRol}/permisos`, {
+      method: "PUT",
+      body: JSON.stringify({ permisos }),
+    }),
+};
+
+/**
+ * Métodos para consumir endpoints de permisos
+ */
+export const permisoAPI = {
+  obtenerTodos: () =>
+    apiCall("/permisos", { method: "GET" }),
+
+  crear: (data) =>
+    apiCall("/permisos", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  actualizar: (idPermiso, data) =>
+    apiCall(`/permisos/${idPermiso}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  eliminar: (idPermiso) =>
+    apiCall(`/permisos/${idPermiso}`, { method: "DELETE" }),
+};

@@ -3,7 +3,7 @@ const Usuario = require('./Usuario');
 class Administrador extends Usuario {
     constructor(data={}) {
         super(data);
-        this.rol='ADMINISTRADOR';
+        this.rolNombre='ADMINISTRADOR';
     }
 
    

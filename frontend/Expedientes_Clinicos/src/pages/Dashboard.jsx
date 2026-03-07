@@ -7,6 +7,7 @@ import { DashboardDoctor } from "../features/dashboard/components/DashboardDocto
 import { DashboardRecepcionista } from "../features/dashboard/components/DashboardRecepcionista";
 import { DashboardEnfermero } from "../features/dashboard/components/DashboardEnfermero";
 import { FormularioExpediente } from "../features/expedientes/components/FormularioExpediente";
+import { GestionRoles } from "../features/admin/components/GestionRoles";
 
 import { BuscarPaciente } from "../features/expedientes/components/BuscarPaciente";
 import { Changepassword } from "../features/dashboard/components/Changepassword";
@@ -61,6 +62,18 @@ export function Dashboard() {
           onVerExpediente={(paciente) => console.log("Abriendo:", paciente.codigo)}
         />
       )
+    }
+
+    // Gestión de Roles y Permisos (solo admin)
+    if (currentView === "gestion-roles") {
+      if (userRole === "ADMINISTRADOR") {
+        return <GestionRoles />;
+      }
+      return (
+        <div className="p-10 text-red-500 font-bold">
+          No tienes permiso para gestionar roles.
+        </div>
+      );
     }
 
     //cambiar contraseña

@@ -57,7 +57,7 @@ class expedienteRepository {
             const resultado = await client.expediente.create({
                 data: {
                     idPaciente: data.idPaciente,
-                    numeroExpediente: numeroExpediente,
+                    numeroExpediente: data.numeroExpediente,
                     estado: estadoNumerico,
                     observaciones: data.observaciones || null,
                     fechaCreacion: new Date(),

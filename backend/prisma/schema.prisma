@@ -7,12 +7,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Rol {
+  idRol         Int              @id @default(autoincrement())
+  nombre        String           @unique @db.NVarChar(50)
+  usuarios      Usuario[]
+  permisos      PermisosPorRol[]
+
+  @@map("Rol")
+}
+
+model Permiso {
+  idPermiso     Int              @id @default(autoincrement())
+  nombre        String           @unique @db.NVarChar(50)
+  roles         PermisosPorRol[]
+
+  @@map("Permiso")
+}
+
+model PermisosPorRol {
+  idRol         Int
+  idPermiso     Int
+  rol           Rol     @relation(fields: [idRol], references: [idRol])
+  permiso       Permiso @relation(fields: [idPermiso], references: [idPermiso])
+
+  @@id([idRol, idPermiso])
+  @@map("PermisosPorRol")
+}
+
 model Usuario {
   id            Int         @id @default(autoincrement())
   nombreUsuario String      @unique
   correo        String      @unique
   clave         String
-  rol           String
+  idRol         Int
   activo        Boolean     @default(true)
   createdAt     DateTime    @default(now())
   apellido      String
@@ -20,6 +47,7 @@ model Usuario {
   nombre        String
   ultimoAcceso  DateTime?
   updatedAt     DateTime    @updatedAt
+  rol           Rol         @relation(fields: [idRol], references: [idRol])
   auditorias    Auditoria[]
 }
 

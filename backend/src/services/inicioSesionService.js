@@ -1,6 +1,5 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { eventos } = require('../config/roles');
 
 class InicioSesionService {
 
@@ -28,7 +27,7 @@ class InicioSesionService {
         }
 
         const token = jwt.sign(
-            { id: usuario.id, rol: usuario.rol },
+            { id: usuario.id, idRol: usuario.idRol },
             process.env.JWT_SECRET || 'secret_key_temporal',
             { expiresIn: "8h" }
         );
@@ -39,7 +38,8 @@ class InicioSesionService {
             nombreUsuario: usuario.nombreUsuario,
             apellido: usuario.apellido,
             correo: usuario.correo,
-            rol: usuario.rol,
+            idRol: usuario.idRol,
+            rol: usuario.rolNombre,
             token
         };
     }
@@ -52,7 +52,7 @@ class InicioSesionService {
 
         await this.usuarioRepository.registrarAccionUsuario(
             usuarioId,
-            eventos.logout
+            'CIERRE_SESION'
         );
 
         return { message: 'Sesión cerrada exitosamente' };

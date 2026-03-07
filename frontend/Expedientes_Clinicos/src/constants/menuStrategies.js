@@ -1,4 +1,4 @@
-import { UserPlus, Search, Activity, Stethoscope, Shield, Users, TestTube, ClipboardList, BarChart3, Pill } from "lucide-react";
+import { UserPlus, Search, Activity, Stethoscope, Shield, Users, TestTube, ClipboardList, BarChart3, Pill, Lock } from "lucide-react";
 
 export const MENU_STRATEGIES = {
     RECEPCIONISTA: [
@@ -19,6 +19,7 @@ export const MENU_STRATEGIES = {
     ADMINISTRADOR: [
         { id: "buscar-paciente", label: "Buscar Paciente", icon: Search, description: "" },
         { id: "gestion-usuarios", label: "Gestión de Usuarios", icon: Shield, description: "Administrar usuarios del sistema" },
+        { id: "gestion-roles", label: "Gestión de Roles", icon: Lock, description: "Roles y permisos del sistema" },
         { id: "auditoria", label: "Auditoría", icon: BarChart3, description: "Registro de eventos del sistema" },
         { id: "catalogo-medicamentos", label: "Catálogo de Medicamentos", icon: Pill, description: "Gestionar medicamentos" },
         { id: "catalogo-examenes", label: "Catálogo de Exámenes", icon: TestTube, description: "Gestionar tipos de examen" },

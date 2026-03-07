@@ -23,10 +23,10 @@ class usuarioService{
 
         const usuario= await this.usuarioRepository.crear(data);
 
-        if(usuario&&usuario.Id){
+        if(usuario&&usuario.id){
             //registrar accion 
-        await this.usuarioRepository.registrarAccionUsuario(usuario.Id,'USUARIO_CREADO',
-            {rol:data.rol}
+        await this.usuarioRepository.registrarAccionUsuario(usuario.id,'USUARIO_CREADO',
+            {idRol:data.idRol}
         );
     }
 

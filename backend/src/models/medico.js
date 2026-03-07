@@ -3,7 +3,7 @@ const Usuario = require('./Usuario');
 class Medico extends Usuario {
     constructor(data={}) {
         super(data);
-        this.rol='MEDICO';
+        this.rolNombre='MEDICO';
         this.especialidad=data.especialidad || 'medicina general';
     }
 

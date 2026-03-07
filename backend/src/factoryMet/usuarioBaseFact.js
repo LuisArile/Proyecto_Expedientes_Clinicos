@@ -2,22 +2,21 @@
 const Usuario=require('../models/Usuario');
 const Medico=require('../models/medico');
 const Administrador=require('../models/administrador');
-const {roles}= require('../config/roles')
 
 
 class UsuarioBase{
 
     static crearUsuario(data){
-        if(!data || !data.rol ){
+        if(!data || !data.rolNombre ){
             throw new Error('Se requiere rol de usuario')
     }
 
 
-    switch(data.rol) {
-            case roles.admin:
+    switch(data.rolNombre) {
+            case 'ADMINISTRADOR':
                 return new Administrador(data);
             
-            case roles.medico:
+            case 'MEDICO':
                 return new Medico(data);
             
             default:

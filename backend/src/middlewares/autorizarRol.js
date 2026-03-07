@@ -1,8 +1,10 @@
+const prisma = require('../config/prisma');
+
 const autorizarRol = (rolesPermitidos) => {
-    return (req, res, siguiente) => {
+    return async (req, res, siguiente) => {
         const usuario = req.usuario;
 
-        if (!usuario || !rolesPermitidos.includes(usuario.rol)) {
+        if (!usuario || !usuario.idRol) {
             return res.status(403).json({ 
                 success: false, 
                 error: "Acceso denegado", 
@@ -10,6 +12,19 @@ const autorizarRol = (rolesPermitidos) => {
             });
         }
 
+        const rol = await prisma.rol.findUnique({
+            where: { idRol: usuario.idRol }
+        });
+
+        if (!rol || !rolesPermitidos.includes(rol.nombre)) {
+            return res.status(403).json({ 
+                success: false, 
+                error: "Acceso denegado", 
+                mensaje: "No tienes los permisos necesarios para acceder a este recurso." 
+            });
+        }
+
+        req.usuario.rolNombre = rol.nombre;
         siguiente();
     };
 };

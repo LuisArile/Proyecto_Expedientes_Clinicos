@@ -6,7 +6,8 @@ class Usuario {
         this.correo=data.correo;
         this.nombreUsuario=data.nombreUsuario;
         this.clave=data.clave;
-        this.rol=data.rol;
+        this.idRol=data.idRol;
+        this.rolNombre=data.rolNombre;
         this.activo=data.activo !==undefined ?data.activo:true;
         this.ultimoAcesso=data.ultimoAcesso;
     }
@@ -41,7 +42,8 @@ class Usuario {
             NombreCompleto:this.getNombreCompleto(),
             correo:this.correo,
             nombreUsuario:this.nombreUsuario,
-            rol:this.rol,
+            idRol:this.idRol,
+            rol:this.rolNombre,
             activo:this.activo,
             ultimoAccesso:this.ultimoAccesso
         };

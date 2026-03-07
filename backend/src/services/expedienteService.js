@@ -1,3 +1,5 @@
+const prisma = require('../config/prisma');
+
 class expedienteService {
     constructor(expedienteRepository, pacienteRepository, auditoriaService) {
         this.expedienteRepository = expedienteRepository;

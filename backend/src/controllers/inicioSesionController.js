@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const { roles } = require('../config/roles');
 
 class inicioSesionController {
     constructor(inicioSesionService, auditoriaService) {
@@ -21,7 +20,7 @@ class inicioSesionController {
 
             const tokendPayload = {
                 id: resultado.id,
-                rol: resultado.rol
+                idRol: resultado.idRol
             };
 
             const token = jwt.sign(tokendPayload, process.env.JWT_SECRET || 'tu_clave_secreta', { 

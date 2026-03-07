@@ -7,6 +7,8 @@ const cors= require("cors");
 const usuarioRouters = require("./routes/usuarioRoute")
 const inicioSesionRouters= require("./routes/inicioSesionRoute")
 const expedienteRouters = require("./routes/expedienteRoute")
+const rolRouters = require("./routes/rolRoute")
+const permisoRouters = require("./routes/permisoRoute")
 
 
 
@@ -33,5 +35,8 @@ app.use("/api", inicioSesionRouters); //inicio y cierre de sesion
 app.use("/api/cierreSesion", inicioSesionRouters);
 
 app.use("/api/expedientes", expedienteRouters); // operaciones con expedientes
+
+app.use("/api/roles", rolRouters); // gestión de roles
+app.use("/api/permisos", permisoRouters); // gestión de permisos
 
 module.exports=app;
