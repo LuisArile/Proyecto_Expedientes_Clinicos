@@ -96,6 +96,34 @@ class UsuarioRepository {
             console.error('Error al registrar auditoría:', error);
         }
     }
+
+    async obtenerPorId(userId) {
+        try {
+            return await prisma.usuario.findUnique({
+                where: { id: Number(userId) }
+            });
+
+        } catch (error) {
+            console.error("Error Prisma:", error);
+            throw error;
+        }
+    } 
+    
+    async actualizarPassword(userId, nuevaPassword) {
+        try {
+            return await prisma.usuario.update({
+                where: {
+                    id: userId
+                },
+                data: {
+                    clave: nuevaPassword
+                }
+            });
+        } catch (error) {
+            console.error("Error Prisma:", error);
+            throw error;
+        }
+    }
 }
 
 module.exports = UsuarioRepository;

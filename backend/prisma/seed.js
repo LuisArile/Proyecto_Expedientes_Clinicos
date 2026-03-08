@@ -2,6 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
+
   // Crear roles
   const administrador = await prisma.rol.upsert({
     where: { nombre: 'ADMINISTRADOR' },
@@ -52,15 +53,14 @@ async function main() {
 
   // Asignar permisos por rol
   const permisosRol = [
-    // ENFERMERO: VER_EXPEDIENTE
     { idRol: enfermero.idRol, idPermiso: verExpediente.idPermiso },
-    // RECEPCIONISTA: VER_EXPEDIENTE, CREAR_EXPEDIENTE, EDITAR_EXPEDIENTE
+
     { idRol: recepcionista.idRol, idPermiso: verExpediente.idPermiso },
     { idRol: recepcionista.idRol, idPermiso: crearExpediente.idPermiso },
     { idRol: recepcionista.idRol, idPermiso: editarExpediente.idPermiso },
-    // MÉDICO: VER_EXPEDIENTE
+
     { idRol: medico.idRol, idPermiso: verExpediente.idPermiso },
-    // ADMINISTRADOR: todos los permisos
+
     { idRol: administrador.idRol, idPermiso: verExpediente.idPermiso },
     { idRol: administrador.idRol, idPermiso: crearExpediente.idPermiso },
     { idRol: administrador.idRol, idPermiso: editarExpediente.idPermiso },
@@ -75,19 +75,6 @@ async function main() {
   }
 
   console.log('Permisos por rol asignados');
-
-  // Asignar rol ADMINISTRADOR a todos los usuarios que no tienen rol asignado
-  const usuariosSinRol = await prisma.usuario.findMany({
-    where: { idRol: null },
-  });
-
-  if (usuariosSinRol.length > 0) {
-    await prisma.usuario.updateMany({
-      where: { idRol: null },
-      data: { idRol: administrador.idRol },
-    });
-    console.log(`${usuariosSinRol.length} usuarios actualizados con rol ADMINISTRADOR por defecto`);
-  }
 
   console.log('Seed completado exitosamente');
 }

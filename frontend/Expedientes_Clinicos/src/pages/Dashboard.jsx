@@ -78,7 +78,9 @@ export function Dashboard() {
 
     //cambiar contraseña
     if (currentView === "changepassword") {
-      return <Changepassword />;
+      return <Changepassword
+      onNavigate={(view) => setCurrentView(view)}
+    />;
     }
 
     // Seleccionar el Dashboard según el rol
