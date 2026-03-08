@@ -49,6 +49,10 @@ model Usuario {
   updatedAt     DateTime    @updatedAt
   rol           Rol         @relation(fields: [idRol], references: [idRol])
   auditorias    Auditoria[]
+  
+  registrosPreclinicos registroPreclinico[]
+
+  @@map("Usuario")
 }
 
 model Auditoria {
@@ -84,6 +88,28 @@ model Expediente {
   fechaActualizacion DateTime @default(now()) @updatedAt
   observaciones      String?  @db.NVarChar(100)
   paciente           Paciente @relation(fields: [idPaciente], references: [idPaciente])
+ 
+  registrosPreclinicos registroPreclinico[]
 
   @@map("Expediente")
+}
+
+model registroPreclinico {
+  id                    Int      @id @default(autoincrement())
+  expedienteId          Int
+  enfermeroId           Int
+  presionArterial       String?
+  temperatura           Float?
+  peso                  Float?
+  frecuenciaCardiaca    Int?
+  observaciones         String?  @db.Text
+  fechaRegistro         DateTime @default(now())
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  
+  expediente Expediente @relation(fields: [expedienteId], references: [idExpediente])
+  enfermero  Usuario    @relation(fields: [enfermeroId], references: [id])
+
+  @@map("registroPreclinico")
 }
