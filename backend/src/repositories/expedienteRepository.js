@@ -33,25 +33,6 @@ class expedienteRepository {
     async crear(data, tx = null) {
         const client = tx || prisma;
         try {
-            // El numeroExpediente ya viene generado o validado desde el Service
-
-            // // Generar numeroExpediente con formato EXP-YYYY-NNNNN
-            // const anioActual = new Date().getFullYear();
-            
-            // // Contar los expedientes del año actual
-            // const expedientesDelAnio = await prisma.expediente.count({
-            //     where: {
-            //         numeroExpediente: {
-            //             startsWith: `EXP-${anioActual}`
-            //         }
-            //     }
-            // });
-            
-            // // Generar el número incremental (01, 02, 03, etc)
-            // const numeroIncremental = String(expedientesDelAnio + 1).padStart(5, '0');
-            // const numeroExpediente = `EXP-${anioActual}-${numeroIncremental}`;
-            
-            // Mapear estado de string a número
             const estadoNumerico = this._mapearEstado(data.estado || 'activo');
             
             const resultado = await client.expediente.create({

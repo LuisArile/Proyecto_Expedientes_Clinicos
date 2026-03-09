@@ -10,10 +10,9 @@ export function useBuscarPacientes() {
     const [resultados, setResultados] = useState([]);
     const [busquedaRealizada, setBusquedaRealizada] = useState(false);
 
-    const ejecutarBusqueda = async ( numPagina = 1 ) => {
+    const ejecutarBusqueda = async ( numPagina = 1, criterio = 'nombre' ) => {
         
         const terminoLimpio = termino.trim();
-
         if (!terminoLimpio.trim()) {
             toast.error("Por favor, ingrese un nombre o DNI");
             return;
@@ -25,12 +24,18 @@ export function useBuscarPacientes() {
         }
 
         setBuscando(true);
+        setPagina(numPagina);
+        if (numPagina === 1) {
+            setPaginacion({ totalPaginas: 1, total: 0 });
+        }
+
         try {
 
-            const response = await buscarPacientes(terminoLimpio, numPagina);
+            const response = await buscarPacientes(terminoLimpio, criterio, numPagina);
 
             setResultados(response.resultados);
             setPaginacion(response.paginacion);
+            setPagina(response.paginacion.paginaActual);
             setPagina(numPagina);
             setBusquedaRealizada(true);            
             
@@ -38,6 +43,9 @@ export function useBuscarPacientes() {
                 toast.info("No se encontraron coincidencias");
             }
         } catch (error) {
+            setResultados([]);
+            setPaginacion({ totalPaginas: 1, total: 0 });
+            setPagina(1);
             toast.error(error.message || "Error al conectar con el servidor");
             setResultados([]);
         } finally {

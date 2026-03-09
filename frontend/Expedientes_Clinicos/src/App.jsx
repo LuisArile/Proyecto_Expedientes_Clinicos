@@ -28,38 +28,36 @@ function PrivateRoute({ children, allowedRoles }) {
 
 function App() {
   return (
-    // <AuthProvider>
-      <Router>
-        <Routes>
+    <Router>
+      <Routes>
 
-          <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
-          <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login />} />
 
-          <Route
-            path="/dashboard"
-            element={
-              // <PrivateRoute allowedRoles={allowedRoles}>
-              <PrivateRoute allowedRoles={["RECEPCIONISTA", "ENFERMERO", "MEDICO", "ADMINISTRADOR"]}>  
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/dashboard"
+          element={
+            // <PrivateRoute allowedRoles={allowedRoles}>
+            <PrivateRoute allowedRoles={["RECEPCIONISTA", "ENFERMERO", "MEDICO", "ADMINISTRADOR"]}>  
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
 
-          <Route
-            path="/changepassword"
-            element={
-              <PrivateRoute allowedRoles={allowedRoles}>
-                <Changepassword />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/changepassword"
+          element={
+            <PrivateRoute allowedRoles={allowedRoles}>
+              <Changepassword />
+            </PrivateRoute>
+          }
+        />
 
-          <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
 
-        </Routes>
-      </Router>
-    // </AuthProvider>
+      </Routes>
+    </Router>
   );
 }
 

@@ -20,7 +20,7 @@ class inicioSesionController {
 
             const tokendPayload = {
                 id: resultado.id,
-                idRol: resultado.idRol
+                rol: resultado.rol
             };
 
             const token = jwt.sign(tokendPayload, process.env.JWT_SECRET || 'tu_clave_secreta', { 
@@ -29,11 +29,17 @@ class inicioSesionController {
 
             res.json({ 
                 success: true, 
-                token: token,
-                data: resultado 
+                token: resultado.token,
+                data: {
+                    id: resultado.id,
+                    nombre: resultado.nombre,
+                    apellido: resultado.apellido,
+                    rol: resultado.rol,
+                    permisos: resultado.permisos
+                }
             });
         } catch (error) {
-            res.status(401).json({ success: false, error: error.message });
+            res.status(401).json({ success: false, error: "Credenciales o configuración de usuario inválida" });
         }
     }
 

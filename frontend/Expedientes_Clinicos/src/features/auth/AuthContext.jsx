@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
 
   const login = async (nombreUsuario, clave) => {
     try {
-      const response = await fetch("http://localhost:3000/api", {
+      const response = await fetch("http://localhost:3000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombreUsuario, clave }),
@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
 
       const result = await response.json();
 
-      if (result.success) {
+      if (result.success && result.data) {
         // Estructura del backend: { id, nombre, rol }
         const userData = result.data; 
         
@@ -31,9 +31,10 @@ export function AuthProvider({ children }) {
         localStorage.setItem("token", result.token);
 
         return { success: true };
-      } else {
+      } 
+      // else {
         return { success: false, error: result.error };
-      }
+      // }
     } catch (error) {
       console.error("Error en login:", error);
       return { success: false, error: "No se pudo conectar con el servidor" };
@@ -67,13 +68,19 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  const checkPermission = (permisoRequerido) => {
+    return user?.permisos?.includes(permisoRequerido);
+  };
+
   return (
     <AuthContext.Provider 
     value={{ 
       user,
       login,
       logout,
-      isAuthenticated: !!user }}
+      checkPermission,
+      isAuthenticated: !!user 
+    }}
     >
       {children}
     </AuthContext.Provider>

@@ -76,8 +76,8 @@ export const expedienteAPI = {
       method: "DELETE",
     }),
   
-  buscar: (termino, pagina = 1, filtro = "") =>
-    apiCall(`/expedientes/buscar?q=${encodeURIComponent(termino)}&page=${pagina}&filter=${filtro}`, {
+  buscar: ({ termino, criterio = "nombre", pagina = 1 }) =>
+    apiCall(`/expedientes/buscar?q=${encodeURIComponent(termino)}&pagina=${pagina}&limite=10&criterio=${criterio}`, {
       method: "GET",
     }),
 };
@@ -139,3 +139,16 @@ export const permisoAPI = {
   eliminar: (idPermiso) =>
     apiCall(`/permisos/${idPermiso}`, { method: "DELETE" }),
 };
+
+/**
+ * Métodos para consumir endpoints de estadísticas/dashboard
+ */
+const estadisticasAPI = {
+  obtenerResumen: async () => {
+    const response = await apiCall("/estadisticas/resumen", {
+      method: "GET",
+    });
+    return response.data; 
+  }
+};
+export default estadisticasAPI;

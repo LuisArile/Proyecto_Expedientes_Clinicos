@@ -9,7 +9,7 @@ const inicioSesionRouters= require("./routes/inicioSesionRoute")
 const expedienteRouters = require("./routes/expedienteRoute")
 const rolRouters = require("./routes/rolRoute")
 const permisoRouters = require("./routes/permisoRoute")
-
+const estadisticasRoute = require("./routes/estadisticasRoute")
 
 
 const app= express();
@@ -38,5 +38,7 @@ app.use("/api/expedientes", expedienteRouters); // operaciones con expedientes
 
 app.use("/api/roles", rolRouters); // gestión de roles
 app.use("/api/permisos", permisoRouters); // gestión de permisos
+
+app.use("/api/estadisticas", estadisticasRoute);
 
 module.exports=app;

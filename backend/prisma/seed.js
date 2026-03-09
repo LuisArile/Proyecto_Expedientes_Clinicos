@@ -2,99 +2,109 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  // Crear roles
-  const administrador = await prisma.rol.upsert({
-    where: { nombre: 'ADMINISTRADOR' },
-    update: {},
-    create: { nombre: 'ADMINISTRADOR' },
-  });
 
-  const medico = await prisma.rol.upsert({
-    where: { nombre: 'MEDICO' },
-    update: {},
-    create: { nombre: 'MEDICO' },
-  });
+  // DEFINICIÓN DE ROLES
+  const rolesADefinir = ['ADMINISTRADOR', 'MEDICO', 'RECEPCIONISTA', 'ENFERMERO'];
+  const rolesDB = {};
 
-  const recepcionista = await prisma.rol.upsert({
-    where: { nombre: 'RECEPCIONISTA' },
-    update: {},
-    create: { nombre: 'RECEPCIONISTA' },
-  });
+  for (const nombreRol of rolesADefinir) {
+    const rol = await prisma.rol.upsert({
+      where: { nombre: nombreRol },
+      update: {},
+      create: { nombre: nombreRol },
+    });
+    rolesDB[nombreRol] = rol;
+  }
+  console.log('Roles procesados');
 
-  const enfermero = await prisma.rol.upsert({
-    where: { nombre: 'ENFERMERO' },
-    update: {},
-    create: { nombre: 'ENFERMERO' },
-  });
+  const permisosADefinir = [
+    'CREAR_EXPEDIENTE',
+    'GESTION_ROLES',
+    'BUSCAR_PACIENTE',
+    'GESTION_USUARIOS',
+    'AUDITORIA',
+    'CATALOGO_MEDICAMENTOS',
+    'CATALOGO_EXAMENES',
+    'GESTION_PACIENTES',
+    'PRECLINICA',
+    'CONSULTA_MEDICA',
+    'SOLICITUD_EXAMEN',
+    'ADJUNTAR_DOCUMENTOS'
+  ];
+  const permisosDB = {};
 
-  console.log('Roles creados:', { administrador, medico, recepcionista, enfermero });
+  for (const nombrePermiso of permisosADefinir) {
+    const permiso = await prisma.permiso.upsert({
+      where: { nombre: nombrePermiso },
+      update: {},
+      create: { nombre: nombrePermiso },
+    });
+    permisosDB[nombrePermiso] = permiso;
+  }
+  console.log('Permisos creados');
 
-  // Crear permisos
-  const verExpediente = await prisma.permiso.upsert({
-    where: { nombre: 'VER_EXPEDIENTE' },
-    update: {},
-    create: { nombre: 'VER_EXPEDIENTE' },
-  });
-
-  const crearExpediente = await prisma.permiso.upsert({
-    where: { nombre: 'CREAR_EXPEDIENTE' },
-    update: {},
-    create: { nombre: 'CREAR_EXPEDIENTE' },
-  });
-
-  const editarExpediente = await prisma.permiso.upsert({
-    where: { nombre: 'EDITAR_EXPEDIENTE' },
-    update: {},
-    create: { nombre: 'EDITAR_EXPEDIENTE' },
-  });
-
-  console.log('Permisos creados:', { verExpediente, crearExpediente, editarExpediente });
-
-  // Asignar permisos por rol
-  const permisosRol = [
-    // ENFERMERO: VER_EXPEDIENTE
-    { idRol: enfermero.idRol, idPermiso: verExpediente.idPermiso },
-    // RECEPCIONISTA: VER_EXPEDIENTE, CREAR_EXPEDIENTE, EDITAR_EXPEDIENTE
-    { idRol: recepcionista.idRol, idPermiso: verExpediente.idPermiso },
-    { idRol: recepcionista.idRol, idPermiso: crearExpediente.idPermiso },
-    { idRol: recepcionista.idRol, idPermiso: editarExpediente.idPermiso },
-    // MÉDICO: VER_EXPEDIENTE
-    { idRol: medico.idRol, idPermiso: verExpediente.idPermiso },
-    // ADMINISTRADOR: todos los permisos
-    { idRol: administrador.idRol, idPermiso: verExpediente.idPermiso },
-    { idRol: administrador.idRol, idPermiso: crearExpediente.idPermiso },
-    { idRol: administrador.idRol, idPermiso: editarExpediente.idPermiso },
+  // ASIGNACIÓN DE PERMISOS POR ROL
+  const matrizAsignacion = [
+    { 
+      rol: 'ADMINISTRADOR', 
+      permisos: permisosADefinir // Acceso completo
+    },
+    { 
+      rol: 'RECEPCIONISTA', 
+      permisos: ['CREAR_EXPEDIENTE', 'BUSCAR_PACIENTE', 'GESTION_PACIENTES'] 
+    },
+    { 
+      rol: 'ENFERMERO', 
+      permisos: ['BUSCAR_PACIENTE', 'PRECLINICA'] 
+    },
+    { 
+      rol: 'MEDICO', 
+      permisos: ['BUSCAR_PACIENTE', 'CONSULTA_MEDICA', 'SOLICITUD_EXAMEN', 'ADJUNTAR_DOCUMENTOS'] 
+    }
   ];
 
-  for (const pr of permisosRol) {
-    await prisma.permisosPorRol.upsert({
-      where: { idRol_idPermiso: { idRol: pr.idRol, idPermiso: pr.idPermiso } },
-      update: {},
-      create: pr,
-    });
+  for (const asignacion of matrizAsignacion) {
+    const rol = rolesDB[asignacion.rol];
+    
+    for (const nombrePermiso of asignacion.permisos) {
+      const permiso = permisosDB[nombrePermiso];
+      
+      await prisma.permisosPorRol.upsert({
+        where: { 
+          idRol_idPermiso: { 
+            idRol: rol.idRol, 
+            idPermiso: permiso.idPermiso 
+          } 
+        },
+        update: {},
+        create: { 
+          idRol: rol.idRol, 
+          idPermiso: permiso.idPermiso 
+        },
+      });
+    }
   }
+  console.log('Matriz de permisos asignada correctamente');
 
-  console.log('Permisos por rol asignados');
-
-  // Asignar rol ADMINISTRADOR a todos los usuarios que no tienen rol asignado
-  const usuariosSinRol = await prisma.usuario.findMany({
-    where: { idRol: null },
-  });
+  // Asignar ADMINISTRADOR a usuarios sin rol
+  // const usuariosSinRol = await prisma.usuario.findMany({
+  //   where: { idRol: 
+  //     { equals: null }
+  //    },
+  // });
 
   if (usuariosSinRol.length > 0) {
     await prisma.usuario.updateMany({
-      where: { idRol: null },
-      data: { idRol: administrador.idRol },
+      where: { idRol: { equals: null } },
+      data: { idRol: rolesDB['ADMINISTRADOR'].idRol },
     });
-    console.log(`${usuariosSinRol.length} usuarios actualizados con rol ADMINISTRADOR por defecto`);
+    console.log(`Se asignó el rol ADMINISTRADOR a ${usuariosSinRol.length} usuarios.`);
   }
-
-  console.log('Seed completado exitosamente');
 }
 
 main()
   .catch((e) => {
-    console.error('Error en seed:', e);
+    console.error('Error en el seed:', e);
     process.exit(1);
   })
   .finally(async () => {

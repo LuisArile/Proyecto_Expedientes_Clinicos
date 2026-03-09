@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/features/auth/authContext";
 import { ROLE_STRATEGIES } from "@/constants/roles"
-import { MENU_STRATEGIES } from "@/constants/menuStrategies";
+// import { MENU_STRATEGIES } from "@/constants/menuStrategies";
+import { ALL_MENU_ITEMS } from "../../constants/allMenuItems";
 
 import {
   Hospital,
@@ -16,7 +17,10 @@ export function Sidebar({ currentView, onNavigate  }) {
   if (!user) return null;
 
   const roleKey = user.rol?.toUpperCase();
-  const menuItems = MENU_STRATEGIES[roleKey] || [];
+  
+  const menuItems = ALL_MENU_ITEMS.filter(item => {
+    return user.permisos?.includes(item.permission) || item.permission === "default";
+  });
 
   const roleConfig = ROLE_STRATEGIES[roleKey] || { 
     label: roleKey, 
@@ -51,7 +55,9 @@ export function Sidebar({ currentView, onNavigate  }) {
             </span>
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-gray-900">{user.nombre} {user.apellido}</p>
+            <p className="text-sm font-semibold text-gray-900">
+              {user.nombre} {user.apellido}
+            </p>
             <p className="text-xs text-gray-500">@{user.nombreUsuario}</p>
           </div>
         </div>
@@ -66,10 +72,13 @@ export function Sidebar({ currentView, onNavigate  }) {
       {/* Menu Items */}
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-1">
-          <p className="text-xs font-semibold text-gray-500 mb-3 px-3">MENÚ PRINCIPAL</p>
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentView === item.id;
+          <p className="text-xs font-semibold text-gray-500 mb-3 px-3">
+            MENÚ PRINCIPAL
+          </p>
+          {menuItems.length > 0 ? (
+            menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentView === item.id;
 
             return (
               <button
@@ -83,20 +92,25 @@ export function Sidebar({ currentView, onNavigate  }) {
               >
                 <Icon className={`h-5 w-5 ${isActive ? "text-white" : "text-gray-500"}`} />
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-medium">{item.label}</p>
+                  <p className="text-sm font-medium">
+                    {item.label}
+                  </p>
                   {item.description && !isActive && (
                     <p className="text-xs text-gray-500">{item.description}</p>
                   )}
                 </div>
               </button>
             );
-          })}
+          })
+          ) : (
+            <p className="text-sm text-gray-500 px-3"> 
+              No tienes permisos asignados.</p>
+          )}
+          </div>
         </div>
-      </div>
 
       {/* Logout Button */}
       <div className="p-5 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-        
         <Button
           onClick={() => onNavigate("changepassword")}
           className="w-full flex items-center gap-2  mb-3 rounded-xl 

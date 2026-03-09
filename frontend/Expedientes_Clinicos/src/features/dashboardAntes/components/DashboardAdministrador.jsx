@@ -70,7 +70,8 @@ export function DashboardAdministrador() {
           pieDeFoto={"Disponibles"}
         />
       </div>
-{/* Acceso rápido a módulos administrativos */}
+      
+      {/* Acceso rápido a módulos administrativos */}
       <Card>
         <CardHeader>
           <CardTitle>Módulos Administrativos</CardTitle>
