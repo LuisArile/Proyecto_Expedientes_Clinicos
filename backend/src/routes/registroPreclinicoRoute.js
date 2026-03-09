@@ -30,12 +30,12 @@ const router = express.Router();
 
 // validar Token
 router.use(validarToken);
-router.use(autorizarRol(['ENFERMERO', 'DOCTOR']));
+//router.use(autorizarRol(['ENFERMERO', 'MEDICO']));
 
 // Rutas
-router.post("/expediente/:expedienteId", (req, res) => registroPreclinicoController.registrar(req, res));
-router.get("/expediente/:expedienteId", (req, res) => registroPreclinicoController.obtenerPorExpediente(req, res));
-router.get("/expediente/:expedienteId/ultimo", (req, res) => registroPreclinicoController.obtenerUltimoPorExpediente(req, res));
+router.post("/expediente/:expedienteId",autorizarRol(['ENFERMERO']) , (req, res) => registroPreclinicoController.registrar(req, res));
+router.get("/expediente/:expedienteId", autorizarRol(['ENFERMERO', 'MEDICO']), (req, res) => registroPreclinicoController.obtenerPorExpediente(req, res));
+router.get("/expediente/:expedienteId/ultimo", autorizarRol(['ENFERMERO', 'MEDICO']), (req, res) => registroPreclinicoController.obtenerUltimoPorExpediente(req, res));
 
 module.exports = router;
 
