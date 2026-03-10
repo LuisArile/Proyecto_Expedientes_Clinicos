@@ -1,4 +1,3 @@
-// src/components/ui/data-table.jsx
 import React from "react";
 import {
   Table,

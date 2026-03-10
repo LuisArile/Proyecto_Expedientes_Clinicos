@@ -35,7 +35,8 @@ class inicioSesionController {
                     nombre: resultado.nombre,
                     apellido: resultado.apellido,
                     rol: resultado.rol,
-                    permisos: resultado.permisos
+                    permisos: resultado.permisos,
+                    nombreUsuario: resultado.nombreUsuario
                 }
             });
         } catch (error) {

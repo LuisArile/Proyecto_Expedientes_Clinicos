@@ -47,7 +47,7 @@ class EstadisticasService {
 
                 dashboardData.tarjetas = [
                     { titulo: "Pacientes Atendidos",    valor: 0, icon: "Users",    border: "border-blue-100",      textColor: "text-blue-600",     pie: "Hoy"          },
-                    { titulo: "Citas Agendadas",        valor: 0, icon: "Calendar", border: "border-green-600",     textColor: "text-green-600",    pie: "Pendientes"   },
+                    { titulo: "Citas Agendadas",        valor: 0, icon: "Calendar", border: "border-green-100",     textColor: "text-green-600",    pie: "Pendientes"   },
                     { titulo: "Expedientes Creados",    valor: 0, icon: "FileText", border: "border-purple-100",    textColor: "text-purple-600",   pie: "Hoy"          },
                 ];
             }

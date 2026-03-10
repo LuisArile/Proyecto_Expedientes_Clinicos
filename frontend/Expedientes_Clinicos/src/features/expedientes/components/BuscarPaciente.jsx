@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Search, Eye, FileText, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,10 @@ import { useBuscarPacientes } from "../hooks/useBuscarPaciente";
 import { SearchFilterCard } from "./SearchFilterCard";
 
 export function BuscarPaciente({ onVolver, onVerExpediente }) {
-    const [criterio, setCriterio] = useState("nombre");
 
     const {
-        termino,
-        setTermino,
+        termino, setTermino,
+        criterio, setCriterio,
         pagina,
         paginacion,
         buscando,
@@ -23,7 +22,7 @@ export function BuscarPaciente({ onVolver, onVerExpediente }) {
         ejecutarBusqueda
     } = useBuscarPacientes();
 
-    const columns = [
+    const columns = useMemo( () => [
         {
             header: "Código de Expediente",
             render: (p) => (
@@ -62,7 +61,7 @@ export function BuscarPaciente({ onVolver, onVerExpediente }) {
                 </Button>
             ),
         },
-    ];
+    ], [onVerExpediente]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
@@ -74,13 +73,12 @@ export function BuscarPaciente({ onVolver, onVerExpediente }) {
             />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Formulario de búsqueda (SearchFilterCard ya debería tener sus estilos de Card) */}
                 <SearchFilterCard
                     criterio={criterio}
                     setCriterio={setCriterio}
                     termino={termino}
                     setTermino={setTermino}
-                    onSearch={() => ejecutarBusqueda(1, criterio)}
+                    onSearch={() => ejecutarBusqueda(1)}
                     isLoading={buscando}
                 />
 
