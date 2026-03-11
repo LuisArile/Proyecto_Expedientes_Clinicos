@@ -86,13 +86,6 @@ async function main() {
   }
   console.log('Matriz de permisos asignada correctamente');
 
-  // Asignar ADMINISTRADOR a usuarios sin rol
-  // const usuariosSinRol = await prisma.usuario.findMany({
-  //   where: { idRol: 
-  //     { equals: null }
-  //    },
-  // });
-
   if (usuariosSinRol.length > 0) {
     await prisma.usuario.updateMany({
       where: { idRol: { equals: null } },
