@@ -1,378 +1,176 @@
-import { useState, useEffect } from "react";
-import { rolAPI, permisoAPI } from "@/services/api";
+import { Shield, Save, Plus, Trash2, Edit2, Check, X, Lock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Plus, Trash2, Edit2, Check, X, Lock } from "lucide-react";
-import { toast } from "sonner";
+import { PageHeader } from "@/components/layout/PageHeader";
 
-export function GestionRoles() {
-  const [roles, setRoles] = useState([]);
-  const [permisos, setPermisos] = useState([]);
-  const [loading, setLoading] = useState(true);
+import React, { useState } from "react"; 
+import { useGestionRoles } from "../hooks/useGestionRoles";
+
+export function GestionRoles({ onVolver }) {
+  const {
+    roles, permisos, loading, rolSeleccionado,
+    permisosSeleccionados, handleCrearRol, handleSeleccionarRol, 
+    handleActualizarRol, handleEliminarRol, togglePermiso, 
+    guardarCambiosPermisos, handleCrearPermiso, handleEliminarPermiso
+  } = useGestionRoles();
+
   const [nuevoRol, setNuevoRol] = useState("");
-  const [nuevoPermiso, setNuevoPermiso] = useState("");
   const [editandoRol, setEditandoRol] = useState(null);
-  const [editandoPermiso, setEditandoPermiso] = useState(null);
   const [nombreEditRol, setNombreEditRol] = useState("");
-  const [nombreEditPermiso, setNombreEditPermiso] = useState("");
-  const [rolSeleccionado, setRolSeleccionado] = useState(null);
-  const [permisosDelRol, setPermisosDelRol] = useState([]);
-  const [permisosSeleccionados, setPermisosSeleccionados] = useState([]);
+  const [nuevoPermiso, setNuevoPermiso] = useState("");
 
-  useEffect(() => {
-    cargarDatos();
-  }, []);
-
-  const cargarDatos = async () => {
-    try {
-      setLoading(true);
-      const [rolesRes, permisosRes] = await Promise.all([
-        rolAPI.obtenerTodos(),
-        permisoAPI.obtenerTodos(),
-      ]);
-      setRoles(rolesRes.data);
-      setPermisos(permisosRes.data);
-    } catch (error) {
-      toast.error("Error al cargar datos: " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // --- ROLES ---
-  const crearRol = async () => {
-    if (!nuevoRol.trim()) return;
-    try {
-      await rolAPI.crear({ nombre: nuevoRol });
-      setNuevoRol("");
-      toast.success("Rol creado exitosamente");
-      cargarDatos();
-    } catch (error) {
-      toast.error("Error al crear rol: " + error.message);
-    }
-  };
-
-  const actualizarRol = async (idRol) => {
-    if (!nombreEditRol.trim()) return;
-    try {
-      await rolAPI.actualizar(idRol, { nombre: nombreEditRol });
-      setEditandoRol(null);
-      toast.success("Rol actualizado exitosamente");
-      cargarDatos();
-    } catch (error) {
-      toast.error("Error al actualizar rol: " + error.message);
-    }
-  };
-
-  const eliminarRol = async (idRol) => {
-    if (!confirm("¿Estás seguro de eliminar este rol?")) return;
-    try {
-      await rolAPI.eliminar(idRol);
-      toast.success("Rol eliminado exitosamente");
-      if (rolSeleccionado?.idRol === idRol) {
-        setRolSeleccionado(null);
-        setPermisosDelRol([]);
-      }
-      cargarDatos();
-    } catch (error) {
-      toast.error("Error al eliminar rol: " + error.message);
-    }
-  };
-
-  // --- PERMISOS ---
-  const crearPermiso = async () => {
-    if (!nuevoPermiso.trim()) return;
-    try {
-      await permisoAPI.crear({ nombre: nuevoPermiso });
-      setNuevoPermiso("");
-      toast.success("Permiso creado exitosamente");
-      cargarDatos();
-    } catch (error) {
-      toast.error("Error al crear permiso: " + error.message);
-    }
-  };
-
-  const actualizarPermiso = async (idPermiso) => {
-    if (!nombreEditPermiso.trim()) return;
-    try {
-      await permisoAPI.actualizar(idPermiso, { nombre: nombreEditPermiso });
-      setEditandoPermiso(null);
-      toast.success("Permiso actualizado exitosamente");
-      cargarDatos();
-    } catch (error) {
-      toast.error("Error al actualizar permiso: " + error.message);
-    }
-  };
-
-  const eliminarPermiso = async (idPermiso) => {
-    if (!confirm("¿Estás seguro de eliminar este permiso?")) return;
-    try {
-      await permisoAPI.eliminar(idPermiso);
-      toast.success("Permiso eliminado exitosamente");
-      cargarDatos();
-    } catch (error) {
-      toast.error("Error al eliminar permiso: " + error.message);
-    }
-  };
-
-  // --- PERMISOS POR ROL ---
-  const seleccionarRol = async (rol) => {
-    setRolSeleccionado(rol);
-    try {
-      const res = await rolAPI.obtenerPermisos(rol.idRol);
-      const permisosActuales = res.data;
-      setPermisosDelRol(permisosActuales);
-      setPermisosSeleccionados(permisosActuales.map((p) => p.idPermiso));
-    } catch (error) {
-      toast.error("Error al cargar permisos del rol: " + error.message);
-    }
-  };
-
-  const togglePermiso = (idPermiso) => {
-    setPermisosSeleccionados((prev) =>
-      prev.includes(idPermiso)
-        ? prev.filter((id) => id !== idPermiso)
-        : [...prev, idPermiso]
-    );
-  };
-
-  const guardarPermisosRol = async () => {
-    if (!rolSeleccionado) return;
-    try {
-      await rolAPI.asignarPermisos(rolSeleccionado.idRol, permisosSeleccionados);
-      toast.success(`Permisos actualizados para ${rolSeleccionado.nombre}`);
-      cargarDatos();
-    } catch (error) {
-      toast.error("Error al asignar permisos: " + error.message);
-    }
-  };
-
-  if (loading) return <p className="p-6">Cargando roles y permisos...</p>;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-blue-50">
+      <p className="text-blue-600 font-bold animate-pulse text-lg">Cargando módulos de seguridad...</p>
+    </div>
+  );
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Gestión de Roles y Permisos</h1>
-        <p className="text-gray-600">Administra los roles del sistema y sus permisos asociados</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
+      <PageHeader
+          title="Gestión de Roles y Permisos"
+          subtitle="Administra los roles del sistema y sus permisos asociados"
+          Icon={Shield}
+          onVolver={onVolver}
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Roles */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-red-600" />
-              Roles
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Crear Rol */}
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={nuevoRol}
-                onChange={(e) => setNuevoRol(e.target.value)}
-                placeholder="Nombre del nuevo rol"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onKeyDown={(e) => e.key === "Enter" && crearRol()}
-              />
-              <Button onClick={crearRol} size="sm" className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* ROLES Y CATÁLOGO */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* SECCIÓN DE ROLES */}
+          <Card className="shadow-sm border-none bg-white/80 backdrop-blur-sm flex flex-col">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-gray-800">
+                <Shield className="size-5 text-red-600" /> Roles del Sistema
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 flex-1">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  value={nuevoRol}
+                  onChange={(e) => setNuevoRol(e.target.value)}
+                  placeholder="Ej: FARMACÉUTICO"
+                  className="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  onKeyDown={(e) => e.key === "Enter" && (handleCrearRol(nuevoRol), setNuevoRol(""))}
+                />
+                <Button onClick={() => { handleCrearRol(nuevoRol); setNuevoRol(""); }} className="bg-blue-600 hover:bg-blue-700 rounded-xl px-6 w-full sm:w-auto">
+                  <Plus className="size-4 mr-1" /> Crear
+                </Button>
+              </div>
 
-            {/* Lista de Roles */}
-            <div className="space-y-2">
-              {roles.map((rol) => (
-                <div
-                  key={rol.idRol}
-                  className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${
-                    rolSeleccionado?.idRol === rol.idRol
-                      ? "bg-blue-50 border-blue-300"
-                      : "bg-gray-50 border-gray-200 hover:bg-gray-100"
-                  }`}
-                  onClick={() => seleccionarRol(rol)}
-                >
-                  {editandoRol === rol.idRol ? (
-                    <div className="flex items-center gap-2 flex-1">
-                      <input
-                        type="text"
-                        value={nombreEditRol}
-                        onChange={(e) => setNombreEditRol(e.target.value)}
-                        className="flex-1 px-2 py-1 border rounded text-sm"
-                        onClick={(e) => e.stopPropagation()}
-                        onKeyDown={(e) => e.key === "Enter" && actualizarRol(rol.idRol)}
-                      />
-                      <button onClick={(e) => { e.stopPropagation(); actualizarRol(rol.idRol); }} className="text-green-600 hover:text-green-800">
-                        <Check className="h-4 w-4" />
-                      </button>
-                      <button onClick={(e) => { e.stopPropagation(); setEditandoRol(null); }} className="text-gray-400 hover:text-gray-600">
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-2">
-                        <Shield className="h-4 w-4 text-gray-500" />
-                        <span className="font-medium text-sm">{rol.nombre}</span>
-                        <span className="text-xs text-gray-400">
-                          ({rol.permisos?.length || 0} permisos)
-                        </span>
+              <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {roles.map((rol) => (
+                  <div key={rol.idRol} onClick={() => handleSeleccionarRol(rol)}
+                    className={`group flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
+                      rolSeleccionado?.idRol === rol.idRol ? "bg-blue-50 border-blue-300 shadow-sm" : "bg-white border-gray-100 hover:border-blue-200 hover:shadow-sm"
+                    }`}>
+                    {editandoRol === rol.idRol ? (
+                      <div className="flex items-center gap-2 flex-1" onClick={e => e.stopPropagation()}>
+                        <input autoFocus className="flex-1 px-2 py-1 border rounded-lg text-sm outline-none ring-2 ring-blue-400"
+                          value={nombreEditRol} onChange={(e) => setNombreEditRol(e.target.value)} />
+                        <button onClick={() => { handleActualizarRol(rol.idRol, nombreEditRol); setEditandoRol(null); }} className="text-green-600"><Check className="size-4"/></button>
+                        <button onClick={() => setEditandoRol(null)} className="text-gray-400"><X className="size-4"/></button>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditandoRol(rol.idRol);
-                            setNombreEditRol(rol.nombre);
-                          }}
-                          className="text-blue-500 hover:text-blue-700 p-1"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); eliminarRol(rol.idRol); }}
-                          className="text-red-500 hover:text-red-700 p-1"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Permisos */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5 text-purple-600" />
-              Permisos
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Crear Permiso */}
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={nuevoPermiso}
-                onChange={(e) => setNuevoPermiso(e.target.value)}
-                placeholder="Nombre del nuevo permiso"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                onKeyDown={(e) => e.key === "Enter" && crearPermiso()}
-              />
-              <Button onClick={crearPermiso} size="sm" className="bg-purple-600 hover:bg-purple-700">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Lista de Permisos */}
-            <div className="space-y-2">
-              {permisos.map((permiso) => (
-                <div
-                  key={permiso.idPermiso}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
-                >
-                  {editandoPermiso === permiso.idPermiso ? (
-                    <div className="flex items-center gap-2 flex-1">
-                      <input
-                        type="text"
-                        value={nombreEditPermiso}
-                        onChange={(e) => setNombreEditPermiso(e.target.value)}
-                        className="flex-1 px-2 py-1 border rounded text-sm"
-                        onKeyDown={(e) => e.key === "Enter" && actualizarPermiso(permiso.idPermiso)}
-                      />
-                      <button onClick={() => actualizarPermiso(permiso.idPermiso)} className="text-green-600 hover:text-green-800">
-                        <Check className="h-4 w-4" />
-                      </button>
-                      <button onClick={() => setEditandoPermiso(null)} className="text-gray-400 hover:text-gray-600">
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-2">
-                        <Lock className="h-4 w-4 text-gray-500" />
-                        <span className="font-medium text-sm">{permiso.nombre}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => {
-                            setEditandoPermiso(permiso.idPermiso);
-                            setNombreEditPermiso(permiso.nombre);
-                          }}
-                          className="text-blue-500 hover:text-blue-700 p-1"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => eliminarPermiso(permiso.idPermiso)}
-                          className="text-red-500 hover:text-red-700 p-1"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Asignación de Permisos por Rol */}
-      {rolSeleccionado && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-blue-600" />
-              Permisos de: {rolSeleccionado.nombre}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Selecciona los permisos que deseas asignar a este rol
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {permisos.map((permiso) => {
-                const isSelected = permisosSeleccionados.includes(permiso.idPermiso);
-                return (
-                  <div
-                    key={permiso.idPermiso}
-                    onClick={() => togglePermiso(permiso.idPermiso)}
-                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                      isSelected
-                        ? "bg-blue-50 border-blue-300 text-blue-800"
-                        : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
-                    }`}
-                  >
-                    <div
-                      className={`h-5 w-5 rounded border-2 flex items-center justify-center ${
-                        isSelected ? "bg-blue-600 border-blue-600" : "border-gray-300"
-                      }`}
-                    >
-                      {isSelected && <Check className="h-3 w-3 text-white" />}
-                    </div>
-                    <span className="text-sm font-medium">{permiso.nombre}</span>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${rolSeleccionado?.idRol === rol.idRol ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}><Lock className="size-4" /></div>
+                          <p className="font-bold text-gray-800 text-sm">{rol.nombre}</p>
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                          <button onClick={(e) => { e.stopPropagation(); setEditandoRol(rol.idRol); setNombreEditRol(rol.nombre); }} className="p-1.5 text-blue-500 hover:bg-blue-100 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></button>
+                          <button onClick={(e) => { e.stopPropagation(); handleEliminarRol(rol.idRol); }} className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></button>
+                        </div>
+                      </>
+                    )}
                   </div>
-                );
-              })}
-            </div>
-            <div className="flex justify-end">
-              <Button
-                onClick={guardarPermisosRol}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                Guardar Permisos
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* CATÁLOGO DE PERMISOS */}
+          <Card className="shadow-sm border-none bg-white/80 backdrop-blur-sm overflow-hidden flex flex-col">
+            <CardHeader className="bg-purple-50/50 border-b border-purple-100">
+              <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                <Lock className="h-5 w-5 text-purple-600" />
+                Catálogo Global de Permisos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-6 flex-1">
+              <div className="space-y-3">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Añadir Nuevo Permiso</p>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="text"
+                    value={nuevoPermiso}
+                    onChange={(e) => setNuevoPermiso(e.target.value)}
+                    placeholder="Ej: EDITAR_PACIENTES"
+                    className="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white"
+                    onKeyDown={(e) => e.key === "Enter" && (handleCrearPermiso(nuevoPermiso), setNuevoPermiso(""))}
+                  />
+                  <Button onClick={() => { handleCrearPermiso(nuevoPermiso); setNuevoPermiso(""); }} className="bg-purple-600 hover:bg-purple-700 rounded-xl w-full sm:w-auto">
+                    <Plus className="size-4 mr-1" /> Agregar
+                  </Button>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 pt-4">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Permisos Definidos</p>
+                <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                  {permisos.map((p) => (
+                    <div key={p.idPermiso} className="flex items-center gap-2 bg-white border border-gray-200 px-3 py-1.5 rounded-full shadow-sm hover:border-purple-200">
+                      <span className="text-xs font-medium text-gray-700">{p.nombre}</span>
+                      <button onClick={() => handleEliminarPermiso(p.idPermiso)} className="text-gray-300 hover:text-red-500 transition-colors"><X className="h-3 w-3" /></button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Asignación de Permisos por Rol */}
+        <Card className="shadow-sm border-none bg-white/80 backdrop-blur-sm">
+          <CardHeader className="pb-3 border-b border-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <CardTitle className="flex items-center gap-2 text-gray-800">
+              <Check className="h-5 w-5 text-green-600" /> Permisos
+            </CardTitle>
+            {rolSeleccionado && (
+              <Button onClick={guardarCambiosPermisos} className="bg-green-600 hover:bg-green-700 gap-2 rounded-xl px-6 w-full sm:w-auto">
+                <Save className="size-4" /> Guardar Cambios en {rolSeleccionado.nombre}
               </Button>
-            </div>
+            )}
+          </CardHeader>
+          <CardContent className="pt-6">
+            {!rolSeleccionado ? (
+              <div className="h-[200px] flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-gray-100 rounded-3xl">
+                <Shield className="h-10 w-10 mb-2 opacity-10" />
+                <p className="text-sm italic">Selecciona un rol de la lista superior para configurar sus accesos</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {permisos.map((p) => {
+                  const isSelected = permisosSeleccionados.includes(p.idPermiso);
+                  return (
+                    <div key={p.idPermiso} onClick={() => togglePermiso(p.idPermiso)}
+                      className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all cursor-pointer ${
+                        isSelected ? "border-blue-500 bg-blue-50 text-blue-900 shadow-sm" : "border-gray-50 bg-gray-50/50 text-gray-400 hover:border-gray-200"
+                      }`}>
+                      <span className="text-[11px] font-bold uppercase truncate mr-2">{p.nombre}</span>
+                      <div className={`h-5 w-5 flex-shrink-0 rounded-full border-2 flex items-center justify-center ${isSelected ? "bg-blue-600 border-blue-600" : "border-gray-200"}`}>
+                        {isSelected && <Check className="h-3 w-3 text-white stroke-[3px]" />}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
-      )}
+      </div>
     </div>
   );
 }

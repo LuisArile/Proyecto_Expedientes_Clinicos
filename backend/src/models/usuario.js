@@ -10,6 +10,7 @@ class Usuario {
         this.rolNombre=data.rolNombre;
         this.activo=data.activo !==undefined ?data.activo:true;
         this.ultimoAcesso=data.ultimoAcesso;
+        this.permisos = data.permisos || [];
     }
 
 
@@ -25,9 +26,8 @@ class Usuario {
         return [];
     }
 
-
-    getPermisos(){
-        return [];
+    getPermisos() {
+        return this.permisos;
     }
 
     getBienvenida(){
@@ -45,7 +45,8 @@ class Usuario {
             idRol:this.idRol,
             rol:this.rolNombre,
             activo:this.activo,
-            ultimoAccesso:this.ultimoAccesso
+            ultimoAccesso:this.ultimoAccesso,
+            permisos: this.getPermisos()
         };
     
     }

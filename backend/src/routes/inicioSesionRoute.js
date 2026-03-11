@@ -18,7 +18,7 @@ const auditoriaService = new AuditoriaService(auditoriaRepository);
 const inicioSesionService = new InicioSesionService(usuarioRepository, auditoriaService);
 const inicioSesionController = new InicioSesionController(inicioSesionService, auditoriaService);
 
-router.post("/", (req, res) => 
+router.post("/login", (req, res) => 
     inicioSesionController.inicioSesion(req, res));
 
 router.post("/logout", validarToken, (req, res) =>

@@ -2,9 +2,9 @@ class BusquedaPacienteDTO {
     constructor(query) {
         
         this.termino = (query.q || query.termino) ? String(query.q || query.termino).trim() : null;
-        
-        this.pagina = parseInt(query.page) || 1;
-        this.limite = parseInt(query.limit) || 10;
+        this.criterio = query.criterio || 'nombre';
+        this.pagina = parseInt(query.pagina) || parseInt(query.page) || 1;
+        this.limite = parseInt(query.limite) || parseInt(query.limit) || 10;
         
         this.validar();
     }

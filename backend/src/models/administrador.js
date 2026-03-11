@@ -24,7 +24,7 @@ class Administrador extends Usuario {
 
 
     getPermisos(){
-        return['*'];
+        return this.permisos || [];
     }
 
     getBienvenida(){

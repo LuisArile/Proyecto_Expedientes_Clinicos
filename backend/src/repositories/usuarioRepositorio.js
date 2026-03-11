@@ -52,19 +52,29 @@ class UsuarioRepository {
         try {
             const data = await prisma.usuario.findUnique({
                 where: { nombreUsuario },
-                include: { rol: true }
+                include: { 
+                    rol: {
+                        include: {
+                            permisos: {
+                                include: { permiso: true }
+                            }
+                        }
+                    }
+                }
             });
 
             if (!data) return null;
 
             const usuarioConRol = {
                 ...data,
-                rolNombre: data.rol.nombre
+                rolNombre: data.rol?.nombre || "SIN_ROL",
+                permisos: data.rol?.permisos?.map(p => p.permiso.nombre) || []
             };
 
             return UsuarioBase.crearUsuario(usuarioConRol);
 
         } catch (error) {
+            // Este es el error que ves en tu consola actualmente
             throw new Error(`Error al buscar usuario: ${error.message}`);
         }
     }

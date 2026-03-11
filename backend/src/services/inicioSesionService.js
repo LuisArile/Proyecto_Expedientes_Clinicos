@@ -27,7 +27,7 @@ class InicioSesionService {
         }
 
         const token = jwt.sign(
-            { id: usuario.id, idRol: usuario.idRol },
+            { id: usuario.id, idRol: usuario.idRol, rol: usuario.rolNombre },
             process.env.JWT_SECRET || 'secret_key_temporal',
             { expiresIn: "8h" }
         );
@@ -40,6 +40,8 @@ class InicioSesionService {
             correo: usuario.correo,
             idRol: usuario.idRol,
             rol: usuario.rolNombre,
+            permisos: usuario.permisos,
+            // ...usuario.toJSON(),
             token
         };
     }

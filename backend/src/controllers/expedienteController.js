@@ -142,13 +142,6 @@ class expedienteController {
 
             const resultados = await this.expedienteService.buscarGlobal(filtroDto, usuarioId);
             
-            // if( !filtroDto.termino ) {
-            //     return res.status(400).json({
-            //         success: false,
-            //         error: 'Debe proporcioanr un término de búsqueda'
-            //     });
-            // }
-
             res.json({ 
                 success: true, 
                 data: resultados 

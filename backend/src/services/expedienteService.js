@@ -160,7 +160,7 @@ class expedienteService {
      */
     async buscarGlobal(filtroDto, usuarioId = null) {
         try {
-            const { termino, pagina, limite } = filtroDto;
+            const { termino, criterio, pagina, limite } = filtroDto;
 
             const skip = (pagina - 1) * limite;
      
@@ -171,8 +171,8 @@ class expedienteService {
                 }).catch(err => console.error("Error auditoría búsqueda:", err));
             }
 
-            const resultados = await this.pacienteRepository.buscarPaciente(termino, limite, skip);
-            const total = await this.pacienteRepository.contarBusqueda(termino);
+            const resultados = await this.pacienteRepository.buscarPaciente(termino, criterio, limite, skip);
+            const total = await this.pacienteRepository.contarBusqueda(termino, criterio);
 
             return {
                 resultados,

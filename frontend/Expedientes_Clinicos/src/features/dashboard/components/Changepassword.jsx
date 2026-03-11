@@ -1,11 +1,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, User, Eye, EyeOff } from "lucide-react";
-import { useAuth } from "@/features/auth/AuthContext";
+import { Lock, User, Eye, EyeOff, Search, ShieldCheck, ArrowLeft } from "lucide-react";
 
-export function Changepassword() {
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { useAuth } from "@/features/auth/AuthContext";
+import { FormField } from "@/components/common/FormField";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { useChangePassword } from "../hooks/useChangePassword";
+
+export function Changepassword( { onVolver } ) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { changePassword, loading, error, success, setError, setSuccess } = useChangePassword();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -15,211 +24,161 @@ export function Changepassword() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
-    if (newPassword !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const response = await fetch(
-        "http://localhost:4000/api/change-password",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-          body: JSON.stringify({
-            userId: user.id,
-            currentPassword,
-            newPassword,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Error al cambiar la contraseña");
-      }
-
-      setSuccess("Contraseña actualizada correctamente");
-
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1500);
-
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    const isOk = await changePassword(currentPassword, newPassword, confirmPassword);
+      if (isOk) {
+        setTimeout(() => {
+          if (onVolver) onVolver();
+          else navigate("/dashboard");
+        }, 2000);
+      }    
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
+    
+      <PageHeader
+            title="Cambiar contraseña" subtitle="Cambiar contraseña de usuario" Icon={Search}
+            onVolver={onVolver}
+      />
 
-        {/* Icono */}
-        <div className="flex justify-center mb-4">
-          <div className="bg-blue-100 p-4 rounded-full">
-            <Lock className="text-blue-600 w-6 h-6" />
+      <Card className="w-full max-w-md mx-auto shadow-lg border-blue-100 mt-4 rounded-2xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-b border-blue-100 pb-6">
+          {/* Icono */}
+          <div className="flex flex-col items-center">
+            <div className="bg-blue-100 p-4 rounded-full">
+              <Lock className="text-blue-600 w-6 h-6" />
+            </div>
           </div>
-        </div>
+          <CardTitle className="text-2xl font-semibold text-center text-gray-800">Cambiar Contraseña</CardTitle>
+          <CardDescription className="text-center text-gray-500 text-sm mb-6">
+            Clínica Médica Vida Plena - Sistema de Gestión Hospitalaria
+          </CardDescription>
+        </CardHeader>
 
-        <h1 className="text-2xl font-semibold text-center text-gray-800">
-          Cambiar Contraseña
-        </h1>
-        <p className="text-center text-gray-500 text-sm mb-6">
-          Clínica Médica Vida Plena - Sistema de Gestión Hospitalaria
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-
-          {/* Usuario fijo */}
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">
-              Usuario
-            </label>
-            <div className="relative">
-              <User className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                value={user?.nombreUsuario || ""}
+        <CardContent className="pt-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            
+            {/* Usuario fijo */} 
+            <FormField label="Usuario" icon={User}>
+              <Input 
+                value={user?.nombreUsuario || "Usuario"} 
                 disabled
-                className="w-full pl-10 py-2 rounded-lg border border-gray-300 bg-gray-100 text-gray-400 text-sm"
+                className="bg-gray-50 border-gray-200 text-gray-500 font-medium cursor-not-allowed"
               />
-            </div>
-          </div>
+            </FormField>
 
-          {/* Contraseña actual */}
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">
-              Contraseña actual
-            </label>
-            <div className="relative">
-              <input
-              type={showCurrent ? "text" : "password"}
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="Ingrese su contraseña actual"
-              className="w-full py-2 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-900"
-              required
-            />
-            {showCurrent ? (
-              <EyeOff
-                onClick={() => setShowCurrent(false)}
-                className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
-              />
-            ) : (
-              <Eye
-                onClick={() => setShowCurrent(true)}
-                className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
-              />
-            )}
-            </div>
-          </div>
-
-          {/* Nueva contraseña */}
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">
-              Nueva contraseña
-            </label>
-            <div className="relative">
-              <input
-                type={showNew ? "text" : "password"}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Ingrese su nueva contraseña"
-                className="w-full py-2 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-900"
-                required
-              />
-              {showNew ? (
-                <EyeOff
-                  onClick={() => setShowNew(false)}
-                  className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+            {/* Contraseña actual */}
+            <FormField label="Contraseña actual" icon={Lock} required>
+              <div className="relative">
+                <Input
+                  type={showCurrent ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full py-2 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-900"
+                  required
                 />
-              ) : (
-                <Eye
-                  onClick={() => setShowNew(true)}
-                  className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+                {showCurrent ? (
+                  <EyeOff
+                    onClick={() => setShowCurrent(false)}
+                    className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+                  />
+                ) : (
+                  <Eye
+                    onClick={() => setShowCurrent(true)}
+                    className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+                  />
+                )}
+              </div>
+            </FormField>
+
+            {/* Nueva contraseña */}
+            <FormField label="Nueva contraseña" icon={Lock} required>
+              <div className="relative">
+                <Input
+                  type={showNew ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Ingrese su nueva contraseña"
+                  className="w-full py-2 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-900"
+                  required                
                 />
-              )}
+                {showNew ? (
+                  <EyeOff
+                    onClick={() => setShowNew(false)}
+                    className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+                  />
+                  ) : (
+                    <Eye
+                      onClick={() => setShowNew(true)}
+                      className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+                    />
+                  )}
+              </div>
+            </FormField>
+
+            <FormField label="Confirmar Nueva contraseña" icon={Lock} required>
+              <div className="relative">
+                <Input
+                  type={showConfirm ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirme su nueva contraseña"
+                  className="w-full py-2 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-900"
+                  required                
+                />
+                {showNew ? (
+                  <EyeOff
+                    onClick={() => setShowConfirm(false)}
+                    className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+                  />
+                  ) : (
+                    <Eye
+                      onClick={() => setShowConfirm(true)}
+                      className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+                    />
+                  )}
+              </div>
+            </FormField>
+
+            {error && <p className="text-destructive text-sm text-center font-medium">{error}</p>}
+            {success && <p className="text-green-600 text-sm text-center font-medium">{success}</p>}
+
+            <div className="pt-2 space-y-4">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-md"
+              >
+                {loading ? (
+                  <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Guardando...</>
+                ) : (
+                  <><ShieldCheck className="mr-2 h-5 w-5" /> Guardar cambios</>
+                )}
+              </Button>
+
+              <Button
+                type="button"
+                // onClick={onCancel}
+                className="w-full flex items-center justify-center text-sm text-slate-500 hover:text-slate-800 transition-colors"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" /> Cancelar y volver
+              </Button>
             </div>
-          </div>
 
-          {/* Confirmar */}
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">
-              Confirmar nueva contraseña
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirm ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirme su nueva contraseña"
-                className="w-full py-2 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-900"
-                required
-              />
-              {showConfirm ? (
-                <EyeOff
-                  onClick={() => setShowConfirm(false)}
-                  className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
-                />
-              ) : (
-                <Eye
-                  onClick={() => setShowConfirm(true)}
-                  className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
-                />
-              )}
+            <div className="border-t border-slate-100 pt-4 mt-6 text-center">
+              <p className="text-[11px] text-slate-400 leading-tight">
+                Para mayor seguridad, se recomienda cambiar su contraseña cada 90 días
+              </p>
             </div>
-          </div>
-
-          {error && (
-            <p className="text-red-600 text-sm text-center">{error}</p>
-          )}
-
-          {success && (
-            <p className="text-green-600 text-sm text-center">{success}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2 rounded-lg text-white font-medium 
-                       bg-gradient-to-r from-blue-600 to-blue-500 
-                       hover:from-blue-700 hover:to-blue-600
-                       transition-all duration-200 disabled:opacity-60"
-          >
-            {loading ? "Guardando..." : "Guardar cambios"}
-          </button>
-
-          <div className="text-center mt-2">
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard")}
-              className="text-gray-500 text-sm hover:underline"
-            >
-              Cancelar y volver
-            </button>
-          </div>
-
-          <div className="border-t pt-4 mt-4 text-center text-xs text-gray-400">
-            Para mayor seguridad, se recomienda cambiar su contraseña cada 90 días
-          </div>
-
-        </form>
-      </div>
+          </form>
+        </CardContent>        
+      </Card>
     </div>
   );
 }

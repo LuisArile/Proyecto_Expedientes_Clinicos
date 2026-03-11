@@ -19,11 +19,7 @@ export const apiCall = async (endpoint, options = {}) => {
     });
 
     const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Error en la solicitud");
-    }
-
+    if (!response.ok) throw new Error(data.error || "Error en la solicitud");
     return data;
   } catch (error) {
     console.error("Error API:", error);
@@ -31,53 +27,39 @@ export const apiCall = async (endpoint, options = {}) => {
   }
 };
 
+{/* API de autenticación */}
+export const authAPI = {
+  login: (nombreUsuario, clave) => 
+    apiCall("/login", { method: "POST", body: JSON.stringify({ nombreUsuario, clave }) }),
+  logout: () => apiCall("/logout", { method: "POST" }),
+};
+
+{/* API de seguridad (cambio de contraseña) */}
+export const seguridadAPI = {
+  cambiarPassword: (userId, currentPassword, newPassword) =>
+    apiCall("/change-password", {
+      method: "PUT",
+      body: JSON.stringify({ userId, currentPassword, newPassword }),
+    }),
+};
+
 /**
  * Métodos para consumir endpoints de expedientes
  */
 export const expedienteAPI = {
-  // Crear expediente con paciente
   crearConPaciente: (pacienteData, expedienteData) =>
     apiCall("/expedientes", {
       method: "POST",
-      body: JSON.stringify({
-        paciente: pacienteData,
-        expediente: expedienteData,
-      }),
-    }),
-
-  // Obtener todos los expedientes
-  obtenerTodos: () =>
-    apiCall("/expedientes", {
-      method: "GET",
-    }),
-
-  // Obtener expediente por ID
-  obtenerPorId: (idExpediente) =>
-    apiCall(`/expedientes/${idExpediente}`, {
-      method: "GET",
-    }),
-
-  // Obtener expediente de un paciente
-  obtenerPorPaciente: (idPaciente) =>
-    apiCall(`/expedientes/paciente/${idPaciente}`, {
-      method: "GET",
-    }),
-
-  // Actualizar expediente
+      body: JSON.stringify({ paciente: pacienteData, expediente: expedienteData }),
+  }),
+  obtenerTodos: () => apiCall("/expedientes", { method: "GET" }),
+  obtenerPorId: (idExpediente) => apiCall(`/expedientes/${idExpediente}`, {method: "GET" }),
+  obtenerPorPaciente: (idPaciente) => apiCall(`/expedientes/paciente/${idPaciente}`, { method: "GET" }),
   actualizar: (idExpediente, datos) =>
-    apiCall(`/expedientes/${idExpediente}`, {
-      method: "PUT",
-      body: JSON.stringify(datos),
-    }),
-
-  // Eliminar expediente
-  eliminar: (idExpediente) =>
-    apiCall(`/expedientes/${idExpediente}`, {
-      method: "DELETE",
-    }),
-  
-  buscar: (termino, pagina = 1, filtro = "") =>
-    apiCall(`/expedientes/buscar?q=${encodeURIComponent(termino)}&page=${pagina}&filter=${filtro}`, {
+    apiCall(`/expedientes/${idExpediente}`, { method: "PUT", body: JSON.stringify(datos) }),
+  eliminar: (idExpediente) => apiCall(`/expedientes/${idExpediente}`, { method: "DELETE"}),
+  buscar: ({ termino, criterio = "nombre", pagina = 1 }) =>
+    apiCall(`/expedientes/buscar?q=${encodeURIComponent(termino)}&pagina=${pagina}&limite=10&criterio=${criterio}`, {
       method: "GET",
     }),
 };
@@ -86,56 +68,28 @@ export const expedienteAPI = {
  * Métodos para consumir endpoints de roles
  */
 export const rolAPI = {
-  obtenerTodos: () =>
-    apiCall("/roles", { method: "GET" }),
-
-  obtenerPorId: (idRol) =>
-    apiCall(`/roles/${idRol}`, { method: "GET" }),
-
-  crear: (data) =>
-    apiCall("/roles", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-
-  actualizar: (idRol, data) =>
-    apiCall(`/roles/${idRol}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    }),
-
-  eliminar: (idRol) =>
-    apiCall(`/roles/${idRol}`, { method: "DELETE" }),
-
-  obtenerPermisos: (idRol) =>
-    apiCall(`/roles/${idRol}/permisos`, { method: "GET" }),
-
-  asignarPermisos: (idRol, permisos) =>
-    apiCall(`/roles/${idRol}/permisos`, {
-      method: "PUT",
-      body: JSON.stringify({ permisos }),
-    }),
+  obtenerTodos: () => apiCall("/roles", { method: "GET" }),
+  obtenerPorId: (idRol) => apiCall(`/roles/${idRol}`, { method: "GET" }),
+  crear: (data) => apiCall("/roles", { method: "POST", body: JSON.stringify(data) }),
+  actualizar: (idRol, data) => apiCall(`/roles/${idRol}`, { method: "PUT", body: JSON.stringify(data) }),
+  eliminar: (idRol) => apiCall(`/roles/${idRol}`, { method: "DELETE" }),
+  obtenerPermisos: (idRol) => apiCall(`/roles/${idRol}/permisos`, { method: "GET" }),
+  asignarPermisos: (idRol, permisos) => apiCall(`/roles/${idRol}/permisos`, { method: "PUT", body: JSON.stringify({ permisos }) }),
 };
 
 /**
  * Métodos para consumir endpoints de permisos
  */
 export const permisoAPI = {
-  obtenerTodos: () =>
-    apiCall("/permisos", { method: "GET" }),
+  obtenerTodos: () => apiCall("/permisos", { method: "GET" }),
+  crear: (data) => apiCall("/permisos", { method: "POST", body: JSON.stringify(data) }),
+  actualizar: (idPermiso, data) => apiCall(`/permisos/${idPermiso}`, { method: "PUT", body: JSON.stringify(data) }),
+  eliminar: (idPermiso) => apiCall(`/permisos/${idPermiso}`, { method: "DELETE" }),
+};
 
-  crear: (data) =>
-    apiCall("/permisos", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-
-  actualizar: (idPermiso, data) =>
-    apiCall(`/permisos/${idPermiso}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    }),
-
-  eliminar: (idPermiso) =>
-    apiCall(`/permisos/${idPermiso}`, { method: "DELETE" }),
+/**
+ * Métodos para consumir endpoints de estadísticas/dashboard
+ */
+export const estadisticasAPI = {
+  obtenerResumen: () => apiCall("/estadisticas/resumen", { method: "GET" }),
 };
