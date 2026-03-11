@@ -28,11 +28,11 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 
 app.use("/api/usuarios", usuarioRouters); //creacion de usuarios
-app.use("/api/obtenerUsuarios", usuarioRouters); //obtener todos los usuarios
+// app.use("/api/obtenerUsuarios", usuarioRouters); //obtener todos los usuarios
 
 
 app.use("/api", inicioSesionRouters); //inicio y cierre de sesion
-app.use("/api/cierreSesion", inicioSesionRouters);
+// app.use("/api/cierreSesion", inicioSesionRouters);
 
 app.use("/api/expedientes", expedienteRouters); // operaciones con expedientes
 
