@@ -11,10 +11,10 @@ import { FormField } from "@/components/common/FormField";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useChangePassword } from "../hooks/useChangePassword";
 
-export function Changepassword( onVolver ) {
+export function Changepassword( { onVolver } ) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { changePassword, loading, error, success } = useChangePassword();
+  const { changePassword, loading, error, success, setError, setSuccess } = useChangePassword();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -31,7 +31,10 @@ export function Changepassword( onVolver ) {
 
     const isOk = await changePassword(currentPassword, newPassword, confirmPassword);
       if (isOk) {
-        setTimeout(() => navigate("/dashboard"), 1500);
+        setTimeout(() => {
+          if (onVolver) onVolver();
+          else navigate("/dashboard");
+        }, 2000);
       }    
   };
 

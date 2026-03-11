@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { securityService } from "../services/securityService";
 import { useAuth } from "@/features/auth/AuthContext";
+import { validatePasswordSchema } from '@/utils/passwordValidator';
 
 export function useChangePassword() {
   const { user } = useAuth();
@@ -9,11 +10,12 @@ export function useChangePassword() {
   const [success, setSuccess] = useState("");
 
   const changePassword = async (currentPassword, newPassword, confirmPassword) => {
-    setError("");
+    setLoading(true);    setError("");
     setSuccess("");
-
-    if (newPassword !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
+    
+    const validationError = validatePasswordSchema(currentPassword, newPassword, confirmPassword);
+    if (validationError) {
+      setError(validationError);
       return false;
     }
 
@@ -30,5 +32,5 @@ export function useChangePassword() {
     }
   };
 
-  return { changePassword, loading, error, success };
+  return { changePassword, loading, error, success, setError, setSuccess };
 }
