@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/Label";
+import { Input } from "@/components/ui/Input";
+import { validarLogin } from "@/components/validaciones/validarLogin";
 import { useNavigate } from "react-router-dom";
 import { User, Lock, Eye, Activity, EyeOff } from "lucide-react";
 import { useAuth } from "../features/auth/AuthContext";
@@ -17,6 +21,13 @@ export function Login() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    const errorValidacion = validarLogin(nombreUsuario, clave);
+
+    if (errorValidacion) {
+      setError(errorValidacion);
+      return;
+    }
 
     const usuarioLimpio = nombreUsuario.trim();
     const claveLimpia = clave.trim();
@@ -60,12 +71,12 @@ export function Login() {
 
           {/* Usuario */}
           <div>
-            <label className="block text-sm text-gray-600 mb-1">
+            <Label className="block text-sm text-gray-600 mb-1">
               Usuario
-            </label>
+            </Label>
             <div className="relative">
               <User className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
-              <input
+              <Input
                 type="text"
                 placeholder="Ingrese su usuario"
                 value={nombreUsuario}
@@ -78,12 +89,12 @@ export function Login() {
 
           {/* Password */}
           <div>
-            <label className="block text-sm text-gray-600 mb-1">
+            <Label className="block text-sm text-gray-600 mb-1">
               Contraseña
-            </label>
+            </Label>
             <div className="relative">
               <Lock className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
-              <input
+              <Input
                 type={showClave ? "text" : "password"}
                 placeholder="Ingrese su contraseña"
                 value={clave}
@@ -111,7 +122,7 @@ export function Login() {
           )}
 
           {/* Botón */}
-          <button
+          <Button
             type="submit"
             disabled={loading}
             className="w-full py-2 rounded-lg text-white font-medium 
@@ -120,7 +131,7 @@ export function Login() {
                        transition-all duration-200 disabled:opacity-60"
           >
             {loading ? "Validando..." : "Iniciar sesión"}
-          </button>
+          </Button>
 
           <div className="border-t pt-4 mt-4 text-center text-xs text-gray-400">
             Para soporte técnico, contacte al administrador del sistema

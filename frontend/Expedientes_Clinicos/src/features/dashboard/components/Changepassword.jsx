@@ -20,11 +20,18 @@ export function Changepassword( { onVolver } ) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const [errors, setErrors] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -37,6 +44,7 @@ export function Changepassword( { onVolver } ) {
         }, 2000);
       }    
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">

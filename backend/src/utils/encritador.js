@@ -4,8 +4,7 @@ class Encriptador {
     
     static async encriptar(campo) {
         try {
-            const salt = await bcrypt.genSalt(10); 
-            return await bcrypt.hash(campo, salt);
+            return await bcrypt.hash(campo, 10);
         } catch (error) {
             throw new Error("Error al encriptar la clave: " + error.message);
         }
