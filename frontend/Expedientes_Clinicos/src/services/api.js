@@ -18,7 +18,15 @@ export const apiCall = async (endpoint, options = {}) => {
       ...options,
     });
 
-    const data = await response.json();
+    const contentType = response.headers.get("content-type");
+      let data;
+    
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        throw new Error(`Error del servidor (${response.status})`);
+      }
+
     if (!response.ok) throw new Error(data.error || "Error en la solicitud");
     return data;
   } catch (error) {
@@ -37,7 +45,7 @@ export const authAPI = {
 {/* API de seguridad (cambio de contraseña) */}
 export const seguridadAPI = {
   cambiarPassword: (userId, currentPassword, newPassword) =>
-    apiCall("/change-password", {
+    apiCall("/usuarios/change-password", {
       method: "PUT",
       body: JSON.stringify({ userId, currentPassword, newPassword }),
     }),
