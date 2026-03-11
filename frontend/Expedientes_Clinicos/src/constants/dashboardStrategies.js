@@ -15,6 +15,13 @@ export const DASHBOARD_CONFIG = {
     listDescription: "Últimos eventos registrados en el log",
     statusLabel: "Evento",
 
+    cards: {
+      usuarios:     { titulo: "Usuarios Activos",     icon: "Users",      border: "border-blue-100",    textColor: "text-blue-900" },
+      auditoria:    { titulo: "Eventos de Auditoría", icon: "BarChart3",  border: "border-purple-100",  textColor: "text-purple-600" },
+      medicamentos: { titulo: "Medicamentos",         icon: "Pill",       border: "border-green-100",   textColor: "text-green-600" },
+      examenes:     { titulo: "Exámenes",             icon: "TestTube",   border: "border-teal-100",    textColor: "text-teal-600" },
+    },    
+
     modulesTitle: "Gestión de Infraestructura",
     modulesSubtitle: "Herramientas de control total",
     modules: [
@@ -24,6 +31,7 @@ export const DASHBOARD_CONFIG = {
       { id: 'examenes', title: "Exámenes", sub: "Tipos de examen", icon: TestTube, color: "text-teal-600", path: "/examenes" },
     ]
   },
+
   MEDICO: {
     title: "Panel Médico",
     subtitle: "Consultas y Diagnóstico",
@@ -36,6 +44,13 @@ export const DASHBOARD_CONFIG = {
     listDescription: "Pacientes programados para hoy",
     statusLabel: "Programada",
 
+    cards: {
+      consultasRealizadas:  { titulo: "Consultas Realizadas", icon: "Stethoscope",  border: "border-purple-100",  textColor: "text-purple-600"  },
+      consultasPendientes: { titulo: "Consultas Pendientes", icon: "Calendar",     border: "border-blue-100",    textColor: "text-blue-600"    },
+      examenesOrdenados:   { titulo: "Exámenes Ordenados",   icon: "TestTube",     border: "border-teal-100",    textColor: "text-teal-600"    },
+      recetasCreadas:    { titulo: "Recetas Creadas",      icon: "NotebookText", border: "border-purple-100",  textColor: "text-purple-600"  },
+    },   
+
     modulesTitle: "Consulta Médica",
     modulesSubtitle: "Gestión de atención al paciente",
     modules: [
@@ -44,6 +59,7 @@ export const DASHBOARD_CONFIG = {
       { id: 'expedientes', title: "Expedientes", sub: "Historial clínico", icon: Shield, color: "text-indigo-600", path: "/expedientes" },
     ]
   },
+
   ENFERMERO: {
     title: "Panel de Enfermería",
     subtitle: "Registro Preclínico",
@@ -57,12 +73,18 @@ export const DASHBOARD_CONFIG = {
     listDescription: "Pendientes de toma de signos vitales (Triaje)",
     statusLabel: "En espera",
 
+    cards: {
+      pacientesEvaluados:  { titulo: "Pacientes Evaluados",      icon: "Users",    border: "border-green-100",   textColor: "text-green-600"   },
+      evaluacionesPendientes: { titulo: "Evaluaciones Pendientes",  icon: "Activity", border: "border-orange-100",  textColor: "text-orange-600"  },
+    },  
+
     modulesTitle: "Atención de Enfermería",
     modulesSubtitle: "Gestión de pacientes en triaje",
     modules: [ 
       { id: 'triaje', title: "Triaje", sub: "Evaluar signos vitales", icon: Activity, color: "text-green-600", path: "/triaje" },
     ]
   },
+
   RECEPCIONISTA: {
     title: "Panel Recepcionista",
     subtitle: "Registro y Citas",
@@ -75,6 +97,12 @@ export const DASHBOARD_CONFIG = {
     listTitle: "Pacientes Recientes",
     listDescription: "Últimos expedientes creados hoy",
     statusLabel: "Creado",
+
+    cards: {
+      pacientes:  { titulo: "Pacientes Atendidos",  icon: "Users",    border: "border-blue-100",    textColor: "text-blue-600"    },
+      expedientes: { titulo: "Citas Agendadas",      icon: "Calendar", border: "border-green-100",   textColor: "text-green-600"   },
+      citas:   { titulo: "Expedientes Creados",  icon: "FileText", border: "border-purple-100",  textColor: "text-purple-600"  },
+    },  
 
     modulesTitle: "Atención al Público",
     modulesSubtitle: "Ingresos y agendamiento",

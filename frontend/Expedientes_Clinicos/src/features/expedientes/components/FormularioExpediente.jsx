@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -37,9 +36,7 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
 
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
       <PageHeader
-          title="Buscar Paciente"
-          subtitle="Consultar expedientes clínicos"
-          Icon={Search}
+          title="Crear Expediente" subtitle="Crear expedientes clinicos" Icon={Search}
           onVolver={onVolver}
       />
       
@@ -63,15 +60,11 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
             {/* Sección de Información Básica */}
             <FormSection title="Información Básica">
               {/* Nombres */}
-              <FormField 
-                label="Nombres" 
-                icon={User} 
-                required 
+              <FormField label="Nombres" icon={User} required 
                 error={errors.nombre?.message}
               >
                 <Input
-                  id="nombre"
-                  placeholder="Ej: Juan Carlos"
+                  id="nombre" placeholder="Ej: Juan Carlos"
                   {...register("nombre", {
                     required: "El nombre es obligatorio",
                     minLength: { value: 2, message: "Mínimo 2 caracteres" }
@@ -81,14 +74,11 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
               </FormField>
               {/* Apellidos */}
               <FormField 
-                label="Apellidos" 
-                icon={User} 
-                required 
+                label="Apellidos" icon={User} required 
                 error={errors.apellido?.message}
               >
                 <Input
-                  id="apellido"
-                  placeholder="Ej: Pérez Gómez"
+                  id="apellido" placeholder="Ej: Pérez Gómez"
                   {...register("apellido", {
                     required: "El apellido es obligatorio",
                     minLength: { value: 2, message: "Mínimo 2 caracteres" }
@@ -98,23 +88,20 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
               </FormField>
               {/* Número de Identidad con validación de duplicados */}
               <FormField 
-                label="Número de Identidad" 
-                icon={IdCard} 
-                required 
+                label="Número de Identidad" icon={IdCard} required 
                 error={errors.numeroIdentidad?.message || (idDuplicado ? "Esta identidad ya está registrada." : null)}
                 className="md:col-span-2"
               >
                 <Input 
-                  id="numeroIdentidad"
-                  placeholder="0000-0000-00000"
-                   {...register("numeroIdentidad", { 
+                  id="numeroIdentidad" placeholder="0000-0000-00000"
+                  {...register("numeroIdentidad", { 
                     required: "La identidad es obligatoria",
                     pattern: {
                       value: /^[0-9]{4}-[0-9]{4}-[0-9]{5}$/,
                       message: "Formato requerido: 0000-0000-00000"
-                    }})}
-                   onBlur={(e) => validarIdDuplicado(e.target.value)}
-                   className={errors.numeroIdentidad || idDuplicado ? "border-red-500" : "border-gray-300"}
+                  }})}
+                  onBlur={(e) => validarId(e.target.value)}
+                  className={errors.numeroIdentidad || idDuplicado ? "border-red-500" : "border-gray-300"}
                 />
               </FormField>
             </FormSection>
@@ -123,9 +110,7 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
             <FormSection title="Datos Demográficos">
               {/* Fecha de Nacimiento */}
               <FormField 
-                label="Fecha de Nacimiento" 
-                icon={Calendar} 
-                required 
+                label="Fecha de Nacimiento" icon={Calendar} required
                 error={errors.fechaNacimiento?.message}
               >
                 <Input
@@ -136,8 +121,7 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
               </FormField>
               {/* Género */}
               <FormField 
-                label="Sexo" 
-                required 
+                label="Sexo" required 
                 error={errors.sexo?.message}
               >
                 <Select
@@ -162,8 +146,7 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
             <FormSection title="Información de Contacto">
               {/* Correo Electrónico */}
               <FormField 
-                label="Correo Electrónico" 
-                icon={Mail} 
+                label="Correo Electrónico" icon={Mail} 
                 error={errors.correo?.message}
               >
                 <Input 
@@ -180,9 +163,7 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
               </FormField>
               {/* Teléfono */}
               <FormField 
-                label="Teléfono" 
-                icon={Phone} 
-                required 
+                label="Teléfono" icon={Phone} required
                 error={errors.telefono?.message}
               >
                 <Input 
@@ -193,9 +174,7 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
               </FormField>
               {/* Dirección Completa */}
               <FormField 
-                label="Dirección Completa" 
-                icon={MapPin} 
-                required 
+                label="Dirección Completa" icon={MapPin} required
                 error={errors.direccion?.message}
                 className="md:col-span-2"
               >
@@ -224,9 +203,7 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
                 )}
               </Button>
               <Button
-                type="button"
-                variant="outline"
-                onClick={onCancel}
+                type="button" variant="outline" onClick={onCancel}
                 className="flex-1 h-11 text-base border-gray-300 hover:bg-gray-50"
               >
                 Cancelar

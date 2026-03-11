@@ -1,8 +1,4 @@
-import {    Clock, UserCheck, PillBottle, Activity,   
-            Users, BarChart3, Pill, TestTube, 
-            FileText,
-            Stethoscope, Calendar, NotebookText 
-        
+import { Clock, UserCheck, PillBottle, Activity, Users, BarChart3, Pill, TestTube, FileText, Stethoscope, Calendar, NotebookText 
         } from "lucide-react";
 
 import { useAuth } from "@/features/auth/AuthContext";
@@ -30,7 +26,7 @@ const ICON_MAP = {
 export function DashboardFeature() {
     const { user } = useAuth();
     const userRole = user?.rol?.toUpperCase();
-    const config = DASHBOARD_CONFIG[userRole] || DASHBOARD_CONFIG.RECEPCIONISTA;
+    const config = DASHBOARD_CONFIG[userRole];
     
     const { tarjetas, actividad, loading } = useDashboardData(userRole);
 
@@ -62,9 +58,21 @@ export function DashboardFeature() {
 
             {/* Estadisticas */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {tarjetas?.map((stat, index) => (
-                    <StatsCard key={index} {...stat} />
-                ))}
+                {tarjetas?.map((stat) => {
+                    const configVisual = config.cards?.[stat.id];
+
+                return (
+                    <StatsCard 
+                        key={stat.id}
+                        titulo={configVisual?.titulo || stat.titulo}
+                        valor={stat.valor}
+                        icon={configVisual?.icon || "Activity"}
+                        border={configVisual?.border || "border-gray-100"}
+                        textColor={configVisual?.textColor || "text-gray-600"}
+                        pie={stat.pie}
+                    />
+                );
+                })}
             </div>
 
             {/* Sección de Módulos */}
@@ -100,7 +108,8 @@ export function DashboardFeature() {
                 </CardContent>
             </Card>
 
-            <Card className="shadow-md border-none">
+            {/* Sección de Actividad Reciente */}
+            <Card className="shadow-md border-none overflow-hidden">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div>
@@ -117,7 +126,7 @@ export function DashboardFeature() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-4">
+                    <div className="space-y-4 max-h-[420px] overflow-y-auto pr-2 custom-scrollbar">
                         {actividad && actividad.length > 0 ? (
                             actividad.map((item, index) => (
                                 <ListItem 

@@ -1,7 +1,7 @@
 const app= require("./src/app");
 require("dotenv").config();
 
-const prisma= require("../backend/src/config/prisma")
+// const prisma= require("../backend/src/config/prisma")
 
 const port= process.env.PORT || 3000;
 

@@ -1,79 +1,85 @@
 class EstadisticasService {
-    constructor(prisma) {
+    constructor(prisma, usuarioRepo, auditoriaRepo, pacienteRepo, expedienteRepo) {
         this.prisma = prisma;
+        this.usuarioRepo = usuarioRepo;
+        this.auditoriaRepo = auditoriaRepo;
+        this.pacienteRepo = pacienteRepo;
+        this.expedienteRepo = expedienteRepo;
+
+        this.estrategias = {
+            ADMINISTRADOR: this.obtenerAdminData.bind(this),
+            RECEPCIONISTA: this.obtenerRecepcionistaData.bind(this),
+            MEDICO: this.obtenerMedicoData.bind(this),
+            ENFERMERO: this.obtenerEnfermeroData.bind(this)
+        };
     }
 
     async obtenerResumenGeneral(usuarioId, rolNombre) {
-        try {
-            console.log("ROL RECIBIDO EN SERVICE:", rolNombre)
+        const rolActual = rolNombre?.toUpperCase().trim();
+        const estrategia = this.estrategias[rolActual];
+        
+        if (!estrategia) return { tarjetas: [], actividad: [] };
+        
+        return await estrategia();
+    }
 
-            const dashboardData = {
-                tarjetas: [],
-                actividadReciente: []
-            };
+    async obtenerAdminData() {
+        const [usuarios, auditoria] = await Promise.all([
+            this.usuarioRepo.obtenerTodos(),
+            this.auditoriaRepo.obtenerRecientes(6),
+            // this.medicamentoRepo.count(), //próximamente
+            // this.examenRepo.count() //próximamente
+        ]);
 
-            const rolActual = rolNombre?.toUpperCase().trim();
+        return {
+            tarjetas: [
+                { id: 'usuarios',       valor: usuarios.length,     pie: "Total en sistema" },
+                { id: 'auditoria',      valor: auditoria.length,    pie: "Logs recientes" },
+                { id: 'medicamentos',   valor: 0,                   pie: "Próximamente" },
+                { id: 'examenes',       valor: 0,                   pie: "Próximamente" }
+            ],
+            actividad: auditoria.map(log => ({
+                id: log.id,
+                usuario: log.usuario?.nombreUsuario || "Sistema",
+                accion: log.accion,
+                fecha: log.fecha
+            }))
+        };
+    }
 
-            // LÓGICA PARA ADMINISTRADOR
-            if (rolActual === 'ADMINISTRADOR') {
-
-                const [total, auditoria] = await Promise.all([
-                    this.prisma.usuario.count(),
-                    this.prisma.auditoria.findMany({
-                        take: 6,
-                        orderBy: { fecha: 'desc' },
-                        include: { usuario: { select: { nombreUsuario: true } } }
-                    }),
-                    // this.prisma.medicamento.count(), //próximamente
-                    // this.prisma.tipoExamen.count() //próximamente
-                ]);
-
-                dashboardData.tarjetas = [
-                    { titulo: "Usuarios Activos",       valor: total,               icon: "Users",      border: "border-blue-100",      textColor: "text-blue-900",     pie: "Total en sistema" },
-                    { titulo: "Eventos de Auditoría",   valor: auditoria.length,    icon: "BarChart3",  border: "border-purple-100",    textColor: "text-purple-600",   pie: "Hoy"              },
-                    { titulo: "Medicamentos",           valor: 0,                   icon: "Pill",       border: "border-green-100",     textColor: "text-green-600",    pie: "Proximamente"     },
-                    { titulo: "Exámenes",               valor: 0,                   icon: "TestTube",   border: "border-teal-100",      textColor: "text-teal-600",     pie: "Proximamente"     },
-                ];
-
-                dashboardData.actividad = auditoria.map(log => ({
-                    id: log.id,
-                    usuario: log.usuario?.nombreUsuario || "Sistema",
-                    accion: log.accion,
-                    fecha: log.fecha
-                }));
-            }
-
-            if (rolNombre === 'RECEPCIONISTA') {
-
-                dashboardData.tarjetas = [
-                    { titulo: "Pacientes Atendidos",    valor: 0, icon: "Users",    border: "border-blue-100",      textColor: "text-blue-600",     pie: "Hoy"          },
-                    { titulo: "Citas Agendadas",        valor: 0, icon: "Calendar", border: "border-green-100",     textColor: "text-green-600",    pie: "Pendientes"   },
-                    { titulo: "Expedientes Creados",    valor: 0, icon: "FileText", border: "border-purple-100",    textColor: "text-purple-600",   pie: "Hoy"          },
-                ];
-            }
-
-            if (rolNombre === 'MEDICO') {
-
-                dashboardData.tarjetas = [
-                    { titulo: "Consultas Realizadas",   valor: 0, icon: "Stethoscope",  border: "border-purple-100",    textColor: "text-purple-600",   pie: "Hoy"          },
-                    { titulo: "Consultas Pendientes",   valor: 0, icon: "Calendar",     border: "border-blue-100",      textColor: "text-blue-600",     pie: "Programadas"  },
-                    { titulo: "Éxamenes Ordenados",     valor: 0, icon: "TestTube",     border: "border-teal-100",      textColor: "text-teal-600",     pie: "Hoy"          },
-                    { titulo: "Recetas Creadas",        valor: 0, icon: "NotebookText", border: "border-purple-100",    textColor: "text-purple-600",   pie: "Hoy"          },
-                ];
-            }
-
-            if (rolNombre === 'ENFERMERO') {
-
-                dashboardData.tarjetas = [
-                    { titulo: "Pacientes Evaluados",        valor: 0, icon: "Users",    border: "border-green-100",     textColor: "text-green-600",    pie: "Hoy"  },
-                    { titulo: "Evaluaciones Pendientes",    valor: 0, icon: "Activity", border: "border-orange-100",    textColor: "text-orange-600",   pie: " "    },
-                ];
-            }            
-            
-            return dashboardData;
-        } catch (error) {
-            throw new Error(`Error al compilar estadísticas: ${error.message}`);
-        }
+    async obtenerRecepcionistaData() {
+        const totalPacientes = await this.prisma.paciente.count(); 
+        
+        return {
+            tarjetas: [
+                { id: 'pacientes',      valor: totalPacientes,      pie: "Registrados" },
+                { id: 'expedientes',    valor: 0,                   pie: "Creados hoy" },
+                { id: 'citas',          valor: 0,                   pie: "Agendadas" }
+            ],
+            actividad: []
+        };
+    } 
+    
+    async obtenerMedicoData() {
+        return {
+            tarjetas: [
+                { id: 'consultasRealizadas',    valor: 0, pie: "Hoy" },
+                { id: 'consultasPendientes',    valor: 0, pie: "Programadas" },
+                { id: 'examenesOrdenados',      valor: 0, pie: "Hoy" },
+                { id: 'recetasCreadas',         valor: 0, pie: "Hoy" }
+            ],
+            actividad: []
+        };
+    }
+    
+    async obtenerEnfermeroData() {
+        return {
+            tarjetas: [
+                { id: 'pacientesEvaluados',     valor: 0, pie: "Próximamente" },
+                { id: 'evaluacionesPendientes', valor: 0, pie: "Próximamente" }
+            ],
+            actividad: []
+        };
     }
 }
 

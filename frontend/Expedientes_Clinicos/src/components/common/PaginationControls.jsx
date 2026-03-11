@@ -2,11 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export function PaginationControls({ 
-  currentPage, 
-  totalPages, 
-  onPageChange, 
-  isLoading 
+export function PaginationControls({ currentPage, totalPages, onPageChange, isLoading
 }) {
   return (
     <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t">

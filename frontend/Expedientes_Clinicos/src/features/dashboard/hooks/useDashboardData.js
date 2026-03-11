@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Users, Activity, UserCheck, AlertCircle } from 'lucide-react';
-import estadisticasAPI from '@/services/api';
+import estadisticasService from "../services/estadisticaService";
 
 export function useDashboardData() {
   const [data, setData] = useState({
@@ -13,7 +13,7 @@ export function useDashboardData() {
   useEffect(() => {
     async function cargarDatos() {
       try {
-        const result = await estadisticasAPI.obtenerResumen();
+        const result = await estadisticasService.obtenerResumen();
         
         setData({
           tarjetas: result.tarjetas || [],

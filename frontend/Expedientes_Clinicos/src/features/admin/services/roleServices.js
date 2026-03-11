@@ -2,11 +2,16 @@ import { rolAPI, permisoAPI } from "@/services/api";
 
 export const rolesService = {
     async fetchAllData() {
-        const [rolesRes, permisosRes] = await Promise.all([
-            rolAPI.obtenerTodos(),
-            permisoAPI.obtenerTodos(),
-        ]);
-        return { roles: rolesRes.data, permisos: permisosRes.data };
+        try {
+            const [rolesRes, permisosRes] = await Promise.all([
+                rolAPI.obtenerTodos(),
+                permisoAPI.obtenerTodos(),
+            ]);
+            return { roles: rolesRes.data, permisos: permisosRes.data };
+        } catch (error) {
+            console.error("Error al cargar datos de roles/permisos:", error);
+            throw error;
+        }
     },
 
     async saveRol(nombre) {

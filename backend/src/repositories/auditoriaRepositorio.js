@@ -20,6 +20,13 @@ class auditoriaRepository{
         }
     }
 
+    async obtenerRecientes(limite = 6) {
+        return await this.prisma.auditoria.findMany({
+            take: limite,
+            orderBy: { fecha: 'desc' },
+            include: { usuario: { select: { nombreUsuario: true } } }
+        });
+    }
 }
 
 

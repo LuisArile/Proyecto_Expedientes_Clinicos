@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { rolesService } from "../services/rolesServices";
+import { rolesService } from "../services/roleServices";
 import { toast } from "sonner";
 
 export function useGestionRoles() {

@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/features/auth/authContext";
@@ -6,13 +7,12 @@ import { ROLE_STRATEGIES } from "@/constants/roles"
 import { ALL_MENU_ITEMS } from "../../constants/allMenuItems";
 
 import {
-  Hospital,
-  LogOut,
-  KeyRound
+  Hospital, LogOut, KeyRound, ChevronDown, ChevronUp
 } from "lucide-react";
 
 export function Sidebar({ currentView, onNavigate  }) {
   const { user, logout } = useAuth();
+  const [isUserOpen, setIsUserOpen] = React.useState(true);
 
   if (!user) return null;
 

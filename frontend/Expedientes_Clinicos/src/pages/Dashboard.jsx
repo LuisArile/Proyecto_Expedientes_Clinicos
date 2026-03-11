@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "../components/layout/dashboardLayout";
 import { useAuth } from "../features/auth/AuthContext";
 import { FormularioExpediente } from "../features/expedientes/components/FormularioExpediente";
@@ -10,8 +10,14 @@ import { DashboardFeature } from "../features/dashboard/components/DashboardFeat
 
 export function Dashboard() {
   const { user } = useAuth();
-  const [currentView, setCurrentView] = useState("inicio");
+  const [currentView, setCurrentView] = useState(() => {
+    return localStorage.getItem("sgec_view") || "inicio";
+  });
 
+  useEffect(() => {
+    localStorage.setItem("sgec_view", currentView);
+  }, [currentView]);  
+  
   // Si no hay usuario todavía, mostramos carga para evitar errores de undefined
   if (!user) {
     return (
@@ -21,45 +27,36 @@ export function Dashboard() {
     );
   }
 
-  const userRole = user.rol?.toUpperCase();
+  const handleNavigate = (view) => {
+    if (typeof view === 'string') {
+      setCurrentView(view);
+    }
+  };
 
   const renderContent = () => {
+    const volverInicio = () => setCurrentView("inicio");
     
-    if (currentView === "crear-expediente") return (
-      <FormularioExpediente 
-        onSuccess={() => setCurrentView("inicio")}
-        onCancel={() => setCurrentView("inicio")} 
-      />
-    );
-
-    if (currentView === "buscar-paciente") return (
-      <BuscarPaciente 
-        onVolver={() => setCurrentView("inicio")} 
-        onVerExpediente={(paciente) => console.log("Abriendo:", paciente.codigo)}
-      />
-    )
-
-    if (currentView === "gestion-roles") return (
-      <GestionRoles 
-        onVolver={() => setCurrentView('inicio')}
-      />
-    )
-
-    if (currentView === "changepassword") return <Changepassword />;
-
-    
-    if(currentView === "inicio") {
-      return <DashboardFeature/>
-    }
-
-    return <p className="p-10 text-center">Módulo en construcción...</p>;
+    switch (currentView) {
+      case "crear-expediente":
+        return <FormularioExpediente onVolver={volverInicio} onSuccess={volverInicio} />;
+      case "buscar-paciente":
+        return <BuscarPaciente onVolver={volverInicio} onVerExpediente={(paciente) => console.log("Abriendo:", paciente.codigo)}/>;
+      case "gestion-roles":
+        return <GestionRoles onVolver={volverInicio} />;
+      case "changepassword":
+        return <Changepassword onVolver={volverInicio} />;
+      case "inicio":
+        return <DashboardFeature />;
+      default:
+        return <p className="p-10 text-center">Módulo en construcción...</p>;
+    }     
   };   
 
   return (
     <DashboardLayout
       currentView={currentView}
       // onNavigate={(view) => setCurrentView(view)}
-      onNavigate={setCurrentView}
+      onNavigate={handleNavigate}
     >
       {renderContent()}
     </DashboardLayout>
