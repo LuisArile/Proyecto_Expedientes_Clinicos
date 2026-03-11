@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, User, Eye, EyeOff, Search, ShieldCheck, ArrowLeft } from "lucide-react";
+import { Lock, User, Eye, EyeOff, Search, ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
