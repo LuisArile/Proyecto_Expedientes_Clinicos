@@ -1,52 +1,95 @@
+const { ErrorValidacion, ErrorNoEncontrado } = require("../utils/errores");
+const capturarAsync = require("../utils/capturarAsync");
+
 class PermisoController {
     constructor(permisoService) {
         this.permisoService = permisoService;
     }
 
-    async crear(req, res) {
-        try {
-            const permiso = await this.permisoService.crear(req.body);
-            res.status(201).json({ success: true, data: permiso });
-        } catch (error) {
-            res.status(400).json({ success: false, error: error.message });
+    
+    crear = capturarAsync(async (req, res) => {
+        // Validar que el nombre del permiso sea proporcionado
+        if (!req.body.nombre || !req.body.nombre.trim()) {
+            throw new ErrorValidacion('El nombre del permiso es obligatorio');
         }
-    }
 
-    async obtenerTodos(req, res) {
-        try {
-            const permisos = await this.permisoService.obtenerTodos();
-            res.json({ success: true, data: permisos });
-        } catch (error) {
-            res.status(400).json({ success: false, error: error.message });
-        }
-    }
+        const permiso = await this.permisoService.crear(req.body);
+        
+        res.status(201).json({
+            success: true,
+            mensaje: 'Permiso creado exitosamente',
+            data: permiso
+        });
+    });
 
-    async obtenerPorId(req, res) {
-        try {
-            const permiso = await this.permisoService.obtenerPorId(req.params.idPermiso);
-            res.json({ success: true, data: permiso });
-        } catch (error) {
-            res.status(404).json({ success: false, error: error.message });
-        }
-    }
 
-    async actualizar(req, res) {
-        try {
-            const permiso = await this.permisoService.actualizar(req.params.idPermiso, req.body);
-            res.json({ success: true, data: permiso });
-        } catch (error) {
-            res.status(400).json({ success: false, error: error.message });
-        }
-    }
+    obtenerTodos = capturarAsync(async (req, res) => {
+        const permisos = await this.permisoService.obtenerTodos();
+        
+        res.json({
+            success: true,
+            data: permisos
+        });
+    });
 
-    async eliminar(req, res) {
-        try {
-            await this.permisoService.eliminar(req.params.idPermiso);
-            res.json({ success: true, mensaje: 'Permiso eliminado correctamente' });
-        } catch (error) {
-            res.status(400).json({ success: false, error: error.message });
+
+    obtenerPorId = capturarAsync(async (req, res) => {
+        const { idPermiso } = req.params;
+
+        if (!idPermiso) {
+            throw new ErrorValidacion('El ID del permiso es obligatorio');
         }
-    }
+
+        const permiso = await this.permisoService.obtenerPorId(idPermiso);
+
+        if (!permiso) {
+            throw new ErrorNoEncontrado('Permiso');
+        }
+
+        res.json({
+            success: true,
+            data: permiso
+        });
+    });
+
+
+    actualizar = capturarAsync(async (req, res) => {
+        const { idPermiso } = req.params;
+
+        if (!idPermiso) {
+            throw new ErrorValidacion('El ID del permiso es obligatorio');
+        }
+
+        // Validar que el nombre no esté vacío si se proporciona
+        if (req.body.nombre && !req.body.nombre.trim()) {
+            throw new ErrorValidacion('El nombre del permiso no puede estar vacío');
+        }
+
+        const permiso = await this.permisoService.actualizar(idPermiso, req.body);
+
+        res.json({
+            success: true,
+            mensaje: 'Permiso actualizado correctamente',
+            data: permiso
+        });
+    });
+
+
+    eliminar = capturarAsync(async (req, res) => {
+        const { idPermiso } = req.params;
+
+        if (!idPermiso) {
+            throw new ErrorValidacion('El ID del permiso es obligatorio');
+        }
+
+        await this.permisoService.eliminar(idPermiso);
+
+        res.json({
+            success: true,
+            mensaje: 'Permiso eliminado correctamente'
+        });
+    });
 }
 
 module.exports = PermisoController;
+

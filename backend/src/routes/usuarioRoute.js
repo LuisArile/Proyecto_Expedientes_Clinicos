@@ -15,8 +15,8 @@ const usuarioController = new  UsuarioController(usuarioService);
 
 
 //RUTAS USUARIOS
-router.post("/", (req,res)=> usuarioController.crear(req,res));
-router.get("/", (req,res)=> usuarioController.obtenerTodos(req,res));
+router.post("/", (req,res,next)=> usuarioController.crear(req,res,next));
+router.get("/", (req,res,next)=> usuarioController.obtenerTodos(req,res,next));
 
 
 module.exports=router;

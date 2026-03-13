@@ -1,71 +1,83 @@
+
+const { ErrorValidacion, ErrorNoEncontrado, ErrorProhibido } = require("../utils/errores");
+const capturarAsync = require("../utils/capturarAsync");
+
 class consultaMedicaController {
     constructor(consultaMedicaService) {
         this.consultaMedicaService = consultaMedicaService;
     }
 
-    // Registrar nueva consulta médica
-    async registrar(req, res) {
-        try {
-            const { expedienteId } = req.params;
-            const medicoId = req.usuario.id;
-            const datos = req.body;
 
-            const resultado = await this.consultaMedicaService.registrar(
-                expedienteId,
-                medicoId,
-                datos
-            );
+        // Registrar nueva consulta médica
+    registrar = capturarAsync(async (req, res) => {
+        const { expedienteId } = req.params;
+        const medicoId = req.usuario?.id;
+        const datos = req.body;
 
-            res.status(201).json({
-                success: true,
-                message: 'Consulta médica registrada exitosamente',
-                data: resultado
-            });
-        } catch (error) {
-            res.status(400).json({
-                success: false,
-                error: error.message
-            });
+        // Validar usuario autenticado
+        if (!medicoId) {
+            throw new ErrorValidacion('Usuario no autenticado');
         }
-    }
+
+        // Validar rol de doctor
+        if (req.usuario.rol !== 'DOCTOR') {
+            throw new ErrorProhibido('Solo los médicos pueden registrar consultas');
+        }
+
+        // Validar expedienteId
+        if (!expedienteId) {
+            throw new ErrorValidacion('El ID del expediente es obligatorio');
+        }
+
+
+        const resultado = await this.consultaMedicaService.registrar(
+            expedienteId,
+            medicoId,
+            datos
+        );
+
+        res.status(201).json({
+            success: true,
+            message: 'Consulta médica registrada exitosamente',
+            data: resultado
+        });
+    });
 
     // Obtener todas las consultas de un expediente
-    async obtenerPorExpediente(req, res) {
-        try {
-            const { expedienteId } = req.params;
+    obtenerPorExpediente = capturarAsync(async (req, res) => {
+        const { expedienteId } = req.params;
 
-            const consultas = await this.consultaMedicaService.obtenerPorExpediente(expedienteId);
-
-            res.json({
-                success: true,
-                data: consultas
-            });
-        } catch (error) {
-            res.status(400).json({
-                success: false,
-                error: error.message
-            });
+        if (!expedienteId) {
+            throw new ErrorValidacion('El ID del expediente es obligatorio');
         }
-    }
+
+        const consultas = await this.consultaMedicaService.obtenerPorExpediente(expedienteId);
+
+        res.json({
+            success: true,
+            data: consultas
+        });
+    });
 
     // Obtener una consulta específica por ID
-    async obtenerPorId(req, res) {
-        try {
-            const { id } = req.params;
+    obtenerPorId = capturarAsync(async (req, res) => {
+        const { id } = req.params;
 
-            const consulta = await this.consultaMedicaService.obtenerPorId(id);
-
-            res.json({
-                success: true,
-                data: consulta
-            });
-        } catch (error) {
-            res.status(404).json({
-                success: false,
-                error: error.message
-            });
+        if (!id) {
+            throw new ErrorValidacion('El ID de la consulta es obligatorio');
         }
-    }
+
+        const consulta = await this.consultaMedicaService.obtenerPorId(id);
+
+        if (!consulta) {
+            throw new ErrorNoEncontrado('Consulta médica');
+        }
+
+        res.json({
+            success: true,
+            data: consulta
+        });
+    });
 }
 
 module.exports = consultaMedicaController;

@@ -12,6 +12,9 @@ const registroPreclinico=require("./routes/registroPreclinicoRoute")
 const consultaMedicaRouters=require("./routes/consultaMedicaRoute")
 
 
+const manejadorErrores = require("./middlewares/manejoErrores")
+
+
 const app= express();
 
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -43,4 +46,7 @@ app.use("/api/registroPreclinico", registroPreclinico); //gestion de registro de
 
 app.use("/api/consultaMedica", consultaMedicaRouters); //Consulta medicas
 
+
+
+app.use(manejadorErrores);
 module.exports=app;
