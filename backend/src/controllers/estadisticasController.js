@@ -4,22 +4,20 @@ class EstadisticasController {
     }
 
     async obtenerDashboard(req, res) {
-        console.log(req.usuario)
         try {
             
-            const { id, rol } = req.usuario;
+            const usuarioSesion = req.usuario || req.user;
 
-            const datos = await this.estadisticasService.obtenerResumenGeneral(id, rol);
+            if (!usuarioSesion) {
+                return res.status(401).json({ success: false, error: "No autenticado" });
+            }
             
-            res.json({
-                success: true,
-                data: datos
-            });
+            const datos = await this.estadisticasService.obtenerResumenGeneral(usuarioSesion);
+            
+            res.json({ success: true, data: datos });
         } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: error.message
-            });
+            console.error("Error en obtenerDashboard:", error);
+            res.status(500).json({ success: false, error: error.message });
         }
     }
 }

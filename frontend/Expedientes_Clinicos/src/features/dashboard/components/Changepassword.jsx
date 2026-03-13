@@ -10,8 +10,9 @@ import { useAuth } from "@/features/auth/AuthContext";
 import { FormField } from "@/components/common/FormField";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useChangePassword } from "../hooks/useChangePassword";
+import { FormHeader } from "@/components/common/FormHeader";
 
-export function Changepassword( { onVolver } ) {
+export function Changepassword( { onVolver, onClick } ) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { changePassword, loading, error, success, setError, setSuccess } = useChangePassword();
@@ -47,47 +48,38 @@ export function Changepassword( { onVolver } ) {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 px-4 pb-8">
     
-      <PageHeader
-            title="Cambiar contraseña" subtitle="Cambiar contraseña de usuario" Icon={Search}
-            onVolver={onVolver}
-      />
+      <PageHeader title="Cambiar contraseña" subtitle="Cambiar contraseña de usuario" Icon={Search} onVolver={onVolver} />
 
-      <Card className="w-full max-w-md mx-auto shadow-lg border-blue-100 mt-4 rounded-2xl overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-b border-blue-100 pb-6">
-          {/* Icono */}
-          <div className="flex flex-col items-center">
-            <div className="bg-blue-100 p-4 rounded-full">
-              <Lock className="text-blue-600 w-6 h-6" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl font-semibold text-center text-gray-800">Cambiar Contraseña</CardTitle>
-          <CardDescription className="text-center text-gray-500 text-sm mb-6">
-            Clínica Médica Vida Plena - Sistema de Gestión Hospitalaria
-          </CardDescription>
+      <Card className="w-full max-w-md mx-auto shadow-lg border-blue-100 mt-6 rounded-2xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-b border-blue-100 py-4">
+          <FormHeader title="Cambiar Contraseña" subtitle="Actualice sus credenciales de acceso" icon={Lock} compact={true}/>
         </CardHeader>
 
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-5">
             
             {/* Usuario fijo */} 
-            <FormField label="Usuario" icon={User}>
-              <Input 
-                value={user?.nombreUsuario || "Usuario"} 
-                disabled
-                className="bg-gray-50 border-gray-200 text-gray-500 font-medium cursor-not-allowed"
-              />
+            <FormField label="Usuario">
+              <div className="relative">
+                <User className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                <Input 
+                  value={user?.nombreUsuario || "Usuario"} 
+                  disabled
+                  className="bw-full pl-10 py-2 rounded-lg border border-gray-300 bg-gray-100 text-gray-600 text-sm"
+                />
+              </div>
             </FormField>
 
             {/* Contraseña actual */}
-            <FormField label="Contraseña actual" icon={Lock} required>
+            <FormField label="Contraseña actual" required>
               <div className="relative">
                 <Input
                   type={showCurrent ? "text" : "password"}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Ingrese su contraseña actual"
                   className="w-full py-2 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-900"
                   required
                 />
@@ -106,7 +98,7 @@ export function Changepassword( { onVolver } ) {
             </FormField>
 
             {/* Nueva contraseña */}
-            <FormField label="Nueva contraseña" icon={Lock} required>
+            <FormField label="Nueva contraseña" required>
               <div className="relative">
                 <Input
                   type={showNew ? "text" : "password"}
@@ -121,16 +113,16 @@ export function Changepassword( { onVolver } ) {
                     onClick={() => setShowNew(false)}
                     className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
                   />
-                  ) : (
-                    <Eye
-                      onClick={() => setShowNew(true)}
-                      className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
-                    />
-                  )}
+                ) : (
+                  <Eye
+                    onClick={() => setShowNew(true)}
+                    className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+                  />
+                )}
               </div>
             </FormField>
 
-            <FormField label="Confirmar Nueva contraseña" icon={Lock} required>
+            <FormField label="Confirmar Nueva contraseña" required>
               <div className="relative">
                 <Input
                   type={showConfirm ? "text" : "password"}
@@ -140,17 +132,17 @@ export function Changepassword( { onVolver } ) {
                   className="w-full py-2 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-900"
                   required                
                 />
-                {showNew ? (
+                {showConfirm ? (
                   <EyeOff
                     onClick={() => setShowConfirm(false)}
                     className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
                   />
-                  ) : (
-                    <Eye
-                      onClick={() => setShowConfirm(true)}
-                      className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
-                    />
-                  )}
+                ) : (
+                  <Eye
+                    onClick={() => setShowConfirm(true)}
+                    className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 cursor-pointer"
+                  />
+                )}
               </div>
             </FormField>
 
@@ -161,7 +153,9 @@ export function Changepassword( { onVolver } ) {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-md"
+                className="w-full py-2 rounded-lg text-white font-medium 
+                          bg-gradient-to-r from-blue-600 to-blue-500 
+                          hover:from-blue-700 hover:to-blue-600"
               >
                 {loading ? (
                   <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Guardando...</>
@@ -173,7 +167,8 @@ export function Changepassword( { onVolver } ) {
               <Button
                 type="button"
                 // onClick={onCancel}
-                className="w-full flex items-center justify-center text-sm text-slate-500 hover:text-slate-800 transition-colors"
+                onClick={() => { navigate("/dashboard");}}
+                className="w-full py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-red-600 hover:text-white"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" /> Cancelar y volver
               </Button>

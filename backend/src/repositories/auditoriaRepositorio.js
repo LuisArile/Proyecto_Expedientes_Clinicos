@@ -55,7 +55,4 @@ class auditoriaRepository{
     }
 }
 
-
-
-
 module.exports=auditoriaRepository;

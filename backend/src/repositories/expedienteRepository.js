@@ -154,21 +154,36 @@ class expedienteRepository {
         }
     }
 
-    async contarCreadosHoy() {
+    async contarCreadosHoy(usuarioId = null, accionFiltro = 'CREACIÓN DE EXPEDIENTE') {
         const inicioHoy = new Date();
         inicioHoy.setHours(0, 0, 0, 0);
         const finHoy = new Date();
         finHoy.setHours(23, 59, 59, 999);
 
-        return await prisma.expediente.count({
+        if (!usuarioId) {
+            return await prisma.expediente.count({
+                where: {
+                    fechaCreacion: {
+                        gte: inicioHoy,
+                        lte: finHoy
+                    }
+                }
+            });
+        }
+        return await prisma.auditoria.count({
             where: {
-                fechaCreacion: { 
-                    gte: inicioHoy, 
-                    lte: finHoy 
+                usuarioId: Number(usuarioId),
+                accion: {
+                    contains: accionFiltro
+                },
+                fecha: {
+                    gte: inicioHoy,
+                    lte: finHoy
                 }
             }
         });
     }
 }
+
 
 module.exports = expedienteRepository;

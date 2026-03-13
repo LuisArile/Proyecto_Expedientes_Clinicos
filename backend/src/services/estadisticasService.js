@@ -14,16 +14,16 @@ class EstadisticasService {
         };
     }
 
-    async obtenerResumenGeneral(usuarioId, rolNombre) {
-        const rolActual = rolNombre?.toUpperCase().trim();
+    async obtenerResumenGeneral(usuarioSesion) {
+        const rolActual = usuarioSesion.rol?.toUpperCase().trim();
         const estrategia = this.estrategias[rolActual];
         
         if (!estrategia) return { tarjetas: [], actividad: [] };
         
-        return await estrategia();
+        return await estrategia(usuarioSesion);
     }
 
-    async obtenerAdminData() {
+    async obtenerAdminData(usuarioSesion) {
         const [usuarios, auditoria] = await Promise.all([
             this.usuarioRepo.obtenerTodos(),
             this.auditoriaRepo.obtenerRecientes(6),
@@ -48,21 +48,29 @@ class EstadisticasService {
         };
     }
 
-    async obtenerRecepcionistaData() {
-        const [expedientesHoy, auditoria] = await Promise.all([
-            this.expedienteRepo.contarCreadosHoy(),
+    async obtenerRecepcionistaData(usuarioSesion) {
+        const inicioHoy = new Date();
+        inicioHoy.setHours(0, 0, 0, 0); 
+
+        const esAdmin = usuarioSesion.rol === 'ADMINISTRADOR' || usuarioSesion.idRol === 1;
+        
+        const usuarioIdFiltro = esAdmin ? null : usuarioSesion.id;
+        const [expedientesHoy, actividadReciente] = await Promise.all([
+            this.expedienteRepo.contarCreadosHoy(usuarioIdFiltro, 'CREACIÓN DE EXPEDIENTE'),
             this.auditoriaRepo.buscarActividad({ 
-            accion: 'CREACIÓN'
-        }, 6)
-    ]);
+                accion: 'CREACIÓN DE EXPEDIENTE', 
+                fechaGte: inicioHoy,
+                ...(usuarioIdFiltro && { usuarioId: usuarioIdFiltro })
+            }, 6)
+        ]);
 
         return {
             tarjetas: [
-                { id: 'pacientes',      valor: 0,                   pie: "Registrados Hoy" },
-                { id: 'expedientes',    valor: expedientesHoy,      pie: "Creados hoy" },
-                { id: 'citas',          valor: 0,                   pie: "Agendadas" }
+                { id: 'pacientes',  valor: 0, pie: "Registrados Hoy" },
+                { id: 'expedientes', valor: expedientesHoy || 0, pie: "Creados hoy" },
+                { id: 'citas', valor: 0, pie: "Agendadas" }
             ],
-            actividad: auditoria.map(log => ({
+            actividad: actividadReciente.map(log => ({
                 id: log.id,
                 usuario: log.usuario ? `${log.usuario.nombre} ${log.usuario.apellido}` : "Sistema",
                 accion: log.accion,
@@ -70,9 +78,9 @@ class EstadisticasService {
                 detalles: log.detalles
             }))
         };
-    } 
+    }
     
-    async obtenerMedicoData() {
+    async obtenerMedicoData(usuarioSesion) {
         return {
             tarjetas: [
                 { id: 'consultasRealizadas',    valor: 0, pie: "Hoy" },
@@ -84,7 +92,7 @@ class EstadisticasService {
         };
     }
     
-    async obtenerEnfermeroData() {
+    async obtenerEnfermeroData(usuarioSesion) {
         return {
             tarjetas: [
                 { id: 'pacientesEvaluados',     valor: 0, pie: "Próximamente" },
