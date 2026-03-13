@@ -1,6 +1,9 @@
 import { Sidebar } from "./sidebar";
+import { useAuth } from "../../features/auth/AuthContext";
 
 export function DashboardLayout({ children, currentView, onNavigate, user }) {
+  const { user: authenticatedUser } = useAuth();
+
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100">
       

@@ -85,6 +85,10 @@ async function main() {
     }
   }
   console.log('Matriz de permisos asignada correctamente');
+  
+  const usuariosSinRol = await prisma.usuario.findMany({
+    where: { idRol: 0 }
+  });
 
   if (usuariosSinRol.length > 0) {
     await prisma.usuario.updateMany({

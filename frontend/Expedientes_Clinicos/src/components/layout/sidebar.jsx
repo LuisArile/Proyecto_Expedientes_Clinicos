@@ -1,10 +1,10 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/features/auth/authContext";
+import { useAuth } from "@/features/auth/AuthContext";
 import { ROLE_STRATEGIES } from "@/constants/roles"
 // import { MENU_STRATEGIES } from "@/constants/menuStrategies";
-import { ALL_MENU_ITEMS } from "../../constants/allMenuItems";
+import { ALL_MENU_ITEMS } from "@/constants/allMenuItems";
 
 import {
   Hospital, LogOut, KeyRound, ChevronDown, ChevronUp

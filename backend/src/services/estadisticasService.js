@@ -40,23 +40,35 @@ class EstadisticasService {
             ],
             actividad: auditoria.map(log => ({
                 id: log.id,
-                usuario: log.usuario?.nombreUsuario || "Sistema",
+                usuario: log.usuario ? `${log.usuario.nombre} ${log.usuario.apellido}` : "Sistema",
                 accion: log.accion,
-                fecha: log.fecha
+                fecha: log.fecha,
+                detalles: log.detalles
             }))
         };
     }
 
     async obtenerRecepcionistaData() {
-        const totalPacientes = await this.prisma.paciente.count(); 
-        
+        const [expedientesHoy, auditoria] = await Promise.all([
+            this.expedienteRepo.contarCreadosHoy(),
+            this.auditoriaRepo.buscarActividad({ 
+            accion: 'CREACIÓN'
+        }, 6)
+    ]);
+
         return {
             tarjetas: [
-                { id: 'pacientes',      valor: totalPacientes,      pie: "Registrados" },
-                { id: 'expedientes',    valor: 0,                   pie: "Creados hoy" },
+                { id: 'pacientes',      valor: 0,                   pie: "Registrados Hoy" },
+                { id: 'expedientes',    valor: expedientesHoy,      pie: "Creados hoy" },
                 { id: 'citas',          valor: 0,                   pie: "Agendadas" }
             ],
-            actividad: []
+            actividad: auditoria.map(log => ({
+                id: log.id,
+                usuario: log.usuario ? `${log.usuario.nombre} ${log.usuario.apellido}` : "Sistema",
+                accion: log.accion,
+                fecha: log.fecha,
+                detalles: log.detalles
+            }))
         };
     } 
     

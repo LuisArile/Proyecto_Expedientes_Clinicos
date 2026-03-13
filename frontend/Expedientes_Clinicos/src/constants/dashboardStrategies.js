@@ -99,9 +99,9 @@ export const DASHBOARD_CONFIG = {
     statusLabel: "Creado",
 
     cards: {
-      pacientes:  { titulo: "Pacientes Atendidos",  icon: "Users",    border: "border-blue-100",    textColor: "text-blue-600"    },
-      expedientes: { titulo: "Citas Agendadas",      icon: "Calendar", border: "border-green-100",   textColor: "text-green-600"   },
-      citas:   { titulo: "Expedientes Creados",  icon: "FileText", border: "border-purple-100",  textColor: "text-purple-600"  },
+      pacientes:  { titulo: "Pacientes Registrados",  icon: "Users",    border: "border-blue-100",    textColor: "text-blue-600"    },
+      expedientes: { titulo: "Expedientes Creados",   icon: "Calendar", border: "border-green-100",   textColor: "text-green-600"   },
+      citas:   { titulo: "Citas Agendadas",           icon: "FileText", border: "border-purple-100",  textColor: "text-purple-600"  },
     },  
 
     modulesTitle: "Atención al Público",

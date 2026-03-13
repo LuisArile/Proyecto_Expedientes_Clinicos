@@ -4,9 +4,10 @@ class auditoriaRepository{
     }
 
 //crear datos en tabla auditoria
-    async crear(data){
+    async crear(data, tx = null){
+        const cliente = tx || this.prisma;
         try {
-            return await this.prisma.auditoria.create({
+            return await cliente.auditoria.create({
                 data: {
                     usuarioId: data.usuarioId,
                     accion: data.accion,
@@ -24,7 +25,32 @@ class auditoriaRepository{
         return await this.prisma.auditoria.findMany({
             take: limite,
             orderBy: { fecha: 'desc' },
-            include: { usuario: { select: { nombreUsuario: true } } }
+            include: { 
+                usuario: { 
+                    select: { 
+                        nombre: true, 
+                        apellido: true, 
+                        nombreUsuario: true 
+                    } 
+                } 
+        }
+        });
+    }
+
+    async buscarActividad(filtros = {}, limite = 10) {
+        const { accion, usuarioId, fechaGte } = filtros;
+        
+        return await this.prisma.auditoria.findMany({
+            where: {
+                ...(accion && { accion: { contains: accion } }),
+                ...(usuarioId && { usuarioId: Number(usuarioId) }),
+                ...(fechaGte && { fecha: { gte: fechaGte } })
+            },
+            take: limite,
+            orderBy: { fecha: 'desc' },
+            include: { 
+                usuario: { select: { nombre: true, apellido: true, nombreUsuario: true } } 
+            }
         });
     }
 }

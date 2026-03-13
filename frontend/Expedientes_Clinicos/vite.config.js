@@ -5,16 +5,22 @@ import path from "path"
 
 // https://vite.dev/config/
 export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss(),
+  ],
+  server: {
+    host: true,
+    port: 5173,
+    watch: {
+      usePolling: true,
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
-
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
 
   test: {
     environment: "jsdom",

@@ -153,6 +153,22 @@ class expedienteRepository {
             throw new Error(`Error al eliminar expediente: ${error.message}`);
         }
     }
+
+    async contarCreadosHoy() {
+        const inicioHoy = new Date();
+        inicioHoy.setHours(0, 0, 0, 0);
+        const finHoy = new Date();
+        finHoy.setHours(23, 59, 59, 999);
+
+        return await prisma.expediente.count({
+            where: {
+                fechaCreacion: { 
+                    gte: inicioHoy, 
+                    lte: finHoy 
+                }
+            }
+        });
+    }
 }
 
 module.exports = expedienteRepository;

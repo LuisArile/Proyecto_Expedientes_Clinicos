@@ -62,7 +62,7 @@ class expedienteService {
                     await this.auditoriaService.registrarExpediente(usuarioId, "CREACIÓN", {
                         idExpediente: expedienteCreado.idExpediente,
                         dniPaciente: pacienteCreado.dni,
-                        accion: "Creación de paciente y apertura de expediente clínico"
+                        detalles: "Creación de paciente y apertura de expediente clínico"
                     }, tx);
                 }
 
