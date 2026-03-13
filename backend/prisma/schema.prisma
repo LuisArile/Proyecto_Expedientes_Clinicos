@@ -51,6 +51,7 @@ model Usuario {
   auditorias    Auditoria[]
   
   registrosPreclinicos registroPreclinico[]
+  consultasMedicas   ConsultaMedica[]
 
   @@map("Usuario")
 }
@@ -91,6 +92,8 @@ model Expediente {
  
   registrosPreclinicos registroPreclinico[]
 
+  consultasMedicas   ConsultaMedica[]
+
   @@map("Expediente")
 }
 
@@ -112,4 +115,37 @@ model registroPreclinico {
   enfermero  Usuario    @relation(fields: [enfermeroId], references: [id])
 
   @@map("registroPreclinico")
+}
+
+model ConsultaMedica {
+  id                Int         @id @default(autoincrement())
+  expedienteId      Int
+  medicoId          Int
+  fechaConsulta     DateTime    @default(now())
+  motivo            String      @db.Text
+  diagnostico       String      @db.Text
+  observaciones     String?     @db.Text
+  tipoConsulta      String      
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  expediente        Expediente  @relation(fields: [expedienteId], references: [idExpediente])
+  medico            Usuario     @relation(fields: [medicoId], references: [id])
+  recetas           RecetaMedica[]
+
+  @@map("ConsultaMedica")
+}
+
+model RecetaMedica {
+  id                Int         @id @default(autoincrement())
+  consultaId        Int
+  medicamento       String
+  dosis             String
+  duracion          String
+  indicaciones      String?     @db.Text
+  createdAt         DateTime    @default(now())
+
+  consulta          ConsultaMedica @relation(fields: [consultaId], references: [id])
+
+  @@map("RecetaMedica")
 }

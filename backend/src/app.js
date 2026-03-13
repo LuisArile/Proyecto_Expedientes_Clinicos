@@ -9,7 +9,7 @@ const expedienteRouters = require("./routes/expedienteRoute")
 const rolRouters = require("./routes/rolRoute")
 const permisoRouters = require("./routes/permisoRoute")
 const registroPreclinico=require("./routes/registroPreclinicoRoute")
-
+const consultaMedicaRouters=require("./routes/consultaMedicaRoute")
 
 
 const app= express();
@@ -40,5 +40,7 @@ app.use("/api/roles", rolRouters); // gestión de roles
 app.use("/api/permisos", permisoRouters); // gestión de permisos
 
 app.use("/api/registroPreclinico", registroPreclinico); //gestion de registro de signos vitales
+
+app.use("/api/consultaMedica", consultaMedicaRouters); //Consulta medicas
 
 module.exports=app;
