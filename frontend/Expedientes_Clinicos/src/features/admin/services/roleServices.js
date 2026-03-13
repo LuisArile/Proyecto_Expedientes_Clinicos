@@ -42,4 +42,8 @@ export const rolesService = {
     async deletePermiso(id) {
         return await permisoAPI.eliminar(id);
     },
+
+    async updatePermiso(id, nombre) {
+        return await permisoAPI.actualizar(id, { nombre });
+    }
 };

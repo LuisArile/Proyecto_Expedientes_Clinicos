@@ -7,6 +7,8 @@ export function useGestionRoles() {
   const [loading, setLoading] = useState(true);
   const [rolSeleccionado, setRolSeleccionado] = useState(null);
   const [permisosSeleccionados, setPermisosSeleccionados] = useState([]);
+  const [editandoPermiso, setEditandoPermiso] = useState(null);
+  const [nombreEditPermiso, setNombreEditPermiso] = useState("");
 
   const cargarDatos = useCallback(async () => {
     try {
@@ -89,11 +91,23 @@ export function useGestionRoles() {
     } catch (e) { toast.error(e.message); }
   };
 
+  const handleActualizarPermiso = async (idPermiso, nuevoNombre) => {
+    if (!nuevoNombre.trim()) return toast.error("El nombre no puede estar vacío");
+    try {
+      await rolesService.updatePermiso(idPermiso, nuevoNombre.trim());
+      toast.success("Permiso actualizado");
+      setEditandoPermiso(null);
+      await cargarDatos();
+    } catch (e) { toast.error(e.message); }
+  };  
+
   return {
     ...data,
     loading,
     rolSeleccionado,
     permisosSeleccionados,
+    editandoPermiso,
+    nombreEditPermiso,
     handleCrearRol,
     handleSeleccionarRol,
     togglePermiso,
@@ -102,6 +116,9 @@ export function useGestionRoles() {
     handleEliminarRol,
     handleActualizarRol,
     handleCrearPermiso,
-    handleEliminarPermiso
+    handleEliminarPermiso,
+    setEditandoPermiso,
+    setNombreEditPermiso,
+    handleActualizarPermiso
   };
 }
