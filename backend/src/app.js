@@ -1,7 +1,6 @@
 require('dotenv').config();
 
 const express= require("express");
-const prisma = require('./config/prisma')
 const cors= require("cors");
 
 const usuarioRouters = require("./routes/usuarioRoute")
@@ -9,6 +8,8 @@ const inicioSesionRouters= require("./routes/inicioSesionRoute")
 const expedienteRouters = require("./routes/expedienteRoute")
 const rolRouters = require("./routes/rolRoute")
 const permisoRouters = require("./routes/permisoRoute")
+const registroPreclinico=require("./routes/registroPreclinicoRoute")
+const consultaMedicaRouters=require("./routes/consultaMedicaRoute")
 const estadisticasRoute = require("./routes/estadisticasRoute")
 
 
@@ -38,6 +39,10 @@ app.use("/api/expedientes", expedienteRouters); // operaciones con expedientes
 
 app.use("/api/roles", rolRouters); // gestión de roles
 app.use("/api/permisos", permisoRouters); // gestión de permisos
+
+app.use("/api/registroPreclinico", registroPreclinico); //gestion de registro de signos vitales
+
+app.use("/api/consultaMedica", consultaMedicaRouters); //Consulta medicas
 
 app.use("/api/estadisticas", estadisticasRoute);
 

@@ -1,0 +1,49 @@
+const prisma = require('../config/prisma');
+
+
+class registroPreclinicoService {
+    constructor(repository, expedienteRepository, auditoriaService) {
+        this.repository = repository;
+        this.expedienteRepository = expedienteRepository;
+        this.auditoriaService = auditoriaService;
+    }
+
+    async registrar(expedienteId, enfermeroId, datos) {
+        try {
+            // Verificar que el expediente existe
+            const expediente = await this.expedienteRepository.obtenerPorId(expedienteId);
+            if (!expediente) {
+                throw new Error('Expediente no encontrado');
+            }
+
+            // Crear el registro
+            const registro = await this.repository.crear({
+                expedienteId,
+                enfermeroId,
+                ...datos
+            });
+
+            return registro;
+        } catch (error) {
+            throw new Error(`Error al registrar: ${error.message}`);
+        }
+    }
+
+    async obtenerPorExpediente(expedienteId) {
+        try {
+            return await this.repository.obtenerPorExpediente(expedienteId);
+        } catch (error) {
+            throw new Error(`Error al obtener registros: ${error.message}`);
+        }
+    }
+
+    async obtenerUltimoPorExpediente(expedienteId) {
+        try {
+            return await this.repository.obtenerUltimoPorExpediente(expedienteId);
+        } catch (error) {
+            throw new Error(`Error al obtener último registro: ${error.message}`);
+        }
+    }
+}
+
+module.exports = registroPreclinicoService;
