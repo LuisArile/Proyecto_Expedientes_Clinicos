@@ -26,11 +26,10 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-
-
 app.use("/api/usuarios", usuarioRouters); //creacion de usuarios
 // app.use("/api/obtenerUsuarios", usuarioRouters); //obtener todos los usuarios
 
+app.use("/api/obtenerUsuarios", usuarioRouters); //obtener todos los usuarios
 
 app.use("/api", inicioSesionRouters); //inicio y cierre de sesion
 // app.use("/api/cierreSesion", inicioSesionRouters);
@@ -43,6 +42,7 @@ app.use("/api/permisos", permisoRouters); // gestión de permisos
 app.use("/api/registroPreclinico", registroPreclinico); //gestion de registro de signos vitales
 
 app.use("/api/consultaMedica", consultaMedicaRouters); //Consulta medicas
+
 
 app.use("/api/estadisticas", estadisticasRoute);
 

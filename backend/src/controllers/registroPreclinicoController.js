@@ -70,6 +70,38 @@ class registroPreclinicoController {
             });
         }
     }
+
+    async obtenerTodos(req, res) {
+        try {
+            const registros = await this.registroPreclinicoService.obtenerTodos();
+
+            res.json({
+                success: true,
+                data: registros
+            });
+        } catch (error) {
+            res.status(400).json({
+                success: false,
+                error: error.message
+            });
+        }
+    }
+
+    async contarTodos(req, res) {
+        try {
+            const total = await this.registroPreclinicoService.contarTodos();
+
+            res.json({
+                success: true,
+                data: { total }
+            });
+        } catch (error) {
+            res.status(400).json({
+                success: false,
+                error: error.message
+            });
+        }
+    }
 }
 
 module.exports = registroPreclinicoController;

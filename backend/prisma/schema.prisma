@@ -104,6 +104,7 @@ model registroPreclinico {
   presionArterial       String?
   temperatura           Float?
   peso                  Float?
+  talla                 Int?
   frecuenciaCardiaca    Int?
   observaciones         String?  @db.Text
   fechaRegistro         DateTime @default(now())

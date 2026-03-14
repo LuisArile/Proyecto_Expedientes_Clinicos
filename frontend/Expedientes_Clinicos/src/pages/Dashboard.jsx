@@ -70,6 +70,10 @@ export function Dashboard() {
         return <GestionRoles onVolver={volverInicio} />;
       case "changepassword":
         return <Changepassword onVolver={volverInicio} />;
+      case "preclinica":
+        return <FormularioRegistroPreclinico onVolver={volverInicio} onSuccess={volverInicio} />;
+      case "pacientes-evaluados":
+        return <ListaRegistrosPreclinicos onVolver={volverInicio} />;
       case "inicio":
         return <DashboardFeature />;
       case "consulta-medica":

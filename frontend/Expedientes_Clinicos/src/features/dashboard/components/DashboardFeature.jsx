@@ -23,7 +23,7 @@ const ICON_MAP = {
 
 };
 
-export function DashboardFeature() {
+export function DashboardFeature({ onNavigate }) {
     const { user } = useAuth();
     const userRole = user?.rol?.toUpperCase();
     const config = DASHBOARD_CONFIG[userRole];
@@ -60,6 +60,7 @@ export function DashboardFeature() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {tarjetas?.map((stat) => {
                     const configVisual = config.cards?.[stat.id];
+                    const navigateTo = configVisual?.navigateTo;
 
                 return (
                     <StatsCard 
@@ -70,6 +71,7 @@ export function DashboardFeature() {
                         border={configVisual?.border || "border-gray-100"}
                         textColor={configVisual?.textColor || "text-gray-600"}
                         pie={stat.pie}
+                        onClick={navigateTo && onNavigate ? () => onNavigate(navigateTo) : undefined}
                     />
                 );
                 })}
@@ -147,10 +149,13 @@ export function DashboardFeature() {
     );
     }
 
-    function StatsCard({ titulo, valor, icon, border, textColor, pie }) {
+    function StatsCard({ titulo, valor, icon, border, textColor, pie, onClick }) {
         const IconComponent = ICON_MAP[icon] || Activity;
         return (
-        <Card className={`hover:shadow-md transition-shadow border-l-4 ${border}`}>
+        <Card 
+            className={`hover:shadow-md transition-shadow border-l-4 ${border} ${onClick ? 'cursor-pointer' : ''}`}
+            onClick={onClick}
+        >
             <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-bold uppercase text-gray-500 tracking-wider">
                     {titulo}
