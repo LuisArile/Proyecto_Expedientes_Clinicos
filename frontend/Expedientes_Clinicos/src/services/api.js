@@ -103,3 +103,17 @@ export const permisoAPI = {
 export const estadisticasAPI = {
   obtenerResumen: () => apiCall("/estadisticas/resumen", { method: "GET" }),
 };
+
+export const consultaMedicaAPI = {
+  registrar: (expedienteId, datos) =>
+    apiCall(`/consultaMedica/expediente/${expedienteId}`, {
+      method: "POST",
+      body: JSON.stringify(datos),
+    }),
+
+  obtenerPorExpediente: (expedienteId) =>
+    apiCall(`/consultaMedica/expediente/${expedienteId}`, { method: "GET" }),
+
+  obtenerPorId: (id) =>
+    apiCall(`/consultaMedica/${id}`, { method: "GET" })
+}
