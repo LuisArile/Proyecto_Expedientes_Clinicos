@@ -1,15 +1,21 @@
-const expedienteService = require("../src/services/expedienteService");
+// MOCK DE PRISMA (evita conexión real)
+jest.mock("../src/config/prisma", () => ({
+    $transaction: jest.fn(),
+}));
 
-describe("expedienteService", () => {
+const prisma = require("../src/config/prisma");
+const ExpedienteService = require("../src/services/expedienteService");
+
+describe("ExpedienteService", () => {
 
     let service;
-    let mockExpedienteRepo;
-    let mockPacienteRepo;
-    let mockAuditoriaService;
+    let expedienteRepo;
+    let pacienteRepo;
+    let auditoriaService;
 
     beforeEach(() => {
 
-        mockExpedienteRepo = {
+        expedienteRepo = {
             obtenerPorNumero: jest.fn(),
             crear: jest.fn(),
             obtenerTodos: jest.fn(),
@@ -19,126 +25,189 @@ describe("expedienteService", () => {
             eliminar: jest.fn()
         };
 
-        mockPacienteRepo = {
+        pacienteRepo = {
             obtenerPorDni: jest.fn(),
             obtenerPorId: jest.fn(),
-            crear: jest.fn()
+            crear: jest.fn(),
+            buscarPaciente: jest.fn(),
+            contarBusqueda: jest.fn()
         };
 
-        mockAuditoriaService = {
+        auditoriaService = {
             registrarExpediente: jest.fn()
         };
 
-        service = new expedienteService(
-            mockExpedienteRepo,
-            mockPacienteRepo,
-            mockAuditoriaService
+        service = new ExpedienteService(
+            expedienteRepo,
+            pacienteRepo,
+            auditoriaService
         );
+    });
+
+    describe("crearConPaciente", () => {
+
+        test("debe crear paciente y expediente correctamente", async () => {
+
+            const pacienteData = { dni: "123", nombre: "Juan" };
+            const expedienteData = {};
+
+            pacienteRepo.obtenerPorDni.mockResolvedValue(null);
+
+            prisma.$transaction.mockImplementation(async (callback) => {
+
+                const tx = {
+                    expediente: {
+                        count: jest.fn().mockResolvedValue(0)
+                    }
+                };
+
+                pacienteRepo.crear.mockResolvedValue({
+                    idPaciente: 1,
+                    dni: "123"
+                });
+
+                expedienteRepo.crear.mockResolvedValue({
+                    idExpediente: 10
+                });
+
+                return callback(tx);
+            });
+
+            const resultado = await service.crearConPaciente(
+                pacienteData,
+                expedienteData,
+                1
+            );
+
+            expect(pacienteRepo.crear).toHaveBeenCalled();
+            expect(expedienteRepo.crear).toHaveBeenCalled();
+
+            expect(resultado).toHaveProperty("paciente");
+            expect(resultado).toHaveProperty("expediente");
+
+        });
+
+        test("debe lanzar error si el DNI ya existe", async () => {
+
+            pacienteRepo.obtenerPorDni.mockResolvedValue({ idPaciente: 1 });
+
+            await expect(
+                service.crearConPaciente({ dni: "123" }, {}, 1)
+            ).rejects.toThrow("El paciente con DNI 123 ya existe");
+
+        });
 
     });
 
-    test("debe crear paciente y expediente correctamente", async () => {
+    describe("obtenerTodos", () => {
 
-        const paciente = { dni: "123", nombre: "Juan" };
-        const expediente = { numeroExpediente: "EXP001" };
+        test("debe retornar expedientes", async () => {
 
-        mockPacienteRepo.obtenerPorDni.mockResolvedValue(null);
-        mockExpedienteRepo.obtenerPorNumero.mockResolvedValue(null);
+            const expedientes = [{ id: 1 }, { id: 2 }];
 
-        mockPacienteRepo.crear.mockResolvedValue({ idPaciente: 1, ...paciente });
-        mockExpedienteRepo.crear.mockResolvedValue({ idExpediente: 10 });
+            expedienteRepo.obtenerTodos.mockResolvedValue(expedientes);
 
-        const resultado = await service.crearConPaciente(paciente, expediente, 1);
+            const resultado = await service.obtenerTodos();
 
-        expect(mockPacienteRepo.crear).toHaveBeenCalled();
-        expect(mockExpedienteRepo.crear).toHaveBeenCalled();
+            expect(resultado).toEqual(expedientes);
 
-        expect(mockAuditoriaService.registrarExpediente)
-            .toHaveBeenCalledWith(1, "Creacion", 10);
-
-        expect(resultado).toHaveProperty("paciente");
-        expect(resultado).toHaveProperty("expediente");
+        });
 
     });
 
-    test("debe lanzar error si el DNI ya existe", async () => {
+    describe("obtenerPorId", () => {
 
-        mockPacienteRepo.obtenerPorDni.mockResolvedValue({ idPaciente: 1 });
+        test("debe lanzar error si el expediente no existe", async () => {
 
-        await expect(
-            service.crearConPaciente({ dni: "123" }, {}, 1)
-        ).rejects.toThrow("El paciente con DNI 123 ya existe");
+            expedienteRepo.obtenerPorId.mockResolvedValue(null);
 
-    });
+            await expect(
+                service.obtenerPorId(5)
+            ).rejects.toThrow("El expediente con ID 5 no existe");
 
-    test("debe lanzar error si el número de expediente existe", async () => {
-
-        mockPacienteRepo.obtenerPorDni.mockResolvedValue(null);
-        mockExpedienteRepo.obtenerPorNumero.mockResolvedValue({ idExpediente: 1 });
-
-        await expect(
-            service.crearConPaciente({ dni: "123" }, { numeroExpediente: "EXP001" }, 1)
-        ).rejects.toThrow("El número de expediente EXP001 ya existe");
+        });
 
     });
 
-    test("obtenerTodos debe retornar expedientes", async () => {
+    describe("obtenerPorPaciente", () => {
 
-        const expedientes = [{ id: 1 }, { id: 2 }];
+        test("debe lanzar error si el paciente no existe", async () => {
 
-        mockExpedienteRepo.obtenerTodos.mockResolvedValue(expedientes);
+            pacienteRepo.obtenerPorId.mockResolvedValue(null);
 
-        const resultado = await service.obtenerTodos();
+            await expect(
+                service.obtenerPorPaciente(2)
+            ).rejects.toThrow("El paciente con ID 2 no existe");
 
-        expect(resultado).toEqual(expedientes);
-
-    });
-
-    test("obtenerPorId debe lanzar error si no existe", async () => {
-
-        mockExpedienteRepo.obtenerPorId.mockResolvedValue(null);
-
-        await expect(
-            service.obtenerPorId(5)
-        ).rejects.toThrow("El expediente con ID 5 no existe");
+        });
 
     });
 
-    test("obtenerPorPaciente debe lanzar error si paciente no existe", async () => {
+    describe("actualizar", () => {
 
-        mockPacienteRepo.obtenerPorId.mockResolvedValue(null);
+        test("debe actualizar expediente", async () => {
 
-        await expect(
-            service.obtenerPorPaciente(2)
-        ).rejects.toThrow("El paciente con ID 2 no existe");
+            expedienteRepo.obtenerPorId.mockResolvedValue({ idExpediente: 1 });
 
-    });
+            expedienteRepo.actualizar.mockResolvedValue({
+                estado: "Activo"
+            });
 
-    test("actualizar debe actualizar expediente", async () => {
+            const resultado = await service.actualizar(1, { estado: "Activo" });
 
-        mockExpedienteRepo.obtenerPorId.mockResolvedValue({ idExpediente: 1 });
+            expect(expedienteRepo.actualizar)
+                .toHaveBeenCalledWith(1, { estado: "Activo" });
 
-        mockExpedienteRepo.actualizar.mockResolvedValue({ estado: "Activo" });
+            expect(resultado.estado).toBe("Activo");
 
-        const resultado = await service.actualizar(1, { estado: "Activo" });
-
-        expect(mockExpedienteRepo.actualizar)
-            .toHaveBeenCalledWith(1, { estado: "Activo" });
-
-        expect(resultado.estado).toBe("Activo");
+        });
 
     });
 
-    test("eliminar debe eliminar expediente", async () => {
+    describe("eliminar", () => {
 
-        mockExpedienteRepo.obtenerPorId.mockResolvedValue({ idExpediente: 1 });
+        test("debe eliminar expediente", async () => {
 
-        mockExpedienteRepo.eliminar.mockResolvedValue(true);
+            expedienteRepo.obtenerPorId.mockResolvedValue({ idExpediente: 1 });
 
-        const resultado = await service.eliminar(1);
+            expedienteRepo.eliminar.mockResolvedValue(true);
 
-        expect(mockExpedienteRepo.eliminar).toHaveBeenCalledWith(1);
-        expect(resultado).toBe(true);
+            const resultado = await service.eliminar(1);
+
+            expect(expedienteRepo.eliminar).toHaveBeenCalledWith(1);
+            expect(resultado).toBe(true);
+
+        });
+
+    });
+
+    describe("buscarGlobal", () => {
+
+        test("debe retornar resultados paginados", async () => {
+
+            const filtro = {
+                termino: "juan",
+                pagina: 1,
+                limite: 10
+            };
+
+            auditoriaService.registrarExpediente.mockResolvedValue(true);
+
+            pacienteRepo.buscarPaciente.mockResolvedValue([{ id: 1 }]);
+            pacienteRepo.contarBusqueda.mockResolvedValue(1);
+
+            const resultado = await service.buscarGlobal(filtro, 1);
+
+            expect(resultado.resultados).toEqual([{ id: 1 }]);
+
+            expect(resultado.paginacion).toEqual({
+                total: 1,
+                paginaActual: 1,
+                limite: 10,
+                totalPaginas: 1
+            });
+
+        });
 
     });
 

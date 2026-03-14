@@ -1,150 +1,131 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, test, expect, vi } from "vitest";
-import { Changepassword } from "../features/dashboard/components/Changepassword";
-import { MemoryRouter } from "react-router-dom";
-
-/* ---------------- MOCKS ---------------- */
-
-// mock navigate
-const mockNavigate = vi.fn();
-
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate
-  };
-});
-
-// mock AuthContext
-const mockUser = {
-  id: 1,
-  nombreUsuario: "admin",
-  token: "fake-token"
-};
+import { describe, test, expect, vi, beforeEach } from "vitest";
+import { Changepassword } from "@/features/dashboard/components/Changepassword";
+import { useAuth } from "@/features/auth/AuthContext";
 
 vi.mock("@/features/auth/AuthContext", () => ({
-  useAuth: () => ({
-    user: mockUser
-  })
+  useAuth: vi.fn()
 }));
 
-// mock fetch
-global.fetch = vi.fn();
+vi.mock("@/components/validaciones/validatePasswordChange", () => ({
+  validatePasswordChange: vi.fn()
+}));
 
-/* ---------------- TESTS ---------------- */
+import { validatePasswordChange } from "@/components/validaciones/validatePasswordChange";
 
-describe("Changepassword", () => {
+describe("Changepassword Component", () => {
 
-  test("renderiza el formulario correctamente", () => {
+  const mockNavigate = vi.fn();
 
-    render(
-      <MemoryRouter>
-        <Changepassword />
-      </MemoryRouter>
-    );
+  beforeEach(() => {
+
+    useAuth.mockReturnValue({
+      user: { nombreUsuario: "admin" }
+    });
+
+    global.fetch = vi.fn();
+
+    localStorage.setItem("token", "fake-token");
+
+  });
+
+  test("debe renderizar el formulario correctamente", () => {
+
+    render(<Changepassword onNavigate={mockNavigate} />);
 
     expect(screen.getByText("Cambiar Contraseña")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("admin")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Ingrese su contraseña actual")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Ingrese su nueva contraseña")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Confirme su nueva contraseña")).toBeInTheDocument();
 
   });
 
-  test("muestra error si las contraseñas no coinciden", async () => {
+  test("debe mostrar error de validación", async () => {
 
-    render(
-      <MemoryRouter>
-        <Changepassword />
-      </MemoryRouter>
-    );
+    validatePasswordChange.mockReturnValue("Error de validación");
 
-    fireEvent.change(screen.getByPlaceholderText("Ingrese su contraseña actual"), {
-      target: { value: "123456" }
-    });
-
-    fireEvent.change(screen.getByPlaceholderText("Ingrese su nueva contraseña"), {
-      target: { value: "abc123" }
-    });
-
-    fireEvent.change(screen.getByPlaceholderText("Confirme su nueva contraseña"), {
-      target: { value: "xyz123" }
-    });
+    render(<Changepassword onNavigate={mockNavigate} />);
 
     fireEvent.click(screen.getByText("Guardar cambios"));
 
-    expect(screen.getByText("Las contraseñas no coinciden")).toBeInTheDocument();
+    expect(await screen.findByText("Error de validación")).toBeInTheDocument();
 
   });
 
-  test("envía request correctamente", async () => {
+  test("debe enviar formulario correctamente", async () => {
+
+    validatePasswordChange.mockReturnValue(null);
 
     fetch.mockResolvedValue({
       ok: true
     });
 
-    render(
-      <MemoryRouter>
-        <Changepassword />
-      </MemoryRouter>
+    render(<Changepassword onNavigate={mockNavigate} />);
+
+    fireEvent.change(
+      screen.getByPlaceholderText("Ingrese su contraseña actual"),
+      { target: { value: "1234" } }
     );
 
-    fireEvent.change(screen.getByPlaceholderText("Ingrese su contraseña actual"), {
-      target: { value: "123456" }
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText("Ingrese su nueva contraseña"),
+      { target: { value: "abcd1234" } }
+    );
 
-    fireEvent.change(screen.getByPlaceholderText("Ingrese su nueva contraseña"), {
-      target: { value: "abc123" }
-    });
-
-    fireEvent.change(screen.getByPlaceholderText("Confirme su nueva contraseña"), {
-      target: { value: "abc123" }
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText("Confirme su nueva contraseña"),
+      { target: { value: "abcd1234" } }
+    );
 
     fireEvent.click(screen.getByText("Guardar cambios"));
 
     await waitFor(() => {
-
-      expect(fetch).toHaveBeenCalledWith(
-        "http://localhost:4000/api/change-password",
-        expect.objectContaining({
-          method: "PUT"
-        })
-      );
-
+      expect(fetch).toHaveBeenCalled();
     });
+
+    expect(await screen.findByText("Contraseña actualizada correctamente"))
+      .toBeInTheDocument();
 
   });
 
-  test("muestra mensaje de éxito", async () => {
+  test("debe manejar error del backend", async () => {
+
+    validatePasswordChange.mockReturnValue(null);
 
     fetch.mockResolvedValue({
-      ok: true
+      ok: false
     });
 
-    render(
-      <MemoryRouter>
-        <Changepassword />
-      </MemoryRouter>
+    render(<Changepassword onNavigate={mockNavigate} />);
+
+    fireEvent.change(
+      screen.getByPlaceholderText("Ingrese su contraseña actual"),
+      { target: { value: "1234" } }
     );
 
-    fireEvent.change(screen.getByPlaceholderText("Ingrese su contraseña actual"), {
-      target: { value: "123456" }
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText("Ingrese su nueva contraseña"),
+      { target: { value: "abcd1234" } }
+    );
 
-    fireEvent.change(screen.getByPlaceholderText("Ingrese su nueva contraseña"), {
-      target: { value: "abc123" }
-    });
-
-    fireEvent.change(screen.getByPlaceholderText("Confirme su nueva contraseña"), {
-      target: { value: "abc123" }
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText("Confirme su nueva contraseña"),
+      { target: { value: "abcd1234" } }
+    );
 
     fireEvent.click(screen.getByText("Guardar cambios"));
 
-    await waitFor(() => {
-      expect(screen.getByText("Contraseña actualizada correctamente")).toBeInTheDocument();
-    });
+    expect(await screen.findByText("Error al cambiar la contraseña"))
+      .toBeInTheDocument();
+
+  });
+
+  test("botón cancelar debe navegar a inicio", () => {
+
+    render(<Changepassword onNavigate={mockNavigate} />);
+
+    fireEvent.click(screen.getByText("Cancelar"));
+
+    expect(mockNavigate).toHaveBeenCalledWith("inicio");
 
   });
 

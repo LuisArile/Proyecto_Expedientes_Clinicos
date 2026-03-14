@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/Label";
-import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { validarLogin } from "@/components/validaciones/validarLogin";
 import { useNavigate } from "react-router-dom";
 import { User, Lock, Eye, Activity, EyeOff } from "lucide-react";

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui/input";
 import { Lock, User, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { validatePasswordChange } from "@/components/validaciones/validatePasswordChange";

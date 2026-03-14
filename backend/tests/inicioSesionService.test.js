@@ -8,129 +8,155 @@ jest.mock("jsonwebtoken");
 describe("InicioSesionService", () => {
 
     let service;
-    let mockUsuarioRepository;
-    let mockAuditoriaService;
+    let usuarioRepository;
+    let auditoriaService;
 
     beforeEach(() => {
 
-        mockUsuarioRepository = {
+        usuarioRepository = {
             filtrarNombreUsuario: jest.fn(),
             registrarAccionUsuario: jest.fn()
         };
 
-        mockAuditoriaService = {
+        auditoriaService = {
             registrar: jest.fn()
         };
 
         service = new InicioSesionService(
-            mockUsuarioRepository,
-            mockAuditoriaService
+            usuarioRepository,
+            auditoriaService
         );
-
     });
 
-    test("debe lanzar error si faltan credenciales", async () => {
+    describe("inicioSesion", () => {
 
-        await expect(
-            service.inicioSesion(null, null)
-        ).rejects.toThrow("Credenciales incorrectas");
+        test("debe iniciar sesión correctamente", async () => {
 
-    });
+            const usuarioMock = {
+                id: 1,
+                nombre: "Admin",
+                apellido: "Perez",
+                correo: "admin@test.com",
+                nombreUsuario: "admin",
+                clave: "hash",
+                idRol: 1,
+                rolNombre: "ADMIN"
+            };
 
-    test("debe lanzar error si el usuario no existe", async () => {
+            usuarioRepository.filtrarNombreUsuario
+                .mockResolvedValue(usuarioMock);
 
-        mockUsuarioRepository.filtrarNombreUsuario.mockResolvedValue(null);
+            bcrypt.compare.mockResolvedValue(true);
 
-        await expect(
-            service.inicioSesion("admin", "123")
-        ).rejects.toThrow("Credenciales incorrectas");
+            jwt.sign.mockReturnValue("fake-token");
 
-    });
+            const resultado = await service.inicioSesion("admin", "1234");
 
-    test("debe lanzar error si la contraseña es incorrecta", async () => {
+            expect(usuarioRepository.filtrarNombreUsuario)
+                .toHaveBeenCalledWith("admin");
 
-        const usuarioMock = { id: 1, clave: "hash" };
+            expect(bcrypt.compare)
+                .toHaveBeenCalledWith("1234", "hash");
 
-        mockUsuarioRepository.filtrarNombreUsuario.mockResolvedValue(usuarioMock);
-        bcrypt.compare.mockResolvedValue(false);
+            expect(jwt.sign).toHaveBeenCalled();
 
-        await expect(
-            service.inicioSesion("admin", "123")
-        ).rejects.toThrow("Credenciales incorrectas");
+            expect(resultado).toEqual({
+                id: 1,
+                nombre: "Admin",
+                nombreUsuario: "admin",
+                apellido: "Perez",
+                correo: "admin@test.com",
+                idRol: 1,
+                rol: "ADMIN",
+                token: "fake-token"
+            });
 
-    });
+        });
 
-    test("debe iniciar sesión correctamente", async () => {
+        test("debe lanzar error si faltan credenciales", async () => {
 
-        const usuarioMock = {
-            id: 1,
-            nombre: "Admin",
-            nombreUsuario: "admin",
-            apellido: "Perez",
-            correo: "admin@test.com",
-            rol: "ADMIN",
-            clave: "hash"
-        };
+            await expect(
+                service.inicioSesion("", "")
+            ).rejects.toThrow("Credenciales incorrectas");
 
-        mockUsuarioRepository.filtrarNombreUsuario.mockResolvedValue(usuarioMock);
-        bcrypt.compare.mockResolvedValue(true);
-        jwt.sign.mockReturnValue("fake-token");
+        });
 
-        const resultado = await service.inicioSesion("admin", "123");
+        test("debe lanzar error si el usuario no existe", async () => {
 
-        expect(jwt.sign).toHaveBeenCalled();
+            usuarioRepository.filtrarNombreUsuario.mockResolvedValue(null);
 
-        expect(resultado).toEqual({
-            id: 1,
-            nombre: "Admin",
-            nombreUsuario: "admin",
-            apellido: "Perez",
-            correo: "admin@test.com",
-            rol: "ADMIN",
-            token: "fake-token"
+            await expect(
+                service.inicioSesion("admin", "1234")
+            ).rejects.toThrow("Credenciales incorrectas");
+
+        });
+
+        test("debe lanzar error si la contraseña es incorrecta", async () => {
+
+            const usuarioMock = {
+                id: 1,
+                clave: "hash"
+            };
+
+            usuarioRepository.filtrarNombreUsuario
+                .mockResolvedValue(usuarioMock);
+
+            bcrypt.compare.mockResolvedValue(false);
+
+            await expect(
+                service.inicioSesion("admin", "1234")
+            ).rejects.toThrow("Credenciales incorrectas");
+
         });
 
     });
 
-    test("cierreSesion debe registrar logout", async () => {
+    describe("cierreSesion", () => {
 
-        mockUsuarioRepository.registrarAccionUsuario.mockResolvedValue(true);
+        test("debe registrar el cierre de sesión correctamente", async () => {
 
-        const resultado = await service.cierreSesion(1);
+            usuarioRepository.registrarAccionUsuario
+                .mockResolvedValue(true);
 
-        expect(mockUsuarioRepository.registrarAccionUsuario).toHaveBeenCalled();
+            const resultado = await service.cierreSesion(1);
 
-        expect(resultado).toEqual({
-            message: "Sesión cerrada exitosamente"
+            expect(usuarioRepository.registrarAccionUsuario)
+                .toHaveBeenCalledWith(1, "CIERRE_SESION");
+
+            expect(resultado).toEqual({
+                message: "Sesión cerrada exitosamente"
+            });
+
+        });
+
+        test("debe lanzar error si el usuario no está autenticado", async () => {
+
+            await expect(
+                service.cierreSesion(null)
+            ).rejects.toThrow("Usuario no autenticado");
+
         });
 
     });
 
-    test("cierreSesion debe lanzar error si no hay usuarioId", async () => {
+    describe("registrarAuditoria", () => {
 
-        await expect(
-            service.cierreSesion(null)
-        ).rejects.toThrow("Usuario no autenticado");
+        test("debe registrar auditoría correctamente", async () => {
 
-    });
+            auditoriaService.registrar.mockResolvedValue(true);
 
-    test("registrarAuditoria debe llamar al auditoriaService", async () => {
+            const resultado = await service.registrarAuditoria(
+                1,
+                "LOGIN",
+                { ip: "127.0.0.1" }
+            );
 
-        mockAuditoriaService.registrar.mockResolvedValue(true);
+            expect(auditoriaService.registrar)
+                .toHaveBeenCalledWith(1, "LOGIN", { ip: "127.0.0.1" });
 
-        const resultado = await service.registrarAuditoria(
-            1,
-            "INICIO_SESION",
-            "login correcto"
-        );
+            expect(resultado).toBe(true);
 
-        expect(mockAuditoriaService.registrar).toHaveBeenCalledWith(
-            1,
-            "INICIO_SESION",
-            "login correcto"
-        );
-
-        expect(resultado).toBe(true);
+        });
 
     });
 

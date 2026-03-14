@@ -1,14 +1,42 @@
 services:
+
   database:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sql-clinica
     env_file:
-      - .env.docker
+      - .env
     ports:
       - "1433:1433"
     volumes:
       - sql_data_clinica:/var/opt/mssql
     restart: always
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "/opt/mssql-tools18/bin/sqlcmd -S database -U sa -P $$SA_PASSWORD -C -Q 'SELECT 1' || exit 1"
+      ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: backend-clinica
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      database:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    container_name: frontend-clinica
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
 
 volumes:
   sql_data_clinica:

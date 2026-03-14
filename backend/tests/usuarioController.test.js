@@ -1,112 +1,151 @@
-const usuarioController = require("../src/controllers/usuarioController");
+const UsuarioController = require('../src/controllers/usuarioController');
 
-describe("usuarioController", () => {
+describe('Pruebas unitarias usuarioController', () => {
 
-    let controller;
-    let mockUsuarioService;
+    let usuarioServiceMock;
+    let usuarioController;
     let req;
     let res;
 
     beforeEach(() => {
 
-        mockUsuarioService = {
+        usuarioServiceMock = {
             crear: jest.fn(),
-            obtenerTodos: jest.fn()
+            obtenerTodos: jest.fn(),
+            cambiarPassword: jest.fn()
         };
 
-        controller = new usuarioController(mockUsuarioService);
+        usuarioController = new UsuarioController(usuarioServiceMock);
 
         req = {
-            body: {}
+            body: {},
+            user: { id: 1 }
         };
 
         res = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn()
         };
-
     });
 
-    test("debe crear un usuario correctamente", async () => {
+    test('Debe crear un usuario correctamente', async () => {
 
-        const usuarioMock = {
-            id: 1,
-            nombreUsuario: "admin",
-            rol: "ADMIN"
-        };
+        const usuarioMock = { id: 1, nombre: "Juan" };
 
-        req.body = usuarioMock;
+        req.body = { nombreUsuario: "juan", clave: "1234" };
 
-        mockUsuarioService.crear.mockResolvedValue(usuarioMock);
+        usuarioServiceMock.crear.mockResolvedValue(usuarioMock);
 
-        await controller.crear(req, res);
+        await usuarioController.crear(req, res);
 
-        expect(mockUsuarioService.crear)
-            .toHaveBeenCalledWith(usuarioMock);
-
+        expect(usuarioServiceMock.crear).toHaveBeenCalledWith(req.body);
         expect(res.status).toHaveBeenCalledWith(201);
-
         expect(res.json).toHaveBeenCalledWith({
             success: true,
             data: usuarioMock
         });
-
     });
 
-    test("debe retornar error si falla la creación", async () => {
+    test('Debe retornar error si falla la creación', async () => {
 
-        req.body = { nombreUsuario: "admin" };
+        req.body = { nombreUsuario: "juan" };
 
-        mockUsuarioService.crear
-            .mockRejectedValue(new Error("Error al crear usuario"));
+        usuarioServiceMock.crear.mockRejectedValue(new Error("Error al crear"));
 
-        await controller.crear(req, res);
+        await usuarioController.crear(req, res);
 
         expect(res.status).toHaveBeenCalledWith(400);
-
         expect(res.json).toHaveBeenCalledWith({
             success: false,
-            error: "Error al crear usuario"
+            error: "Error al crear"
         });
-
     });
 
-    test("debe obtener todos los usuarios", async () => {
+    test('Debe obtener todos los usuarios', async () => {
 
-        const usuariosMock = [
-            { id: 1, nombreUsuario: "admin" },
-            { id: 2, nombreUsuario: "doctor" }
-        ];
+        const usuariosMock = [{ id: 1 }, { id: 2 }];
 
-        mockUsuarioService.obtenerTodos
-            .mockResolvedValue(usuariosMock);
+        usuarioServiceMock.obtenerTodos.mockResolvedValue(usuariosMock);
 
-        await controller.obtenerTodos(req, res);
+        await usuarioController.obtenerTodos(req, res);
 
-        expect(mockUsuarioService.obtenerTodos)
-            .toHaveBeenCalled();
-
+        expect(usuarioServiceMock.obtenerTodos).toHaveBeenCalled();
         expect(res.json).toHaveBeenCalledWith({
             success: true,
             data: usuariosMock
         });
-
     });
 
-    test("debe manejar error al obtener usuarios", async () => {
+    test('Debe retornar error si falla obtener usuarios', async () => {
 
-        mockUsuarioService.obtenerTodos
-            .mockRejectedValue(new Error("Error al obtener usuarios"));
+        usuarioServiceMock.obtenerTodos.mockRejectedValue(new Error("Error BD"));
 
-        await controller.obtenerTodos(req, res);
+        await usuarioController.obtenerTodos(req, res);
 
         expect(res.status).toHaveBeenCalledWith(400);
-
         expect(res.json).toHaveBeenCalledWith({
             success: false,
-            error: "Error al obtener usuarios"
+            error: "Error BD"
         });
+    });
 
+    test('Debe cambiar la contraseña correctamente', async () => {
+
+        req.body = {
+            currentPassword: "1234",
+            newPassword: "5678"
+        };
+
+        const resultadoMock = { mensaje: "Contraseña actualizada correctamente" };
+
+        usuarioServiceMock.cambiarPassword.mockResolvedValue(resultadoMock);
+
+        await usuarioController.cambiarPassword(req, res);
+
+        expect(usuarioServiceMock.cambiarPassword).toHaveBeenCalledWith(
+            1,
+            "1234",
+            "5678"
+        );
+
+        expect(res.json).toHaveBeenCalledWith({
+            success: true,
+            data: resultadoMock
+        });
+    });
+
+    test('Debe validar campos obligatorios al cambiar contraseña', async () => {
+
+        req.body = {
+            currentPassword: "",
+            newPassword: ""
+        };
+
+        await usuarioController.cambiarPassword(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({
+            success: false,
+            error: "Todos los campos son obligatorios"
+        });
+    });
+
+    test('Debe manejar errores al cambiar contraseña', async () => {
+
+        req.body = {
+            currentPassword: "1234",
+            newPassword: "5678"
+        };
+
+        usuarioServiceMock.cambiarPassword.mockRejectedValue(new Error("Error contraseña"));
+
+        await usuarioController.cambiarPassword(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({
+            success: false,
+            error: "Error contraseña"
+        });
     });
 
 });
