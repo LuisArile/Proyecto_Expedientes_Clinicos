@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, test, expect, vi } from "vitest";
+import { describe, test, expect, vi, beforeEach } from "vitest";
 import { Sidebar } from "../components/layout/sidebar";
 import { MemoryRouter } from "react-router-dom";
 
@@ -8,7 +8,8 @@ import { MemoryRouter } from "react-router-dom";
 const mockLogout = vi.fn();
 const mockNavigate = vi.fn();
 
-vi.mock("@/features/auth/authContext", () => ({
+/* MOCK DEL CONTEXTO DE AUTENTICACIÓN */
+vi.mock("@/features/auth/AuthContext", () => ({
   useAuth: () => ({
     user: {
       nombre: "Carlos",
@@ -55,6 +56,10 @@ vi.mock("@/components/ui/badge", () => ({
 /* ---------- TESTS ---------- */
 
 describe("Sidebar", () => {
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   test("renderiza información del usuario", () => {
 
