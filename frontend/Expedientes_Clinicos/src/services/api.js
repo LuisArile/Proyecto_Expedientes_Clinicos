@@ -1,7 +1,7 @@
 const API_BASE_URL = "http://localhost:3000/api";
 
 const getHeaders = () => {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   return {
     "Content-Type": "application/json",
     ...(token && { Authorization: `Bearer ${token}` }),
@@ -92,4 +92,19 @@ export const permisoAPI = {
  */
 export const estadisticasAPI = {
   obtenerResumen: () => apiCall("/estadisticas/resumen", { method: "GET" }),
+};
+
+/**
+ * Métodos para consumir endpoints de registro preclínico
+ */
+export const registroPreclinicoAPI = {
+  registrar: (expedienteId, datos) =>
+    apiCall(`/registroPreclinico/expediente/${expedienteId}`, {
+      method: "POST",
+      body: JSON.stringify(datos),
+    }),
+  obtenerPorExpediente: (expedienteId) => apiCall(`/registroPreclinico/expediente/${expedienteId}`, { method: "GET" }),
+  obtenerUltimo: (expedienteId) => apiCall(`/registroPreclinico/expediente/${expedienteId}/ultimo`, { method: "GET" }),
+  obtenerTodos: () => apiCall("/registroPreclinico/todos", { method: "GET" }),
+  obtenerConteo: () => apiCall("/registroPreclinico/conteo", { method: "GET" }),
 };
