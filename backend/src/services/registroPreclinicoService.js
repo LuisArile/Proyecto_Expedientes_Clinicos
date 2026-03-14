@@ -44,6 +44,22 @@ class registroPreclinicoService {
             throw new Error(`Error al obtener último registro: ${error.message}`);
         }
     }
+
+    async obtenerTodos() {
+        try {
+            return await this.repository.obtenerTodos();
+        } catch (error) {
+            throw new Error(`Error al obtener todos los registros: ${error.message}`);
+        }
+    }
+
+    async contarTodos() {
+        try {
+            return await this.repository.contarTodos();
+        } catch (error) {
+            throw new Error(`Error al contar registros: ${error.message}`);
+        }
+    }
 }
 
 module.exports = registroPreclinicoService;

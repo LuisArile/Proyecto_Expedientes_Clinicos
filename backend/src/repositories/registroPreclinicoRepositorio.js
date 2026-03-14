@@ -7,6 +7,7 @@ const prisma = require('../config/prisma');
  * @property {string} [presionArterial]
  * @property {number} [temperatura]
  * @property {number} [peso]
+ * @property {number} [talla]
  * @property {number} [frecuenciaCardiaca]
  * @property {string} [observaciones]
  */
@@ -29,6 +30,7 @@ class registroPreclinicoRepository {
                     presionArterial: data.presionArterial || null,
                     temperatura: data.temperatura ? parseFloat(data.temperatura) : null,
                     peso: data.peso ? parseFloat(data.peso) : null,
+                    talla: data.talla ? parseInt(data.talla) : null,
                     frecuenciaCardiaca: data.frecuenciaCardiaca ? parseInt(data.frecuenciaCardiaca) : null,
                     observaciones: data.observaciones || null,
                     fechaRegistro: new Date()
@@ -118,6 +120,47 @@ class registroPreclinicoRepository {
             return data;
         } catch (error) {
             throw new Error(`Error al obtener último registro: ${error.message}`);
+        }
+    }
+
+    /**
+     * Obtiene todos los registros preclínicos.
+     * @returns {Promise<Array<Object>>} Lista de registros.
+     */
+    async obtenerTodos() {
+        try {
+            const resultados = await prisma.registroPreclinico.findMany({
+                orderBy: { fechaRegistro: 'desc' },
+                include: {
+                    expediente: {
+                        include: {
+                            paciente: true
+                        }
+                    },
+                    enfermero: {
+                        select: {
+                            id: true,
+                            nombre: true,
+                            apellido: true
+                        }
+                    }
+                }
+            });
+            return resultados;
+        } catch (error) {
+            throw new Error(`Error al obtener todos los registros: ${error.message}`);
+        }
+    }
+
+    /**
+     * Cuenta el total de registros preclínicos.
+     * @returns {Promise<number>} Total de registros.
+     */
+    async contarTodos() {
+        try {
+            return await prisma.registroPreclinico.count();
+        } catch (error) {
+            throw new Error(`Error al contar registros: ${error.message}`);
         }
     }
 }
