@@ -81,14 +81,54 @@ class EstadisticasService {
     }
     
     async obtenerMedicoData(usuarioSesion) {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        const manana = new Date(hoy);
+        manana.setDate(manana.getDate() + 1);
+
+        const esAdmin = usuarioSesion.rol === 'ADMINISTRADOR' || usuarioSesion.idRol === 1;
+        const filtroMedico = esAdmin ? {} : { medicoId: usuarioSesion.id };
+
+        const [consultasHoy, recetasHoy, actividadReciente] = await Promise.all([
+            this.prisma.consultaMedica.count({
+                where: {
+                    ...filtroMedico,
+                    fechaConsulta: { gte: hoy, lt: manana }
+                }
+            }),
+            this.prisma.recetaMedica.count({
+                where: {
+                    consulta: {
+                        ...filtroMedico,
+                        fechaConsulta: { gte: hoy, lt: manana }
+                    }
+                }
+            }),
+            this.prisma.consultaMedica.findMany({
+                where: filtroMedico,
+                take: 6,
+                orderBy: { fechaConsulta: 'desc' },
+                include: {
+                    expediente: {
+                        include: { paciente: true }
+                    }
+                }
+            })
+        ]);
+
         return {
             tarjetas: [
-                { id: 'consultasRealizadas',    valor: 0, pie: "Hoy" },
-                { id: 'consultasPendientes',    valor: 0, pie: "Programadas" },
-                { id: 'examenesOrdenados',      valor: 0, pie: "Hoy" },
-                { id: 'recetasCreadas',         valor: 0, pie: "Hoy" }
+                { id: 'consultasRealizadas', valor: consultasHoy, pie: "Atenciones hoy" },
+                { id: 'consultasPendientes', valor: 0, pie: "En sala de espera" /* Próximamente*/},
+                { id: 'examenesOrdenados', valor: 0, pie: "Hoy" },
+                { id: 'recetasCreadas', valor: 0, pie: "Hoy" }
             ],
-            actividad: []
+            actividad: actividadReciente.map(con => ({
+                id: con.id,
+                primaryText: `${con.expediente?.paciente?.nombre} ${con.expediente?.paciente?.apellido}`,
+                secondaryText: `Consulta: ${con.tipoConsulta || 'General'} - Dx: ${con.diagnostico.substring(0, 40)}${con.diagnostico.length > 40 ? '...' : ''}`,
+                fecha: con.fechaConsulta
+            }))
         };
     }
     
@@ -122,7 +162,6 @@ class EstadisticasService {
             }
         });
 
-    async obtenerEnfermeroData(usuarioSesion) {
         return {
             tarjetas: [
                 { id: 'pacientesEvaluados', valor: totalEvaluados, pie: `${evaluadosHoy} hoy` },
@@ -137,5 +176,4 @@ class EstadisticasService {
         };
     }
 }
-
 module.exports = EstadisticasService;
