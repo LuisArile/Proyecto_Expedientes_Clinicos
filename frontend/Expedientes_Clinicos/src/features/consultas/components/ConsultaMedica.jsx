@@ -16,6 +16,8 @@ import { FormSection } from "@/components/common/FormSection";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+import { StatusModal } from "@/components/common/StatusModal";
+
 export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
   const { user } = useAuth();
   
@@ -27,8 +29,8 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
   const { fields, append, remove } = useFieldArray({ control, name: "medicamentos" });
     
   const tipoDiag = watch("tipoDiagnostico")
-  
-  const { guardarConsulta, guardando } = useConsultaMedica(paciente?.id || paciente?.dni, methods, onSuccess);
+
+  const { guardarConsulta, guardando, modal, setModal } = useConsultaMedica( paciente?.id || paciente?.dni, methods, onSuccess );
 
   const alEnviar = async (data) => {
     const idExpediente = paciente?.expedientes?.idExpediente || paciente?.idExpediente;
@@ -157,7 +159,8 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-100">
                 <Button 
-                  type="submit" disabled={guardando} 
+                  type="submit" 
+                  disabled={guardando} 
                   className="flex-1 bg-purple-600 hover:bg-purple-700 h-12 text-lg shadow-lg transition-transform active:scale-95"
                 >
                   {guardando ? <Loader2 className="animate-spin" /> : <Save className="mr-2" />} 
@@ -170,6 +173,19 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
             </div>
           </Card>
         </form>
+
+        {modal && (
+          <StatusModal
+            isOpen={modal.open}
+            result={modal.result}
+            onClose={() => {
+              setModal({ ...modal, open: false });
+              if (modal.result.success) {
+                onSuccess?.();
+              }
+            }}
+          />
+        )}
       </main>
     </div>
   );
