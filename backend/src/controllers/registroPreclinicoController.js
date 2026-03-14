@@ -24,6 +24,11 @@ class registroPreclinicoController {
         }
 
 
+        if (!datos || Object.keys(datos).length === 0) {
+            throw new ErrorValidacion('Debe proporcionar al menos un signo vital');
+        }
+
+        
         const resultado = await this.registroPreclinicoService.registrar(
             expedienteId,
             enfermeroId,

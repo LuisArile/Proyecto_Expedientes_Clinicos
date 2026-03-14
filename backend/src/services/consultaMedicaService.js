@@ -8,13 +8,24 @@ class consultaMedicaService {
         this.auditoriaService = auditoriaService;
     }
 
-    // Validaciones en diagnostico
+    // Validaciones 
     validarDiagnostico(diagnostico) {
         const errores = [];
-        if (!diagnostico) errores.push('El diagnóstico es requerido');
-        if (!diagnostico.id) errores.push('El ID del diagnóstico es requerido');
-        if (!diagnostico.descripcion) errores.push('La descripción es requerida');
-        if (!diagnostico.tipo) errores.push('El tipo (PRESUNTIVO/DEFINITIVO) es requerido');
+        if (!diagnostico) {
+            errores.push('El diagnóstico es obligatorio');
+            return errores;
+        }
+        
+        if (!diagnostico.id) {
+            errores.push('El ID del diagnóstico es requerido');
+        }
+        if (!diagnostico.descripcion) {
+            errores.push('La descripción es requerida');
+        }
+        if (!diagnostico.tipo) {
+            errores.push('El tipo (PRESUNTIVO/DEFINITIVO) es requerido');
+        }
+        
         return errores;
     }
 

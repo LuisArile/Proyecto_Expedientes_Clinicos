@@ -4,22 +4,26 @@ class auditoriaRepository{
     }
 
 //crear datos en tabla auditoria
-    async crear(data){
+async crear(data) {
         try {
+
+            const detallesString = data.detalles && typeof data.detalles === 'object' 
+                ? JSON.stringify(data.detalles) 
+                : data.detalles;
+
             return await this.prisma.auditoria.create({
                 data: {
                     usuarioId: data.usuarioId,
                     accion: data.accion,
-                    detalles: data.detalles || null
-                }, 
+                    detalles: detallesString,
+                    fecha: new Date()
+                },
                 include: { usuario: true }
             });
-
         } catch (error) {
             throw new Error(`Error al crear registro de auditoría: ${error.message}`);
         }
     }
-
 }
 
 
