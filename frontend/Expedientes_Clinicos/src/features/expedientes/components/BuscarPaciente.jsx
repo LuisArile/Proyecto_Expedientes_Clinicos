@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Search, Eye, FileText, Loader2 } from "lucide-react";
+import { Search, Eye, FileText, Loader2, Activity, Stethoscope } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +9,11 @@ import { PaginationControls } from "@/components/common/PaginationControls";
 import { useBuscarPacientes } from "../hooks/useBuscarPaciente";
 import { SearchFilterCard } from "./SearchFilterCard";
 
-export function BuscarPaciente({ onVolver, onVerExpediente }) {
+import { useAuth } from "../../auth/AuthContext";
+
+export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica }) {
+
+    const { user } = useAuth();
 
     const {
         termino, setTermino,
@@ -22,46 +26,63 @@ export function BuscarPaciente({ onVolver, onVerExpediente }) {
         ejecutarBusqueda
     } = useBuscarPacientes();
 
-    const columns = useMemo( () => [
-        {
-            header: "Código de Expediente",
-            render: (p) => (
-                <span className="font-mono text-sm text-blue-600">
-                    {p.expedientes?.numeroExpediente || p.codigo || "SIN EXP"}
-                </span>
-            ),
-        },
-        {
-            header: "Nombre Completo",
-            render: (p) => (
-                <span className="font-medium text-gray-900">
-                    {`${p.nombre || ""} ${p.apellido || ""}`}
-                </span>
-            ),
-        },
-        {
-            header: "Identidad",
-            render: (p) => (
-                <span className="text-gray-600">
-                    {p.dni || p.identidad || "N/A"}
-                </span>
-            ),
-        },
-        {
-            header: "Acción",
-            className: "text-center",
-            render: (p) => (
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onVerExpediente(p)}
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300"
-                >
-                    <Eye className="size-4 mr-1" /> Ver expediente
-                </Button>
-            ),
-        },
-    ], [onVerExpediente]);
+    const columns = useMemo( () => {
+        const rol = user?.rol?.toUpperCase();
+        const esPersonalAutorizado = rol === "MEDICO" || rol === "ADMIN";
+        return [
+            {
+                header: "Código de Expediente",
+                render: (p) => (
+                    <span className="font-mono text-sm text-blue-600">
+                        {p.expedientes?.numeroExpediente || p.codigo || "SIN EXP"}
+                    </span>
+                ),
+            },
+            {
+                header: "Nombre Completo",
+                render: (p) => (
+                    <span className="font-medium text-gray-900">
+                        {`${p.nombre || ""} ${p.apellido || ""}`}
+                    </span>
+                ),
+            },
+            {
+                header: "Identidad",
+                render: (p) => (
+                    <span className="text-gray-600">
+                        {p.dni || p.identidad || "N/A"}
+                    </span>
+                ),
+            },
+            {
+                header: "Acciones",
+                className: "text-center",
+                render: (p) => (
+                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onVerExpediente(p)}
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300"
+                        >
+                            <Eye className="size-4 mr-1" /> Ver expediente
+                        </Button>
+
+                        {onConsultaMedica && esPersonalAutorizado && (
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => onConsultaMedica(p)}
+                                className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-300"
+                            >
+                                <Stethoscope className="size-4 mr-1" /> Consulta
+                            </Button>
+                        )}
+                    </div>
+                ),
+            },
+        ];
+    }, [onVerExpediente, onConsultaMedica, user]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
