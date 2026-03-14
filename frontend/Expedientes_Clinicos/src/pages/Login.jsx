@@ -29,7 +29,7 @@ export function Login() {
       } else {
         setError(result.error || "Credenciales incorrectas");
       }
-    } catch (err) {
+    } catch {
       setError("Credenciales incorrectas");
     } finally {
       setLoading(false);

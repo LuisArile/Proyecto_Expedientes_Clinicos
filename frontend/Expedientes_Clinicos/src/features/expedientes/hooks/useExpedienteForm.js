@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { crearExpediente, validarIdentidadDuplicada } from "../services/expedienteService";
 
-export function useExpedienteForm(onSuccess) {
+export function useExpedienteForm() {
   const [loading, setLoading] = useState(false);
   const [idDuplicado, setIdDuplicado] = useState(false);
   const [modal, setModal] = useState({ open: false, result: {} });
@@ -16,7 +16,7 @@ export function useExpedienteForm(onSuccess) {
       const existe = await validarIdentidadDuplicada(id);
       setIdDuplicado(existe);
       return existe;
-    } catch (error) {
+    } catch {
       setIdDuplicado(false);
       return false;
     }
@@ -60,7 +60,7 @@ export function useExpedienteForm(onSuccess) {
           result: { success: false, mensaje: response.error || "Error al crear expediente" }
         });
       }
-    } catch (error) {
+    } catch {
       setModal({
         open: true,
         result: { success: false, mensaje: "Error de conexión con el servidor" }

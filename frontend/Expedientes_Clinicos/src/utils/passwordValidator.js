@@ -18,7 +18,7 @@ export function validatePasswordSchema( currentPassword = null, newPassword, con
     const hasUpperCase = /[A-Z]/.test(newPass); // Al menos una mayúscula
     const hasLowerCase = /[a-z]/.test(newPass); // Al menos una minúscula
     const hasNumber = /[0-9]/.test(newPass); // Al menos un número
-    const hasSpecial = /[!@#$%^&*()_\-+=\[\]{};:,.<>?/|\\]/.test(newPass); // Al menos un carácter especial
+    const hasSpecial = /[!@#$%^&*()_\-+=[\]{};:,.<>?/|\\]/.test(newPass); // Al menos un carácter especial
 
     if (!hasUpperCase || !hasLowerCase || !hasNumber) {
         return "Debe incluir mayúscula, minúscula y un número";
