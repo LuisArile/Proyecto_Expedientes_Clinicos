@@ -7,15 +7,17 @@ import { GestionRoles } from "../features/admin/components/GestionRoles";
 import { BuscarPaciente } from "../features/expedientes/components/BuscarPaciente";
 import { Changepassword } from "../features/dashboard/components/Changepassword";
 import { DashboardFeature } from "../features/dashboard/components/DashboardFeature";
+import { FormularioRegistroPreclinico } from "../features/preclinica/components/FormularioRegistroPreclinico";
+import { ListaRegistrosPreclinicos } from "../features/preclinica/components/ListaRegistrosPreclinicos";
 
 export function Dashboard() {
   const { user } = useAuth();
   const [currentView, setCurrentView] = useState(() => {
-    return localStorage.getItem("sgec_view") || "inicio";
+    return sessionStorage.getItem("sgec_view") || "inicio";
   });
 
   useEffect(() => {
-    localStorage.setItem("sgec_view", currentView);
+    sessionStorage.setItem("sgec_view", currentView);
   }, [currentView]);  
   
   // Si no hay usuario todavía, mostramos carga para evitar errores de undefined
@@ -45,8 +47,12 @@ export function Dashboard() {
         return <GestionRoles onVolver={volverInicio} />;
       case "changepassword":
         return <Changepassword onVolver={volverInicio} />;
+      case "preclinica":
+        return <FormularioRegistroPreclinico onVolver={volverInicio} onSuccess={volverInicio} />;
+      case "pacientes-evaluados":
+        return <ListaRegistrosPreclinicos onVolver={volverInicio} />;
       case "inicio":
-        return <DashboardFeature />;
+        return <DashboardFeature onNavigate={handleNavigate} />;
       default:
         return <p className="p-10 text-center">Módulo en construcción...</p>;
     }     
