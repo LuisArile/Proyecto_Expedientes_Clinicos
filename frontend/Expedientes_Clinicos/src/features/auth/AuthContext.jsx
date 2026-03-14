@@ -6,8 +6,8 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
 
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
-    const savedToken = localStorage.getItem("token");
+    const savedUser = sessionStorage.getItem("user");
+    const savedToken = sessionStorage.getItem("token");
     return (savedUser && savedToken) ? JSON.parse(savedUser) : null;
   });
   
@@ -19,8 +19,8 @@ export function AuthProvider({ children }) {
       if (result.success && result.data) {
         const userData = result.data; 
         setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
-        localStorage.setItem("token", result.token);
+        sessionStorage.setItem("user", JSON.stringify(userData));
+        sessionStorage.setItem("token", result.token);
         return { success: true };
       } 
       return { success: false, error: result.error };
@@ -36,8 +36,8 @@ export function AuthProvider({ children }) {
       console.error("Error al registrar cierre de sesión en bitácora:", error);
     } finally {
       setUser(null);
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
+      sessionStorage.removeItem("user");
+      sessionStorage.removeItem("token");
     }
   };
 
