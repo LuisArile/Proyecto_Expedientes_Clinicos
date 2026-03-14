@@ -74,7 +74,7 @@ export const DASHBOARD_CONFIG = {
     statusLabel: "En espera",
 
     cards: {
-      pacientesEvaluados:  { titulo: "Pacientes Evaluados",      icon: "Users",    border: "border-green-100",   textColor: "text-green-600"   },
+      pacientesEvaluados:  { titulo: "Pacientes Evaluados",      icon: "Users",    border: "border-green-100",   textColor: "text-green-600", navigateTo: "pacientes-evaluados" },
       evaluacionesPendientes: { titulo: "Evaluaciones Pendientes",  icon: "Activity", border: "border-orange-100",  textColor: "text-orange-600"  },
     },  
 
