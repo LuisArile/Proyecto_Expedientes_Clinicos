@@ -73,12 +73,46 @@ class EstadisticasService {
     }
     
     async obtenerEnfermeroData() {
+        const totalEvaluados = await this.prisma.registroPreclinico.count();
+
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        const manana = new Date(hoy);
+        manana.setDate(manana.getDate() + 1);
+
+        const evaluadosHoy = await this.prisma.registroPreclinico.count({
+            where: {
+                fechaRegistro: { gte: hoy, lt: manana }
+            }
+        });
+
+        const actividadReciente = await this.prisma.registroPreclinico.findMany({
+            where: {
+                fechaRegistro: { gte: hoy, lt: manana }
+            },
+            orderBy: { fechaRegistro: 'desc' },
+            take: 10,
+            include: {
+                expediente: {
+                    include: { paciente: true }
+                },
+                enfermero: {
+                    select: { nombre: true, apellido: true }
+                }
+            }
+        });
+
         return {
             tarjetas: [
-                { id: 'pacientesEvaluados',     valor: 0, pie: "Próximamente" },
+                { id: 'pacientesEvaluados', valor: totalEvaluados, pie: `${evaluadosHoy} hoy` },
                 { id: 'evaluacionesPendientes', valor: 0, pie: "Próximamente" }
             ],
-            actividad: []
+            actividad: actividadReciente.map(reg => ({
+                id: reg.id,
+                primaryText: `${reg.expediente?.paciente?.nombre} ${reg.expediente?.paciente?.apellido}`,
+                secondaryText: `Signos vitales registrados`,
+                fecha: reg.fechaRegistro
+            }))
         };
     }
 }
