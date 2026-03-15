@@ -52,17 +52,17 @@ class RolService {
         return await this.rolRepository.eliminar(idRol);
     }
 
-    async asignarPermisos(idRol, idsPermisos) {
+    async asignarPermisos(idRol, permisos) {
         const rol = await this.rolRepository.obtenerPorId(idRol);
         if (!rol) {
             throw new Error('Rol no encontrado');
         }
 
-        if (!Array.isArray(idsPermisos)) {
+        if (!Array.isArray(permisos)) {
             throw new Error('Se requiere un array de IDs de permisos');
         }
 
-        return await this.rolRepository.asignarPermisos(idRol, idsPermisos);
+        return await this.rolRepository.asignarPermisos(idRol, permisos);
     }
 
     async obtenerPermisosPorRol(idRol) {
