@@ -24,7 +24,7 @@ export function AuthProvider({ children }) {
         return { success: true };
       } 
       return { success: false, error: result.error };
-    } catch (error) {
+    } catch  {
       return { success: false, error: "No se pudo conectar con el servidor" };
     }
   };
@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
     if (user && user.token) {
       // futura validación de token
     }
-  }, []);
+  }, [user]);
 
   const checkPermission = (permisoRequerido) => {
     return user?.permisos?.includes(permisoRequerido);
@@ -66,6 +66,7 @@ export function AuthProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

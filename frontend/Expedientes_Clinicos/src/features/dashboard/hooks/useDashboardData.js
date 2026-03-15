@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Users, Activity, UserCheck, AlertCircle } from 'lucide-react';
 import estadisticasService from "../services/estadisticaService";
 
 export function useDashboardData() {
@@ -21,7 +20,7 @@ export function useDashboardData() {
           loading: false,
           error: null
         });
-      } catch (err) {
+      } catch {
         setData(prev => ({ 
           ...prev, 
           tarjetas: [],

@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from "react";
-import { Search, Eye, FileText, Loader2, Activity, Stethoscope } from "lucide-react";
+import React, { useMemo } from "react";
+import { Search, Eye, FileText, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

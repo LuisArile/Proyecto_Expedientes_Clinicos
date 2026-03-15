@@ -12,7 +12,7 @@ import {
 
 export function Sidebar({ currentView, onNavigate  }) {
   const { user, logout } = useAuth();
-  const [isUserOpen, setIsUserOpen] = React.useState(true);
+  //const [isUserOpen, setIsUserOpen] = React.useState(true); conflicto eslint
 
   if (!user) return null;
 

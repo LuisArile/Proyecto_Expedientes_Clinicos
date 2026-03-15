@@ -30,7 +30,7 @@ vi.mock("@/features/auth/AuthContext", () => ({
 }));
 
 // mock fetch
-global.fetch = vi.fn();
+globalThis.fetch = vi.fn();
 
 /* ---------------- TESTS ---------------- */
 

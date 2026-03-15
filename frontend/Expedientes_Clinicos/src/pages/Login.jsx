@@ -7,11 +7,37 @@ import { useLoginForm } from "../hooks/useLoginForm";
 import { FormHeader } from "@/components/common/FormHeader";
 
 export function Login() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const { 
-    formData, error, loading, showClave, 
-    setShowClave, handleChange, handleSubmit 
-  } = useLoginForm();
+  const [nombreUsuario, setNombreUsuario] = useState("");
+  const [clave, setClave] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showClave, setShowClave] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const usuarioLimpio = nombreUsuario.trim();
+    const claveLimpia = clave.trim();
+
+    try {
+      const result = await login(usuarioLimpio, claveLimpia);
+      if(result && result.success){
+        console.log("Login exitoso, redirigiendo...");
+        navigate("/dashboard");
+      } else {
+        setError(result.error || "Credenciales incorrectas");
+      }
+    } catch {
+      setError("Credenciales incorrectas");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">

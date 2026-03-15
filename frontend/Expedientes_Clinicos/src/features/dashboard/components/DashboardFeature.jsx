@@ -92,7 +92,7 @@ export function DashboardFeature({ onNavigate }) {
                         {config.modules?.map((modulo) => (
                             <div 
                                 key={modulo.id}
-                                onClick={() => navigate(modulo.path)}
+                                onClick={() => onNavigate(modulo.path)}
                                 className="p-5 bg-white border border-gray-100 rounded-xl hover:shadow-md hover:border-blue-200 cursor-pointer transition-all group"
                             >
                                 <div className="flex flex-col items-center text-center gap-3">

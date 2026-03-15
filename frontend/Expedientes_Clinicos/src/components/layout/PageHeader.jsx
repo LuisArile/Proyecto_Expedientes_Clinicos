@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Users, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
+// eslint-disable-next-line no-unused-vars 
 export function PageHeader({ title, subtitle, Icon, onVolver, userName = "Usuario Actual", systemName = "Sistema SGEC"
 }) {
   return (

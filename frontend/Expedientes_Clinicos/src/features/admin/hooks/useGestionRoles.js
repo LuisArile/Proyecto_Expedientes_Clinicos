@@ -37,7 +37,7 @@ export function useGestionRoles() {
     try {
       const permisos = await rolesService.getPermisosByRol(rol.idRol);
       setPermisosSeleccionados(permisos.map(p => p.idPermiso));
-    } catch (e) { toast.error("Error al cargar permisos"); }
+    } catch { toast.error("Error al cargar permisos"); }
   };
 
   const handleEliminarRol = async (idRol) => {

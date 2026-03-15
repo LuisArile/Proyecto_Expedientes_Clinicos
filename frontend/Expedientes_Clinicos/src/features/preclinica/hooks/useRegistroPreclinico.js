@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { registrarPreclinico } from "../services/registroPreclinicoService";
 
-export function useRegistroPreclinico(onSuccess) {
+export function useRegistroPreclinico() {
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState({ open: false, result: {} });
 

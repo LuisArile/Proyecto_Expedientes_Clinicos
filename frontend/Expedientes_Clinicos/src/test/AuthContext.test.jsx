@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from "../features/auth/AuthContext";
 
 /* -------- MOCK FETCH -------- */
 
-global.fetch = vi.fn();
+globalThis.fetch = vi.fn();
 
 /* -------- COMPONENTE DE PRUEBA -------- */
 
