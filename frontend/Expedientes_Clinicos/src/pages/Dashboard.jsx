@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "../components/layout/dashboardLayout";
-import { useAuth } from "../features/auth/AuthContext";
+import { useAuth } from "@/features/auth/useAuth";
 import { Button } from "@/components/ui/button";
 
 import { DashboardFeature } from "../features/dashboard/components/DashboardFeature";

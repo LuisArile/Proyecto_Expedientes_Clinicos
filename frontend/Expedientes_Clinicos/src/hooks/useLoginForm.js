@@ -37,7 +37,7 @@ export function useLoginForm() {
       } else {
         setError(result.error || "Credenciales incorrectas");
       }
-    } catch (err) {
+    } catch {
       setError("No se pudo conectar con el servidor");
     } finally {
       setLoading(false);

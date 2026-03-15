@@ -4,15 +4,15 @@ import { Lock, User, Eye, EyeOff, Search, ShieldCheck, ArrowLeft, Loader2 } from
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-import { useAuth } from "@/features/auth/AuthContext";
+import { useAuth } from "@/features/auth/useAuth";
 import { FormField } from "@/components/common/FormField";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useChangePassword } from "../hooks/useChangePassword";
 import { FormHeader } from "@/components/common/FormHeader";
 
-export function Changepassword( { onVolver, onClick } ) {
+export function Changepassword( { onVolver } ) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { changePassword, loading, error, success, setError, setSuccess } = useChangePassword();
@@ -20,12 +20,6 @@ export function Changepassword( { onVolver, onClick } ) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  const [errors, setErrors] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: ""
-  });
 
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);

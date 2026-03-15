@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 
 import { toast } from "sonner";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "@/features/auth/useAuth";
 import { useConsultaMedica } from "../hooks/useConsultaMedica";
 import { Stethoscope, FileText, Save, Clock, Pill, Plus, Trash2, Loader2 } from "lucide-react";
 

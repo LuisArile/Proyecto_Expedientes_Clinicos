@@ -1,5 +1,4 @@
 import { Sidebar } from "./sidebar";
-import { useAuth } from "../../features/auth/AuthContext";
 
 export function DashboardLayout({ children, currentView, onNavigate }) {
   return (

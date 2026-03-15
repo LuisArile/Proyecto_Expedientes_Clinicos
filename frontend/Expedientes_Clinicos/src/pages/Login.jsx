@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
-import { User, Lock, Eye, Activity, EyeOff } from "lucide-react";
+import { User, Lock, Eye, EyeOff } from "lucide-react";
 import { FormField } from "@/components/common/FormField";
-import { useLoginForm } from "../hooks/useLoginForm";
 import { FormHeader } from "@/components/common/FormHeader";
+import { useAuth } from "@/features/auth/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export function Login() {
   const { login } = useAuth();
@@ -56,8 +57,8 @@ export function Login() {
                 name="nombreUsuario"
                 type="text"
                 placeholder="Ingrese su usuario"
-                value={formData.nombreUsuario}
-                onChange={handleChange}
+                value={nombreUsuario}
+                onChange={(e) => setNombreUsuario(e.target.value)}
                 className="text-gray-800 w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                 required
               />
@@ -72,8 +73,8 @@ export function Login() {
                 name="clave"
                 type={showClave ? "text" : "password"}
                 placeholder="Ingrese su contraseña"
-                value={formData.clave}
-                onChange={handleChange}
+                value={clave}
+                onChange={(e) => setClave(e.target.value)}
                 className="text-gray-800 w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                 required
               />

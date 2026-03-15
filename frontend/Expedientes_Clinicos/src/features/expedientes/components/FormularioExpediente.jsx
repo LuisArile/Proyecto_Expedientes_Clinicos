@@ -20,10 +20,6 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
   const [generoSeleccionado, setGeneroSeleccionado] = useState("");
 
   const { loading, idDuplicado, modal, setModal, validarId, enviarFormulario } = useExpedienteForm(onSuccess);
-
-  const onSubmit = (data) => { 
-    enviarFormulario(data, generoSeleccionado);
-  };
   
   const inputClass = (name) => `${errors[name] || (name === 'numeroIdentidad' && idDuplicado) ? "border-red-500" : "border-gray-300"} transition-all`;
 

@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Search, Eye, FileText, Loader2 } from "lucide-react";
+import { Search, Eye, FileText, Loader2, Stethoscope } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { PaginationControls } from "@/components/common/PaginationControls";
 import { useBuscarPacientes } from "../hooks/useBuscarPaciente";
 import { SearchFilterCard } from "./SearchFilterCard";
 
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "@/features/auth/useAuth";
 
 export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica }) {
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Activity, Loader2, Users } from "lucide-react";
+import { Loader2, Users } from "lucide-react";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { DataTable } from "@/components/common/DataTable";
 import { obtenerTodosRegistros } from "../services/registroPreclinicoService";

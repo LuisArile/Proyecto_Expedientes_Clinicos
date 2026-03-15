@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { registrarConsultaMedica } from "../services/consultaService";
 import { toast } from "sonner";
 
-export const useConsultaMedica = (pacienteId, formMethods, onSuccess) => {
+export const useConsultaMedica = (pacienteId, formMethods) => {
 
     const [guardando, setGuardando] = useState(false);
 
@@ -53,7 +53,7 @@ export const useConsultaMedica = (pacienteId, formMethods, onSuccess) => {
                     }
                 });
             }
-        } catch (err) {
+        } catch {
             setModal({
                 open: true,
                 result: { 

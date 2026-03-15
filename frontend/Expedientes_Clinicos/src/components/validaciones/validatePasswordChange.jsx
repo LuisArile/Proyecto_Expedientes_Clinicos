@@ -37,7 +37,7 @@ export function validatePasswordChange({ currentPassword, newPassword, confirmPa
 }
 
   // Al menos un carácter especial
-  if (!/[!@#$%^&*()_\-+=\[\]{};:,.<>?/|\\]/.test(newPass)) {
+  if (!/[!@#$%^&*()_\-+=[\]{};:,.<>?/|\\]/.test(newPass)) {
     return "La contraseña debe contener al menos un carácter especial";
   }
 
