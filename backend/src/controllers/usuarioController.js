@@ -2,19 +2,20 @@ const { ErrorValidacion, ErrorNoAutorizado } = require("../utils/errores");
 const capturarAsync = require("../utils/capturarAsync");
 
 class usuarioController {
-    constructor(rolService) {
-        this.rolService = rolService;
+    constructor(usuarioService) {
+        this.usuarioService = usuarioService;
     }
 
    crear = capturarAsync(async (req, res) => {
-        const { nombre, correo, nombreUsuario, clave } = req.body;
+        const { nombre, correo, nombreUsuario, clave, idRol } = req.body;
         
         if (!nombre) throw new ErrorValidacion('El nombre es obligatorio');
         if (!correo) throw new ErrorValidacion('El correo es obligatorio');
         if (!nombreUsuario) throw new ErrorValidacion('El nombre de usuario es obligatorio');
         if (!clave) throw new ErrorValidacion('La contraseña es obligatoria');
+        if(!idRol) throw new ErrorValidacion('El rol es obligatorio');
 
-        const usuario = await this.rolService.crear(req.body);
+        const usuario = await this.usuarioService.crear(req.body);
         
         res.status(201).json({
             success: true,
@@ -24,13 +25,13 @@ class usuarioController {
     });
 
     obtenerTodos = capturarAsync(async (req, res) => {
-        const usuarios = await this.rolService.obtenerTodos();
+        const usuarios = await this.usuarioService.obtenerTodos();
         res.json({ success: true, data: usuarios });
     });
 
     cambiarPassword = capturarAsync(async (req, res) => {
         const { currentPassword, newPassword } = req.body;
-        const userId = req.usuario?.id;
+        const userId = req.user?.id || req.usuario?.id;
 
         if (!userId) {
             throw new ErrorNoAutorizado('No se encontró información del usuario');
@@ -40,7 +41,7 @@ class usuarioController {
             throw new ErrorValidacion('Todos los campos son obligatorios');
         }
 
-        const usuario = await this.rolService.cambiarPassword(
+        const resultado = await this.usuarioService.cambiarPassword(
             userId,
             currentPassword,
             newPassword
@@ -49,7 +50,7 @@ class usuarioController {
         res.json({ 
             success: true, 
             mensaje: 'Contraseña actualizada correctamente',
-            data: usuario 
+            data: resultado 
         });
     });
 
@@ -60,7 +61,7 @@ class usuarioController {
             throw new ErrorValidacion('El ID del rol es obligatorio');
         }
 
-        const rol = await this.rolService.obtenerPorId(idRol);
+        const rol = await this.usuarioService.obtenerPorId(idRol);
 
         if (!rol) {
             throw new ErrorNoEncontrado('Rol');
@@ -85,7 +86,7 @@ class usuarioController {
             throw new ErrorValidacion('El nombre del rol no puede estar vacío');
         }
 
-        const rol = await this.rolService.actualizar(idRol, req.body);
+        const rol = await this.usuarioService.actualizar(idRol, req.body);
 
         res.json({
             success: true,
@@ -102,7 +103,7 @@ class usuarioController {
             throw new ErrorValidacion('El ID del rol es obligatorio');
         }
 
-        await this.rolService.eliminar(idRol);
+        await this.usuarioService.eliminar(idRol);
 
         res.json({
             success: true,
@@ -127,7 +128,7 @@ class usuarioController {
             throw new ErrorValidacion('Debe proporcionar al menos un permiso');
         }
 
-        const rol = await this.rolService.asignarPermisos(idRol, permisos);
+        const rol = await this.usuarioService.asignarPermisos(idRol, permisos);
 
         res.json({
             success: true,
@@ -144,7 +145,7 @@ class usuarioController {
             throw new ErrorValidacion('El ID del rol es obligatorio');
         }
 
-        const permisos = await this.rolService.obtenerPermisosPorRol(idRol);
+        const permisos = await this.usuarioService.obtenerPermisosPorRol(idRol);
 
         res.json({
             success: true,
