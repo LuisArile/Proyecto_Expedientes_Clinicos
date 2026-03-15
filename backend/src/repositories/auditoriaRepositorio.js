@@ -1,21 +1,29 @@
-class auditoriaRepository{
-    constructor(prisma){
-        this.prisma=prisma;
+class auditoriaRepository {
+    constructor(prisma) {
+        this.prisma = prisma;
     }
 
-//crear datos en tabla auditoria
-    async crear(data, tx = null){
+    async crear(data, tx = null) {
         const cliente = tx || this.prisma;
+        
         try {
+            const detallesString = data.detalles && typeof data.detalles === 'object' 
+                ? JSON.stringify(data.detalles) 
+                : data.detalles;
+
             return await cliente.auditoria.create({
                 data: {
                     usuarioId: data.usuarioId,
                     accion: data.accion,
-                    detalles: data.detalles || null
-                }, 
-                include: { usuario: true }
+                    detalles: detallesString || null,
+                    fecha: new Date() 
+                },
+                include: { 
+                    usuario: { 
+                        select: { nombre: true, apellido: true, nombreUsuario: true } 
+                    } 
+                }
             });
-
         } catch (error) {
             throw new Error(`Error al crear registro de auditoría: ${error.message}`);
         }
@@ -33,7 +41,7 @@ class auditoriaRepository{
                         nombreUsuario: true 
                     } 
                 } 
-        }
+            }
         });
     }
 
@@ -55,4 +63,4 @@ class auditoriaRepository{
     }
 }
 
-module.exports=auditoriaRepository;
+module.exports = auditoriaRepository;

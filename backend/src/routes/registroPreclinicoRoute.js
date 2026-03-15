@@ -33,6 +33,9 @@ router.use(validarToken);
 //router.use(autorizarRol(['ENFERMERO', 'MEDICO']));
 
 // Rutas
+router.post("/expediente/:expedienteId",autorizarRol(['ENFERMERO']) , (req, res,next) => registroPreclinicoController.registrar(req, res,next));
+router.get("/expediente/:expedienteId", autorizarRol(['ENFERMERO', 'MEDICO']), (req, res,next) => registroPreclinicoController.obtenerPorExpediente(req, res,next));
+router.get("/expediente/:expedienteId/ultimo", autorizarRol(['ENFERMERO', 'MEDICO']), (req, res,next) => registroPreclinicoController.obtenerUltimoPorExpediente(req, res,next));
 router.post("/expediente/:expedienteId", autorizarRol(['ENFERMERO']), (req, res) => registroPreclinicoController.registrar(req, res));
 router.get("/todos", autorizarRol(['ENFERMERO', 'MEDICO', 'ADMINISTRADOR']), (req, res) => registroPreclinicoController.obtenerTodos(req, res));
 router.get("/conteo", autorizarRol(['ENFERMERO', 'MEDICO', 'ADMINISTRADOR']), (req, res) => registroPreclinicoController.contarTodos(req, res));

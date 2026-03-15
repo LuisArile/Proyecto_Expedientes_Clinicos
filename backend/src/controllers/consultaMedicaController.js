@@ -1,10 +1,12 @@
+const { ErrorValidacion, ErrorNoEncontrado, ErrorProhibido } = require('../utils/errores');
+const capturarAsync = require('../utils/capturarAsync');
+
 class consultaMedicaController {
     constructor(consultaMedicaService) {
         this.consultaMedicaService = consultaMedicaService;
     }
 
-    // Registrar nueva consulta médica
-    async registrar(req, res) {
+    registrar = capturarAsync(async (req, res, next) => {
         try {
             const { expedienteId } = req.params;
             const medicoId = req.usuario.id;
@@ -22,15 +24,11 @@ class consultaMedicaController {
                 data: resultado
             });
         } catch (error) {
-            res.status(400).json({
-                success: false,
-                error: error.message
-            });
+            throw new ErrorValidacion(error.message);
         }
-    }
+    });
 
-    // Obtener todas las consultas de un expediente
-    async obtenerPorExpediente(req, res) {
+    obtenerPorExpediente = capturarAsync(async (req, res, next) => {
         try {
             const { expedienteId } = req.params;
 
@@ -41,31 +39,31 @@ class consultaMedicaController {
                 data: consultas
             });
         } catch (error) {
-            res.status(400).json({
-                success: false,
-                error: error.message
-            });
+            throw new ErrorValidacion(error.message);
         }
-    }
+    });
 
-    // Obtener una consulta específica por ID
-    async obtenerPorId(req, res) {
+    obtenerPorId = capturarAsync(async (req, res, next) => {
         try {
             const { id } = req.params;
 
             const consulta = await this.consultaMedicaService.obtenerPorId(id);
+
+            if (!consulta) {
+                throw new ErrorNoEncontrado('Consulta médica');
+            }
 
             res.json({
                 success: true,
                 data: consulta
             });
         } catch (error) {
-            res.status(404).json({
-                success: false,
-                error: error.message
-            });
+            if (error instanceof ErrorNoEncontrado) {
+                throw error;
+            }
+            throw new ErrorValidacion(error.message);
         }
-    }
+    });
 }
 
 module.exports = consultaMedicaController;

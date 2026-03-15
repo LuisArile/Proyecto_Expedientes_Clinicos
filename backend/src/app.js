@@ -10,6 +10,9 @@ const rolRouters = require("./routes/rolRoute")
 const permisoRouters = require("./routes/permisoRoute")
 const registroPreclinico=require("./routes/registroPreclinicoRoute")
 const consultaMedicaRouters=require("./routes/consultaMedicaRoute")
+
+
+const manejadorErrores = require("./middlewares/manejoErrores")
 const estadisticasRoute = require("./routes/estadisticasRoute")
 
 
@@ -46,4 +49,7 @@ app.use("/api/consultaMedica", consultaMedicaRouters); //Consulta medicas
 
 app.use("/api/estadisticas", estadisticasRoute);
 
+
+
+app.use(manejadorErrores);
 module.exports=app;

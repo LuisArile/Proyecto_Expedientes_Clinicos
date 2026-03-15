@@ -13,6 +13,10 @@ const usuarioRepository = new  UsuarioRepository(prisma);
 const usuarioService    = new  UsuarioService(usuarioRepository);
 const usuarioController = new  UsuarioController(usuarioService);
 
+
+//RUTAS USUARIOS
+router.post("/", (req,res,next)=> usuarioController.crear(req,res,next));
+router.get("/", (req,res,next)=> usuarioController.obtenerTodos(req,res,next));
 router.post("/", (req,res)=> usuarioController.crear(req,res));
 router.get("/", (req,res)=> usuarioController.obtenerTodos(req,res));
 router.put("/change-password", authMiddleware,(req,res)=> usuarioController.cambiarPassword(req,res));
