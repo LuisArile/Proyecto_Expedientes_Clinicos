@@ -15,12 +15,20 @@ class EstadisticasService {
     }
 
     async obtenerResumenGeneral(usuarioSesion) {
-        const rolActual = usuarioSesion.rol?.toUpperCase().trim();
-        const estrategia = this.estrategias[rolActual];
+        let rolActual = usuarioSesion.rol?.toString().toUpperCase().trim();
         
-        if (!estrategia) return { tarjetas: [], actividad: [] };
+        if (!rolActual && usuarioSesion.idRol) {
+            const rolesMap = { 1: 'ADMINISTRADOR', 2: 'MEDICO', 3: 'RECEPCIONISTA', 4: 'ENFERMERO' };
+            rolActual = rolesMap[usuarioSesion.idRol];
+        }
         
-        return await estrategia(usuarioSesion);
+        const metodoEstrategia = this.estrategias[rolActual];
+        
+        if (!metodoEstrategia) {
+            console.error(`No se encontró estrategia para el rol: [${rolActual}]`);
+            return { tarjetas: [], actividad: [] };
+        }
+        return await metodoEstrategia(usuarioSesion);
     }
 
     async obtenerAdminData(usuarioSesion) {
@@ -40,8 +48,8 @@ class EstadisticasService {
             ],
             actividad: auditoria.map(log => ({
                 id: log.id,
-                usuario: log.usuario ? `${log.usuario.nombre} ${log.usuario.apellido}` : "Sistema",
-                accion: log.accion,
+                primaryText: log.usuario ? `${log.usuario.nombre} ${log.usuario.apellido}` : "Sistema",
+                secondaryText: log.accion,
                 fecha: log.fecha,
                 detalles: log.detalles
             }))
@@ -54,7 +62,7 @@ class EstadisticasService {
 
         const esAdmin = usuarioSesion.rol === 'ADMINISTRADOR' || usuarioSesion.idRol === 1;
         
-        const usuarioIdFiltro = esAdmin ? null : usuarioSesion.id;
+        const usuarioIdFiltro = esAdmin ? null : Number(usuarioSesion.id);
         const [expedientesHoy, actividadReciente] = await Promise.all([
             this.expedienteRepo.contarCreadosHoy(usuarioIdFiltro, 'CREACIÓN DE EXPEDIENTE'),
             this.auditoriaRepo.buscarActividad({ 
@@ -121,7 +129,7 @@ class EstadisticasService {
                 { id: 'consultasRealizadas', valor: consultasHoy, pie: "Atenciones hoy" },
                 { id: 'consultasPendientes', valor: 0, pie: "En sala de espera" /* Próximamente*/},
                 { id: 'examenesOrdenados', valor: 0, pie: "Hoy" },
-                { id: 'recetasCreadas', valor: 0, pie: "Hoy" }
+                { id: 'recetasCreadas', valor: recetasHoy, pie: "Hoy" }
             ],
             actividad: actividadReciente.map(con => ({
                 id: con.id,

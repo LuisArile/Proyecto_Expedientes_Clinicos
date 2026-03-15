@@ -25,7 +25,7 @@ const ICON_MAP = {
 
 export function DashboardFeature({ onNavigate }) {
     const { user } = useAuth();
-    const userRole = user?.rol?.toUpperCase();
+    const userRole = user?.rol?.toUpperCase().trim();
     const config = DASHBOARD_CONFIG[userRole];
     
     const { tarjetas, actividad, loading } = useDashboardData(userRole);
