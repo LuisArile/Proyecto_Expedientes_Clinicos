@@ -18,10 +18,25 @@ const estadisticasRoute = require("./routes/estadisticasRoute")
 
 const app= express();
 
+// Lista de orígenes permitidos
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:5173', // Desarrollo local
+    'http://localhost'        // Docker / Nginx
+];
+
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 app.use(cors({
-    origin: frontendUrl, 
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Error de CORS: Origen no permitido por SGEC'));
+        }
+    },
     credentials: true
 }));
 

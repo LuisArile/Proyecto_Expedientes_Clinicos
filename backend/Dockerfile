@@ -1,20 +1,17 @@
-FROM node:20-alpine
+FROM node:22
 
-# # Dependencias necesarias para Prisma y SQL Server
-# # openssl es crítico para las conexiones seguras de Prisma
-# RUN apk add --no-cache openssl
+WORKDIR /app
 
-# WORKDIR /app
+COPY package*.json ./
 
-# COPY package*.json ./
-# COPY prisma ./prisma/
+RUN npm config set registry https://registry.npmjs.org/
 
-# RUN npm install
-# RUN npx prisma generate
+RUN npm ci
 
-# # Copiamos el resto del código del backend
-# COPY . .
+COPY . .
 
-# EXPOSE 3000
+RUN npx prisma generate
 
-# CMD ["npm", "run", "dev"]
+EXPOSE 3000
+
+CMD ["npm","start"]
