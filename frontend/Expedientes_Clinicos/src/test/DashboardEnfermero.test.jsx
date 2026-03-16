@@ -1,34 +1,32 @@
 import { render, screen } from "@testing-library/react";
 import { describe, test, expect, vi } from "vitest";
-import { DashboardEnfermero } from "../features/dashboard/components/Dashboardenfermero";
+import { DashboardFeature } from "../features/dashboard/components/DashboardFeature";
 import { MemoryRouter } from "react-router-dom";
 
 /* ---------------- MOCKS ---------------- */
 
-// Mock AuthContext
-vi.mock("@/features/auth/AuthContext", () => ({
+vi.mock("@/features/auth/useAuth", () => ({
   useAuth: () => ({
     user: {
       nombre: "Ana",
-      apellido: "Gomez"
+      apellido: "Gomez",
+      rol: "ENFERMERO"
     }
   })
 }));
 
-// Mock hook
-vi.mock("../features/dashboard/hooks/useEnfermeroDashboard", () => ({
-  useEnfermeroDashboard: () => ({
+vi.mock("../features/dashboard/hooks/useDashboardData", () => ({
+  useDashboardData: () => ({
     loading: false,
-    estadisticasHoy: {
-      horaInicio: "08:00",
-      pacientesEvaluados: 8,
-      evaluacionesPendientes: 3
-    },
-    consulta: [
+    tarjetas: [
+      { id: "pacientesEvaluados", valor: 8, pie: "atendidos" },
+      { id: "evaluacionesPendientes", valor: 3, pie: "pendientes" }
+    ],
+    actividad: [
       {
         nombre: "Carlos Perez",
         tipo: "Triage",
-        hora: "09:20"
+        fecha: "2026-03-16T09:20:00.000Z"
       }
     ]
   })
@@ -36,11 +34,11 @@ vi.mock("../features/dashboard/hooks/useEnfermeroDashboard", () => ({
 
 // Mock componentes UI
 vi.mock("@/components/ui/card", () => ({
-  Card: ({ children }) => <div>{children}</div>,
-  CardContent: ({ children }) => <div>{children}</div>,
-  CardHeader: ({ children }) => <div>{children}</div>,
-  CardTitle: ({ children }) => <div>{children}</div>,
-  CardDescription: ({ children }) => <div>{children}</div>
+  Card: ({ children, ...props }) => <div {...props}>{children}</div>,
+  CardContent: ({ children, ...props }) => <div {...props}>{children}</div>,
+  CardHeader: ({ children, ...props }) => <div {...props}>{children}</div>,
+  CardTitle: ({ children, ...props }) => <div {...props}>{children}</div>,
+  CardDescription: ({ children, ...props }) => <div {...props}>{children}</div>
 }));
 
 vi.mock("@/components/ui/badge", () => ({
@@ -60,7 +58,7 @@ describe("DashboardEnfermero", () => {
 
     render(
       <MemoryRouter>
-        <DashboardEnfermero />
+        <DashboardFeature onNavigate={vi.fn()} />
       </MemoryRouter>
     );
 
@@ -74,7 +72,7 @@ describe("DashboardEnfermero", () => {
 
     render(
       <MemoryRouter>
-        <DashboardEnfermero />
+        <DashboardFeature onNavigate={vi.fn()} />
       </MemoryRouter>
     );
 
@@ -87,13 +85,27 @@ describe("DashboardEnfermero", () => {
 
     render(
       <MemoryRouter>
-        <DashboardEnfermero />
+        <DashboardFeature onNavigate={vi.fn()} />
       </MemoryRouter>
     );
 
     expect(screen.getByText("Carlos Perez")).toBeInTheDocument();
     expect(screen.getByText("Triage")).toBeInTheDocument();
-    expect(screen.getByText("09:20")).toBeInTheDocument();
+
+  });
+
+  test("permite navegar desde tarjeta con destino", () => {
+
+    const onNavigate = vi.fn();
+
+    render(
+      <MemoryRouter>
+        <DashboardFeature onNavigate={onNavigate} />
+      </MemoryRouter>
+    );
+
+    screen.getByText("Pacientes Evaluados").click();
+    expect(onNavigate).toHaveBeenCalledWith("pacientes-evaluados");
 
   });
 

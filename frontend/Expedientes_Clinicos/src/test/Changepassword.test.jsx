@@ -1,7 +1,9 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, test, expect, vi } from "vitest";
+import { describe, test, expect, vi, beforeEach } from "vitest";
 import { Changepassword } from "../features/dashboard/components/Changepassword";
 import { MemoryRouter } from "react-router-dom";
+import { AuthContext } from "@/features/auth/AuthContext";
+import { securityService } from "@/features/dashboard/services/securityService";
 
 /* ---------------- MOCKS ---------------- */
 
@@ -16,33 +18,37 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-// mock AuthContext
-const mockUser = {
-  id: 1,
-  nombreUsuario: "admin",
-  token: "fake-token"
-};
-
-vi.mock("@/features/auth/AuthContext", () => ({
-  useAuth: () => ({
-    user: mockUser
-  })
+vi.mock("@/features/dashboard/services/securityService", () => ({
+  securityService: {
+    cambiarPassword: vi.fn()
+  }
 }));
 
-// mock fetch
-globalThis.fetch = vi.fn();
+function renderWithAuth(ui) {
+  return render(
+    <AuthContext.Provider
+      value={{
+        user: {
+          id: 1,
+          nombreUsuario: "admin"
+        }
+      }}
+    >
+      <MemoryRouter>{ui}</MemoryRouter>
+    </AuthContext.Provider>
+  );
+}
 
 /* ---------------- TESTS ---------------- */
 
 describe("Changepassword", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   test("renderiza el formulario correctamente", () => {
 
-    render(
-      <MemoryRouter>
-        <Changepassword />
-      </MemoryRouter>
-    );
+    renderWithAuth(<Changepassword />);
 
     expect(screen.getByText("Cambiar Contraseña")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Ingrese su contraseña actual")).toBeInTheDocument();
@@ -53,91 +59,71 @@ describe("Changepassword", () => {
 
   test("muestra error si las contraseñas no coinciden", async () => {
 
-    render(
-      <MemoryRouter>
-        <Changepassword />
-      </MemoryRouter>
-    );
+    renderWithAuth(<Changepassword />);
 
     fireEvent.change(screen.getByPlaceholderText("Ingrese su contraseña actual"), {
-      target: { value: "123456" }
+      target: { value: "Actual123!" }
     });
 
     fireEvent.change(screen.getByPlaceholderText("Ingrese su nueva contraseña"), {
-      target: { value: "abc123" }
+      target: { value: "Nueva123!" }
     });
 
     fireEvent.change(screen.getByPlaceholderText("Confirme su nueva contraseña"), {
-      target: { value: "xyz123" }
-    });
-
-    fireEvent.click(screen.getByText("Guardar cambios"));
-
-    expect(screen.getByText("Las contraseñas no coinciden")).toBeInTheDocument();
-
-  });
-
-  test("envía request correctamente", async () => {
-
-    fetch.mockResolvedValue({
-      ok: true
-    });
-
-    render(
-      <MemoryRouter>
-        <Changepassword />
-      </MemoryRouter>
-    );
-
-    fireEvent.change(screen.getByPlaceholderText("Ingrese su contraseña actual"), {
-      target: { value: "123456" }
-    });
-
-    fireEvent.change(screen.getByPlaceholderText("Ingrese su nueva contraseña"), {
-      target: { value: "abc123" }
-    });
-
-    fireEvent.change(screen.getByPlaceholderText("Confirme su nueva contraseña"), {
-      target: { value: "abc123" }
+      target: { value: "Otra123!" }
     });
 
     fireEvent.click(screen.getByText("Guardar cambios"));
 
     await waitFor(() => {
+      expect(screen.getByText("Las contraseñas no coinciden")).toBeInTheDocument();
+    });
+    expect(securityService.cambiarPassword).not.toHaveBeenCalled();
 
-      expect(fetch).toHaveBeenCalledWith(
-        "http://localhost:4000/api/change-password",
-        expect.objectContaining({
-          method: "PUT"
-        })
-      );
+  });
 
+  test("envía cambio de contraseña correctamente", async () => {
+
+    securityService.cambiarPassword.mockResolvedValue({ success: true });
+
+    renderWithAuth(<Changepassword />);
+
+    fireEvent.change(screen.getByPlaceholderText("Ingrese su contraseña actual"), {
+      target: { value: "Actual123!" }
+    });
+
+    fireEvent.change(screen.getByPlaceholderText("Ingrese su nueva contraseña"), {
+      target: { value: "Nueva123!" }
+    });
+
+    fireEvent.change(screen.getByPlaceholderText("Confirme su nueva contraseña"), {
+      target: { value: "Nueva123!" }
+    });
+
+    fireEvent.click(screen.getByText("Guardar cambios"));
+
+    await waitFor(() => {
+      expect(securityService.cambiarPassword).toHaveBeenCalledWith(1, "Actual123!", "Nueva123!");
     });
 
   });
 
-  test("muestra mensaje de éxito", async () => {
+  test("muestra mensaje de éxito y ejecuta onVolver", async () => {
+    const onVolver = vi.fn();
+    securityService.cambiarPassword.mockResolvedValue({ success: true });
 
-    fetch.mockResolvedValue({
-      ok: true
-    });
-
-    render(
-      <MemoryRouter>
-        <Changepassword />
-      </MemoryRouter>
-    );
+    renderWithAuth(<Changepassword onVolver={onVolver} />);
 
     fireEvent.change(screen.getByPlaceholderText("Ingrese su contraseña actual"), {
-      target: { value: "123456" }
+      target: { value: "Actual123!" }
     });
 
     fireEvent.change(screen.getByPlaceholderText("Ingrese su nueva contraseña"), {
-      target: { value: "abc123" }
+      target: { value: "Nueva123!" }
     });
 
     fireEvent.change(screen.getByPlaceholderText("Confirme su nueva contraseña"), {
-      target: { value: "abc123" }
+      target: { value: "Nueva123!" }
     });
 
     fireEvent.click(screen.getByText("Guardar cambios"));
@@ -145,6 +131,10 @@ describe("Changepassword", () => {
     await waitFor(() => {
       expect(screen.getByText("Contraseña actualizada correctamente")).toBeInTheDocument();
     });
+
+    await waitFor(() => {
+      expect(onVolver).toHaveBeenCalled();
+    }, { timeout: 3000 });
 
   });
 

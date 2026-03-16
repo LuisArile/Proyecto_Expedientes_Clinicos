@@ -1,29 +1,26 @@
 import { render, screen } from "@testing-library/react";
 import { describe, test, expect, vi } from "vitest";
-import { DashboardRecepcionista } from "../features/dashboard/components/DashboardRecepcionista";
+import { DashboardFeature } from "../features/dashboard/components/DashboardFeature";
 import { MemoryRouter } from "react-router-dom";
 
 /* -------- MOCKS -------- */
 
-// AuthContext
-vi.mock("@/features/auth/AuthContext", () => ({
+vi.mock("@/features/auth/useAuth", () => ({
   useAuth: () => ({
-    user: { nombre: "Laura", apellido: "Lopez" }
+    user: { nombre: "Laura", apellido: "Lopez", rol: "RECEPCIONISTA" }
   })
 }));
 
-// Hook
-vi.mock("../features/dashboard/hooks/useRecepcionistaDashboard", () => ({
-  useRecepcionistaDashboard: () => ({
+vi.mock("../features/dashboard/hooks/useDashboardData", () => ({
+  useDashboardData: () => ({
     loading: false,
-    estadisticas: {
-      horaInicio: "08:00",
-      pacientesAtendidos: 12,
-      citasAgendadas: 6,
-      expedientesCreados: 4
-    },
-    registro: [
-      { nombre: "Juan", apellido: "Perez", id: "EXP-01", hora: "09:10" }
+    tarjetas: [
+      { id: "pacientes", valor: 12, pie: "nuevos" },
+      { id: "expedientes", valor: 4, pie: "hoy" },
+      { id: "citas", valor: 6, pie: "agendadas" }
+    ],
+    actividad: [
+      { nombre: "Juan Perez", tipo: "EXP-01", fecha: "2026-03-16T09:10:00.000Z" }
     ]
   })
 }));
@@ -49,7 +46,7 @@ describe("DashboardRecepcionista", () => {
   test("renderiza nombre del recepcionista", () => {
     render(
       <MemoryRouter>
-        <DashboardRecepcionista />
+        <DashboardFeature onNavigate={vi.fn()} />
       </MemoryRouter>
     );
 
@@ -61,11 +58,11 @@ describe("DashboardRecepcionista", () => {
   test("renderiza estadísticas del día", () => {
     render(
       <MemoryRouter>
-        <DashboardRecepcionista />
+        <DashboardFeature onNavigate={vi.fn()} />
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Pacientes atendidos")).toBeInTheDocument();
+    expect(screen.getByText("Pacientes Registrados")).toBeInTheDocument();
     expect(screen.getByText("Citas Agendadas")).toBeInTheDocument();
     expect(screen.getByText("Expedientes Creados")).toBeInTheDocument();
   });
@@ -73,13 +70,12 @@ describe("DashboardRecepcionista", () => {
   test("renderiza pacientes recientes", () => {
     render(
       <MemoryRouter>
-        <DashboardRecepcionista />
+        <DashboardFeature onNavigate={vi.fn()} />
       </MemoryRouter>
     );
 
     expect(screen.getByText("Juan Perez")).toBeInTheDocument();
     expect(screen.getByText("EXP-01")).toBeInTheDocument();
-    expect(screen.getByText("09:10")).toBeInTheDocument();
   });
 
 });

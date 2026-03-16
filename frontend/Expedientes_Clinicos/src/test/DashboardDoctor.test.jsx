@@ -1,35 +1,33 @@
 import { render, screen } from "@testing-library/react";
 import { describe, test, expect, vi } from "vitest";
-import { DashboardDoctor } from "../features/dashboard/components/DashboardDoctor";
+import { DashboardFeature } from "../features/dashboard/components/DashboardFeature";
 import { MemoryRouter } from "react-router-dom";
 
 /* ---------------- MOCKS ---------------- */
 
-// Mock AuthContext
-vi.mock("@/features/auth/AuthContext", () => ({
+vi.mock("@/features/auth/useAuth", () => ({
   useAuth: () => ({
     user: {
       nombre: "Carlos",
-      apellido: "Ramirez"
+      apellido: "Ramirez",
+      rol: "MEDICO"
     }
   })
 }));
 
-// Mock hook
-vi.mock("../features/dashboard/hooks/useDoctorDashboard", () => ({
-  useDoctorDashboard: () => ({
+vi.mock("../features/dashboard/hooks/useDashboardData", () => ({
+  useDashboardData: () => ({
     loading: false,
-    estadisticas: {
-      horaInicio: "08:00",
-      consultasRealizadas: 5,
-      consultasPendientes: 3,
-      examenesOrdenados: 2
-    },
-    consulta: [
+    tarjetas: [
+      { id: "consultasRealizadas", valor: 5, pie: "hoy" },
+      { id: "consultasPendientes", valor: 3, pie: "pendientes" },
+      { id: "examenesOrdenados", valor: 2, pie: "ordenados" }
+    ],
+    actividad: [
       {
         nombre: "Juan Pérez",
         tipo: "Consulta general",
-        hora: "09:30"
+        fecha: "2026-03-16T09:30:00.000Z"
       }
     ]
   })
@@ -37,11 +35,11 @@ vi.mock("../features/dashboard/hooks/useDoctorDashboard", () => ({
 
 // Mock componentes UI
 vi.mock("@/components/ui/card", () => ({
-  Card: ({ children }) => <div>{children}</div>,
-  CardContent: ({ children }) => <div>{children}</div>,
-  CardHeader: ({ children }) => <div>{children}</div>,
-  CardTitle: ({ children }) => <div>{children}</div>,
-  CardDescription: ({ children }) => <div>{children}</div>
+  Card: ({ children, ...props }) => <div {...props}>{children}</div>,
+  CardContent: ({ children, ...props }) => <div {...props}>{children}</div>,
+  CardHeader: ({ children, ...props }) => <div {...props}>{children}</div>,
+  CardTitle: ({ children, ...props }) => <div {...props}>{children}</div>,
+  CardDescription: ({ children, ...props }) => <div {...props}>{children}</div>
 }));
 
 // Mock util
@@ -57,7 +55,7 @@ describe("DashboardDoctor", () => {
 
     render(
       <MemoryRouter>
-        <DashboardDoctor />
+        <DashboardFeature onNavigate={vi.fn()} />
       </MemoryRouter>
     );
 
@@ -71,7 +69,7 @@ describe("DashboardDoctor", () => {
 
     render(
       <MemoryRouter>
-        <DashboardDoctor />
+        <DashboardFeature onNavigate={vi.fn()} />
       </MemoryRouter>
     );
 
@@ -85,13 +83,12 @@ describe("DashboardDoctor", () => {
 
     render(
       <MemoryRouter>
-        <DashboardDoctor />
+        <DashboardFeature onNavigate={vi.fn()} />
       </MemoryRouter>
     );
 
     expect(screen.getByText("Juan Pérez")).toBeInTheDocument();
     expect(screen.getByText("Consulta general")).toBeInTheDocument();
-    expect(screen.getByText("09:30")).toBeInTheDocument();
 
   });
 

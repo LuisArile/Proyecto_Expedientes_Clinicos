@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, test, expect, vi } from "vitest";
+import { describe, test, expect, vi, beforeEach } from "vitest";
 import { Sidebar } from "../components/layout/sidebar";
 import { MemoryRouter } from "react-router-dom";
 
@@ -7,54 +7,35 @@ import { MemoryRouter } from "react-router-dom";
 
 const mockLogout = vi.fn();
 const mockNavigate = vi.fn();
+const authState = {
+  user: {
+    nombre: "Carlos",
+    apellido: "Perez",
+    nombreUsuario: "cperez",
+    rol: "ADMINISTRADOR",
+    permisos: ["CREAR_EXPEDIENTE"]
+  },
+  logout: mockLogout
+};
 
-vi.mock("@/features/auth/authContext", () => ({
-  useAuth: () => ({
-    user: {
-      nombre: "Carlos",
-      apellido: "Perez",
-      nombreUsuario: "cperez",
-      rol: "ADMINISTRADOR"
-    },
-    logout: mockLogout
-  })
-}));
-
-vi.mock("@/constants/menuStrategies", () => ({
-  MENU_STRATEGIES: {
-    ADMINISTRADOR: [
-      {
-        id: "dashboard",
-        label: "Dashboard",
-        description: "Panel principal",
-        icon: () => <span>icon</span>
-      }
-    ]
-  }
-}));
-
-vi.mock("@/constants/roles", () => ({
-  ROLE_STRATEGIES: {
-    ADMINISTRADOR: {
-      label: "Administrador",
-      color: "bg-blue"
-    }
-  }
-}));
-
-vi.mock("@/components/ui/button", () => ({
-  Button: ({ children, onClick }) => (
-    <button onClick={onClick}>{children}</button>
-  )
-}));
-
-vi.mock("@/components/ui/badge", () => ({
-  Badge: ({ children }) => <span>{children}</span>
+vi.mock("@/features/auth/useAuth", () => ({
+  useAuth: () => authState
 }));
 
 /* ---------- TESTS ---------- */
 
 describe("Sidebar", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    authState.user = {
+      nombre: "Carlos",
+      apellido: "Perez",
+      nombreUsuario: "cperez",
+      rol: "ADMINISTRADOR",
+      permisos: ["CREAR_EXPEDIENTE"]
+    };
+    authState.logout = mockLogout;
+  });
 
   test("renderiza información del usuario", () => {
 
@@ -69,7 +50,7 @@ describe("Sidebar", () => {
 
   });
 
-  test("renderiza menú según rol", () => {
+  test("renderiza menú según permisos", () => {
 
     render(
       <MemoryRouter>
@@ -77,11 +58,12 @@ describe("Sidebar", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Dashboard")).toBeInTheDocument();
+    expect(screen.getByText("Crear Expediente")).toBeInTheDocument();
+    expect(screen.queryByText("Gestión de Roles")).not.toBeInTheDocument();
 
   });
 
-  test("navega al hacer click en item del menú", () => {
+  test("navega al hacer click en item permitido", () => {
 
     render(
       <MemoryRouter>
@@ -89,9 +71,9 @@ describe("Sidebar", () => {
       </MemoryRouter>
     );
 
-    fireEvent.click(screen.getByText("Dashboard"));
+    fireEvent.click(screen.getByText("Crear Expediente"));
 
-    expect(mockNavigate).toHaveBeenCalledWith("dashboard");
+    expect(mockNavigate).toHaveBeenCalledWith("crear-expediente");
 
   });
 
@@ -120,6 +102,20 @@ describe("Sidebar", () => {
     fireEvent.click(screen.getByText("Cerrar Sesión"));
 
     expect(mockLogout).toHaveBeenCalled();
+
+  });
+
+  test("si no hay usuario no renderiza contenido", () => {
+
+    authState.user = null;
+
+    const { container } = render(
+      <MemoryRouter>
+        <Sidebar currentView="inicio" onNavigate={mockNavigate} />
+      </MemoryRouter>
+    );
+
+    expect(container.firstChild).toBeNull();
 
   });
 
