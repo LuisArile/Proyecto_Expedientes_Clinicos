@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/features/auth/useAuth";
 import { ROLE_STRATEGIES } from "@/constants/roles"
-// import { MENU_STRATEGIES } from "@/constants/menuStrategies";
 import { ALL_MENU_ITEMS } from "@/constants/allMenuItems";
 
 import {
@@ -12,8 +11,7 @@ import {
 
 export function Sidebar({ currentView, onNavigate  }) {
   const { user, logout } = useAuth();
-  //const [isUserOpen, setIsUserOpen] = React.useState(true); conflicto eslint
-
+  
   if (!user) return null;
 
   const roleKey = user.rol?.toUpperCase();
