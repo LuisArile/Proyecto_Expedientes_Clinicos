@@ -9,6 +9,14 @@ describe("EstadisticasService", () => {
     let mockPacienteRepo;
     let mockExpedienteRepo;
 
+    const crearServicio = () => new EstadisticasService(
+        mockPrisma,
+        mockUsuarioRepo,
+        mockAuditoriaRepo,
+        mockPacienteRepo,
+        mockExpedienteRepo
+    );
+
     beforeEach(() => {
         mockPrisma = {
             consultaMedica: {
@@ -39,13 +47,11 @@ describe("EstadisticasService", () => {
             contarCreadosHoy: jest.fn()
         };
 
-        service = new EstadisticasService(
-            mockPrisma,
-            mockUsuarioRepo,
-            mockAuditoriaRepo,
-            mockPacienteRepo,
-            mockExpedienteRepo
-        );
+        service = crearServicio();
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
     });
 
     describe("obtenerResumenGeneral", () => {
@@ -54,11 +60,15 @@ describe("EstadisticasService", () => {
             const usuario = { id: 1, rol: "ADMINISTRADOR" };
             const mockData = { tarjetas: [], actividad: [] };
             
-            service.obtenerAdminData = jest.fn().mockResolvedValue(mockData);
+            const obtenerAdminDataSpy = jest
+                .spyOn(EstadisticasService.prototype, "obtenerAdminData")
+                .mockResolvedValue(mockData);
+
+            service = crearServicio();
             
             const resultado = await service.obtenerResumenGeneral(usuario);
             
-            expect(service.obtenerAdminData).toHaveBeenCalledWith(usuario);
+            expect(obtenerAdminDataSpy).toHaveBeenCalledWith(usuario);
             expect(resultado).toEqual(mockData);
         });
 
@@ -66,11 +76,15 @@ describe("EstadisticasService", () => {
             const usuario = { id: 2, rol: "RECEPCIONISTA" };
             const mockData = { tarjetas: [], actividad: [] };
             
-            service.obtenerRecepcionistaData = jest.fn().mockResolvedValue(mockData);
+            const obtenerRecepcionistaDataSpy = jest
+                .spyOn(EstadisticasService.prototype, "obtenerRecepcionistaData")
+                .mockResolvedValue(mockData);
+
+            service = crearServicio();
             
             const resultado = await service.obtenerResumenGeneral(usuario);
             
-            expect(service.obtenerRecepcionistaData).toHaveBeenCalledWith(usuario);
+            expect(obtenerRecepcionistaDataSpy).toHaveBeenCalledWith(usuario);
             expect(resultado).toEqual(mockData);
         });
 
@@ -78,11 +92,15 @@ describe("EstadisticasService", () => {
             const usuario = { id: 3, rol: "MEDICO" };
             const mockData = { tarjetas: [], actividad: [] };
             
-            service.obtenerMedicoData = jest.fn().mockResolvedValue(mockData);
+            const obtenerMedicoDataSpy = jest
+                .spyOn(EstadisticasService.prototype, "obtenerMedicoData")
+                .mockResolvedValue(mockData);
+
+            service = crearServicio();
             
             const resultado = await service.obtenerResumenGeneral(usuario);
             
-            expect(service.obtenerMedicoData).toHaveBeenCalledWith(usuario);
+            expect(obtenerMedicoDataSpy).toHaveBeenCalledWith(usuario);
             expect(resultado).toEqual(mockData);
         });
 
@@ -90,11 +108,15 @@ describe("EstadisticasService", () => {
             const usuario = { id: 4, rol: "ENFERMERO" };
             const mockData = { tarjetas: [], actividad: [] };
             
-            service.obtenerEnfermeroData = jest.fn().mockResolvedValue(mockData);
+            const obtenerEnfermeroDataSpy = jest
+                .spyOn(EstadisticasService.prototype, "obtenerEnfermeroData")
+                .mockResolvedValue(mockData);
+
+            service = crearServicio();
             
             const resultado = await service.obtenerResumenGeneral(usuario);
             
-            expect(service.obtenerEnfermeroData).toHaveBeenCalled();
+            expect(obtenerEnfermeroDataSpy).toHaveBeenCalledWith(usuario);
             expect(resultado).toEqual(mockData);
         });
 
@@ -102,11 +124,15 @@ describe("EstadisticasService", () => {
             const usuario = { id: 1, idRol: 1 };
             const mockData = { tarjetas: [], actividad: [] };
             
-            service.obtenerAdminData = jest.fn().mockResolvedValue(mockData);
+            const obtenerAdminDataSpy = jest
+                .spyOn(EstadisticasService.prototype, "obtenerAdminData")
+                .mockResolvedValue(mockData);
+
+            service = crearServicio();
             
             const resultado = await service.obtenerResumenGeneral(usuario);
             
-            expect(service.obtenerAdminData).toHaveBeenCalledWith(usuario);
+            expect(obtenerAdminDataSpy).toHaveBeenCalledWith(usuario);
             expect(resultado).toEqual(mockData);
         });
 

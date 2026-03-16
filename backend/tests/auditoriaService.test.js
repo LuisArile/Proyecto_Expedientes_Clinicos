@@ -27,7 +27,7 @@ describe("AuditoriaService", () => {
             usuarioId: 1,
             accion: "INICIO_SESION",
             detalles: "detalle prueba"
-        });
+        }, null);
 
         expect(resultado).toEqual(registroMock);
 
@@ -62,7 +62,7 @@ describe("AuditoriaService", () => {
             usuarioId: 1,
             accion: "INICIO_SESION",
             detalles: "Usuario admin inició sesión"
-        });
+        }, null);
 
     });
 
@@ -74,9 +74,9 @@ describe("AuditoriaService", () => {
 
         expect(mockRepository.crear).toHaveBeenCalledWith({
             usuarioId: 1,
-            accion: "Creacion de expediente",
-            detalles: "creacion de expediente 10"
-        });
+            accion: "Creacion DE EXPEDIENTE",
+            detalles: "Expediente ID: 10. Proceso de creacion"
+        }, null);
 
     });
 
@@ -90,7 +90,7 @@ describe("AuditoriaService", () => {
             usuarioId: 1,
             accion: "Actualizacion de usuario",
             detalles: "actualizacion de usuario 5"
-        });
+        }, null);
 
     });
 
@@ -104,7 +104,7 @@ describe("AuditoriaService", () => {
             usuarioId: 1,
             accion: "Eliminacion de Paciente",
             detalles: "eliminacion de paciente 20"
-        });
+        }, null);
 
     });
 
