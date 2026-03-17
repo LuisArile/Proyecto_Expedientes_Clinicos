@@ -7,12 +7,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Rol {
+  idRol         Int              @id @default(autoincrement())
+  nombre        String           @unique @db.NVarChar(50)
+  usuarios      Usuario[]
+  permisos      PermisosPorRol[]
+
+  @@map("Rol")
+}
+
+model Permiso {
+  idPermiso     Int              @id @default(autoincrement())
+  nombre        String           @unique @db.NVarChar(50)
+  roles         PermisosPorRol[]
+
+  @@map("Permiso")
+}
+
+model PermisosPorRol {
+  idRol         Int
+  idPermiso     Int
+  rol           Rol     @relation(fields: [idRol], references: [idRol])
+  permiso       Permiso @relation(fields: [idPermiso], references: [idPermiso])
+
+  @@id([idRol, idPermiso])
+  @@map("PermisosPorRol")
+}
+
 model Usuario {
   id            Int         @id @default(autoincrement())
   nombreUsuario String      @unique
   correo        String      @unique
   clave         String
-  rol           String
+  idRol         Int
   activo        Boolean     @default(true)
   createdAt     DateTime    @default(now())
   apellido      String
@@ -20,7 +47,13 @@ model Usuario {
   nombre        String
   ultimoAcceso  DateTime?
   updatedAt     DateTime    @updatedAt
+  rol           Rol         @relation(fields: [idRol], references: [idRol])
   auditorias    Auditoria[]
+  
+  registrosPreclinicos registroPreclinico[]
+  consultasMedicas   ConsultaMedica[]
+
+  @@map("Usuario")
 }
 
 model Auditoria {
@@ -56,6 +89,64 @@ model Expediente {
   fechaActualizacion DateTime @default(now()) @updatedAt
   observaciones      String?  @db.NVarChar(100)
   paciente           Paciente @relation(fields: [idPaciente], references: [idPaciente])
+ 
+  registrosPreclinicos registroPreclinico[]
+
+  consultasMedicas   ConsultaMedica[]
 
   @@map("Expediente")
+}
+
+model registroPreclinico {
+  id                    Int      @id @default(autoincrement())
+  expedienteId          Int
+  enfermeroId           Int
+  presionArterial       String?
+  temperatura           Float?
+  peso                  Float?
+  talla                 Int?
+  frecuenciaCardiaca    Int?
+  observaciones         String?  @db.Text
+  fechaRegistro         DateTime @default(now())
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  
+  expediente Expediente @relation(fields: [expedienteId], references: [idExpediente])
+  enfermero  Usuario    @relation(fields: [enfermeroId], references: [id])
+
+  @@map("registroPreclinico")
+}
+
+model ConsultaMedica {
+  id                Int         @id @default(autoincrement())
+  expedienteId      Int
+  medicoId          Int
+  fechaConsulta     DateTime    @default(now())
+  motivo            String      @db.Text
+  diagnostico       String      @db.Text
+  observaciones     String?     @db.Text
+  tipoConsulta      String      
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  expediente        Expediente  @relation(fields: [expedienteId], references: [idExpediente])
+  medico            Usuario     @relation(fields: [medicoId], references: [id])
+  recetas           RecetaMedica[]
+
+  @@map("ConsultaMedica")
+}
+
+model RecetaMedica {
+  id                Int         @id @default(autoincrement())
+  consultaId        Int
+  medicamento       String
+  dosis             String
+  duracion          String
+  indicaciones      String?     @db.Text
+  createdAt         DateTime    @default(now())
+
+  consulta          ConsultaMedica @relation(fields: [consultaId], references: [id])
+
+  @@map("RecetaMedica")
 }

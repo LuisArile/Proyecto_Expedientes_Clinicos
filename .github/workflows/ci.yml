@@ -52,5 +52,11 @@ jobs:
       - name: Instalar dependencias frontend
         run: npm install
 
+      - name: Run ESLint
+        run: npm run lint
+    
       - name: Ejecutar pruebas frontend
         run: npm test
+    
+      - name: Build project
+        run: npm run build

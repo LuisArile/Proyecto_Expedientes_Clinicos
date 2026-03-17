@@ -115,25 +115,43 @@ class pacienteRepository {
      * @param {number} skip - Cuántos registros saltar.
      * @returns {Promise<Array<Object>>} Lista de hasta 10 pacientes que coincidan con el término.
      */
-    async buscarPaciente(termino, limite = 10, skip = 0){
+    async buscarPaciente(termino, criterio = 'todos', limite = 10, skip = 0){
         try {
-            return await prisma.paciente.findMany({
-                where: {
+            let whereClause = {}; 
+
+            if(criterio === 'nombre') {
+                whereClause = {
+                    OR: [
+                        { nombre: { contains: termino } },
+                        { apellido: { contains: termino } }
+                    ]
+                };
+            } else if (criterio === 'identidad') {
+                whereClause = {
+                    dni: { contains: termino } 
+                };
+            } else if (criterio === 'codigo') {
+                whereClause = { 
+                    expedientes: { 
+                        numeroExpediente: { contains: termino } } 
+                };
+            } else {
+                whereClause = {
                     OR: [
                         { dni: { contains: termino } },
                         { nombre: { contains: termino } },
                         { apellido: { contains: termino } },
-                        // { fechaNacimiento: { contains: termino, mode: 'insensitive' } },
-                    
-                        {
-                            expedientes: {
-                                numeroExpediente: { contains: termino }
-                            }
-                        }
-                    ],
-                },
-                include: 
-                { expedientes: true },
+                        { expedientes: { 
+                            numeroExpediente: { contains: termino } 
+                            } 
+                        },
+                    ]
+                };
+            }
+            
+            return await prisma.paciente.findMany({
+                where: whereClause,
+                include: { expedientes: true },
                 take: limite,
                 skip: skip,
                 orderBy: { nombre: 'asc' }
@@ -143,16 +161,42 @@ class pacienteRepository {
         }
     }
 
-    async contarBusqueda(termino) {
+    async contarBusqueda(termino, criterio = 'todos') {
         try {
-            return await prisma.paciente.count({
-                where: {
+            let whereClause = {};
+
+            if(criterio === 'nombre') {
+                whereClause = {
+                    OR: [
+                        { nombre: { contains: termino } },
+                        { apellido: { contains: termino } }
+                    ]
+                };
+            } else if (criterio === 'identidad') {
+                whereClause = {
+                    dni: { contains: termino } 
+                };
+            } else if (criterio === 'codigo') {
+                whereClause = { 
+                    expedientes: { 
+                        numeroExpediente: { contains: termino } } 
+                };
+            } else {
+                whereClause = {
                     OR: [
                         { dni: { contains: termino } },
                         { nombre: { contains: termino } },
                         { apellido: { contains: termino } },
+                        { expedientes: { 
+                            numeroExpediente: { contains: termino } 
+                            } 
+                        },
                     ]
-                }
+                };
+            }
+
+            return await prisma.paciente.count({
+                where: whereClause
             });
         } catch (error) {
             throw new Error(`Error al contar resultados de búsqueda: ${error.message}`);

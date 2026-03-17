@@ -17,7 +17,7 @@ vi.mock("react-router-dom", async () => {
 // Mock AuthContext
 const mockLogin = vi.fn();
 
-vi.mock("../features/auth/AuthContext", () => ({
+vi.mock("@/features/auth/useAuth", () => ({
   useAuth: () => ({
     login: mockLogin
   })
@@ -109,6 +109,34 @@ describe("Login component", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Credenciales incorrectas")).toBeInTheDocument();
+    });
+
+  });
+
+  test("recorta espacios antes de enviar credenciales", async () => {
+
+    mockLogin.mockResolvedValue({
+      success: true
+    });
+
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Ingrese su usuario"), {
+      target: { value: "  admin  " }
+    });
+
+    fireEvent.change(screen.getByPlaceholderText("Ingrese su contraseña"), {
+      target: { value: "  123456  " }
+    });
+
+    fireEvent.click(screen.getByText("Iniciar sesión"));
+
+    await waitFor(() => {
+      expect(mockLogin).toHaveBeenCalledWith("admin", "123456");
     });
 
   });

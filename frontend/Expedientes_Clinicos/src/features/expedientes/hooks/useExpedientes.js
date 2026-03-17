@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   crearExpediente,
   obtenerExpedientes,
@@ -40,7 +40,7 @@ export function useExpedientes() {
         setError(null);
         const response = await crearExpediente(pacienteData, expedienteData);
         if (response.success) {
-          await cargarExpedientes(); // Recargar la lista
+          await cargarExpedientes();
         }
         return response;
       } catch (err) {
@@ -76,7 +76,7 @@ export function useExpedientes() {
         setError(null);
         const response = await actualizarExpediente(idExpediente, datos);
         if (response.success) {
-          await cargarExpedientes(); // Recargar la lista
+          await cargarExpedientes();
         }
         return response;
       } catch (err) {
@@ -97,7 +97,7 @@ export function useExpedientes() {
         setError(null);
         const response = await eliminarExpediente(idExpediente);
         if (response.success) {
-          await cargarExpedientes(); // Recargar la lista
+          await cargarExpedientes();
         }
         return response;
       } catch (err) {

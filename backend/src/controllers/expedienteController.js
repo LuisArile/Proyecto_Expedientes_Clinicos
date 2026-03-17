@@ -1,165 +1,156 @@
 const BusquedaGlobalDTO = require('../dtos/BusquedaPacienteDTO');
+const { ErrorValidacion, ErrorNoEncontrado } = require("../utils/errores");
+const capturarAsync = require("../utils/capturarAsync");
+
 class expedienteController {
     constructor(expedienteService) {
         this.expedienteService = expedienteService;
     }
 
-    async crearConPaciente(req, res) {
-        try {
-            // Validar que req.body exista
-            if (!req.body) {
-                return res.status(400).json({ 
-                    success: false, 
-                    error: 'El body de la petición está vacío. Asegúrate de enviar Content-Type: application/json' 
-                });
-            }
-
-            const { paciente, expediente } = req.body;
-            
-            if (!paciente) {
-                return res.status(400).json({ 
-                    success: false, 
-                    error: 'Los datos del paciente son requeridos. Envía: { "paciente": {...}, "expediente": {...} }' 
-                });
-            }
-
-            if (!expediente) {
-                return res.status(400).json({ 
-                    success: false, 
-                    error: 'Los datos del expediente son requeridos. Envía: { "paciente": {...}, "expediente": {...} }' 
-                });
-            }
-
-            // Obtener el ID del usuario logueado desde el token (agregado por el middleware)
-            const usuarioId = req.usuario ? req.usuario.id : null;
-
-            const resultado = await this.expedienteService.crearConPaciente(paciente, expediente, usuarioId);
-            res.status(201).json({ 
-                success: true, 
-                data: resultado,
-                message: 'Expediente y paciente creados exitosamente'
-            });
-        } catch (error) {
-            res.status(400).json({ 
-                success: false, 
-                error: error.message 
-            });
+        crearConPaciente = capturarAsync(async (req, res, next) => {
+        if (!req.body) {
+            throw new ErrorValidacion('El body de la petición está vacío');
         }
-    }
 
-    async obtenerTodos(req, res) {
-        try {
-            const expedientes = await this.expedienteService.obtenerTodos();
-            res.json({ 
-                success: true, 
-                data: expedientes 
-            });
-        } catch (error) {
-            res.status(400).json({ 
-                success: false, 
-                error: error.message 
-            });
+        const { paciente, expediente } = req.body;
+        
+        if (!paciente) {
+            throw new ErrorValidacion('Los datos del paciente son requeridos');
         }
-    }
 
-    async obtenerPorId(req, res) {
-        try {
-            const { idExpediente } = req.params;
-            const expediente = await this.expedienteService.obtenerPorId(idExpediente);
-            res.json({ 
-                success: true, 
-                data: expediente 
-            });
-        } catch (error) {
-            res.status(404).json({ 
-                success: false, 
-                error: error.message 
-            });
+        if (!paciente.dni) {
+            throw new ErrorValidacion('El DNI del paciente es obligatorio');
         }
-    }
-
-    async obtenerPorPaciente(req, res) {
-        try {
-            const { idPaciente } = req.params;
-            const expediente = await this.expedienteService.obtenerPorPaciente(idPaciente);
-            res.json({ 
-                success: true, 
-                data: expediente 
-            });
-        } catch (error) {
-            res.status(404).json({ 
-                success: false, 
-                error: error.message 
-            });
+        if (!paciente.nombre) {
+            throw new ErrorValidacion('El nombre del paciente es obligatorio');
         }
-    }
-
-    async actualizar(req, res) {
-        try {
-            const { idExpediente } = req.params;
-            const { estado, observaciones } = req.body;
-
-            const resultado = await this.expedienteService.actualizar(idExpediente, {
-                estado,
-                observaciones
-            });
-
-            res.json({ 
-                success: true, 
-                data: resultado,
-                message: 'Expediente actualizado exitosamente'
-            });
-        } catch (error) {
-            res.status(400).json({ 
-                success: false, 
-                error: error.message 
-            });
+        if (!paciente.apellido) {
+            throw new ErrorValidacion('El apellido del paciente es obligatorio');
         }
-    }
-
-    async eliminar(req, res) {
-        try {
-            const { idExpediente } = req.params;
-            await this.expedienteService.eliminar(idExpediente);
-            res.json({ 
-                success: true, 
-                message: 'Expediente eliminado exitosamente'
-            });
-        } catch (error) {
-            res.status(400).json({ 
-                success: false, 
-                error: error.message 
-            });
+        if (!paciente.fechaNacimiento) {
+            throw new ErrorValidacion('La fecha de nacimiento es obligatoria');
         }
-    }
 
-    async buscarGlobal(req, res) {
-        try {
-
-            const filtroDto = new BusquedaGlobalDTO(req.query);
-
-            const usuarioId = req.usuario ? req.usuario.id : null;
-
-            const resultados = await this.expedienteService.buscarGlobal(filtroDto, usuarioId);
-            
-            // if( !filtroDto.termino ) {
-            //     return res.status(400).json({
-            //         success: false,
-            //         error: 'Debe proporcioanr un término de búsqueda'
-            //     });
-            // }
-
-            res.json({ 
-                success: true, 
-                data: resultados 
-            });
-        } catch (error) {
-            res.status(400).json({ 
-                success: false, 
-                error: error.message 
-            });
+        if (!expediente) {
+            throw new ErrorValidacion('Los datos del expediente son requeridos');
         }
-    }
+
+        const usuarioId = req.usuario?.id;
+        if (!usuarioId) {
+            throw new ErrorValidacion('Usuario no autenticado');
+        }
+
+        const resultado = await this.expedienteService.crearConPaciente(paciente, expediente, usuarioId);
+        
+        res.status(201).json({
+            success: true,
+            message: 'Expediente y paciente creados exitosamente',
+            data: resultado
+        });
+    });
+
+    obtenerTodos = capturarAsync(async (req, res, next) => {
+        const expedientes = await this.expedienteService.obtenerTodos();
+        
+        res.json({
+            success: true,
+            data: expedientes
+        });
+    });
+
+    obtenerPorId = capturarAsync(async (req, res, next) => {
+        const { idExpediente } = req.params;
+
+        if (!idExpediente) {
+            throw new ErrorValidacion('El ID del expediente es obligatorio');
+        }
+
+        const expediente = await this.expedienteService.obtenerPorId(idExpediente);
+
+        if (!expediente) {
+            throw new ErrorNoEncontrado('Expediente');
+        }
+
+        res.json({
+            success: true,
+            data: expediente
+        });
+    });
+
+    obtenerPorPaciente = capturarAsync(async (req, res, next) => {
+        const { idPaciente } = req.params;
+
+        if (!idPaciente) {
+            throw new ErrorValidacion('El ID del paciente es obligatorio');
+        }
+
+        const expediente = await this.expedienteService.obtenerPorPaciente(idPaciente);
+
+        if (!expediente) {
+            throw new ErrorNoEncontrado('Expediente para este paciente');
+        }
+
+        res.json({
+            success: true,
+            data: expediente
+        });
+    });
+
+    
+    actualizar = capturarAsync(async (req, res, next) => {
+        const { idExpediente } = req.params;
+        const { estado, observaciones } = req.body;
+
+        if (!idExpediente) {
+            throw new ErrorValidacion('El ID del expediente es obligatorio');
+        }
+
+        const resultado = await this.expedienteService.actualizar(idExpediente, {
+            estado,
+            observaciones
+        });
+
+        res.json({
+            success: true,
+            message: 'Expediente actualizado exitosamente',
+            data: resultado
+        });
+    });
+
+    
+    eliminar = capturarAsync(async (req, res,next) => {
+        const { idExpediente } = req.params;
+
+        if (!idExpediente) {
+            throw new ErrorValidacion('El ID del expediente es obligatorio');
+        }
+
+        await this.expedienteService.eliminar(idExpediente);
+
+        res.json({
+            success: true,
+            message: 'Expediente eliminado exitosamente'
+        });
+    });
+
+    // Búsqueda global
+    buscarGlobal = capturarAsync(async (req, res, next) => {
+        const filtroDto = new BusquedaGlobalDTO(req.query);
+        const usuarioId = req.usuario?.id;
+
+        // Validar término de búsqueda
+        if (!filtroDto.termino || filtroDto.termino.trim() === '') {
+            throw new ErrorValidacion('Debe proporcionar un término de búsqueda');
+        }
+
+        const resultados = await this.expedienteService.buscarGlobal(filtroDto, usuarioId);
+
+        res.json({
+            success: true,
+            data: resultados
+        });
+    });
 }
+
 
 module.exports = expedienteController;

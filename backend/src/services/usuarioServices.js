@@ -23,10 +23,10 @@ class usuarioService{
 
         const usuario= await this.usuarioRepository.crear(data);
 
-        if(usuario&&usuario.Id){
+        if(usuario&&usuario.id){
             //registrar accion 
-        await this.usuarioRepository.registrarAccionUsuario(usuario.Id,'USUARIO_CREADO',
-            {rol:data.rol}
+        await this.usuarioRepository.registrarAccionUsuario(usuario.id,'USUARIO_CREADO',
+            {idRol:data.idRol}
         );
     }
 
@@ -46,7 +46,30 @@ class usuarioService{
             throw new Error(`Error al obtener usuarios: ${error.message}`);
         }
     }
-    
+
+    async cambiarPassword(userId, currentPassword, newPassword) {
+
+        const usuario = await this.usuarioRepository.obtenerPorId(userId);
+
+        if (!usuario) {
+            throw new Error("Usuario no encontrado");
+        }
+
+        // Verificar contraseña actual
+        const passwordCorrecta = await bcrypt.compare(currentPassword, usuario.clave);
+
+        if (!passwordCorrecta) {
+            throw new Error("La contraseña actual es incorrecta");
+        }
+
+        // Generar hash de la nueva contraseña
+        const hashedPassword = await Encriptador.encriptar(newPassword);
+       
+        // Actualizar contraseña en la base de datos
+        const resultado = await this.usuarioRepository.actualizarPassword(userId, hashedPassword);
+        
+        return { mensaje: "Contraseña actualizada correctamente" };
+    }
 }
     
 module.exports=usuarioService;

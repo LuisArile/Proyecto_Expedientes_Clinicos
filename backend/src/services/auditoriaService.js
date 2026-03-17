@@ -15,7 +15,7 @@ class AuditoriaService {
      * @param {string} detalles - Detalles adicionales de la acción
      * @returns {Promise<Object>} Registro creado
      */
-    async registrar(usuarioId, accion, detalles = null) {
+    async registrar(usuarioId, accion, detalles = null, tx = null) {
         try {
             if (!usuarioId) {
                 console.warn("Intento de auditoría sin usuarioId");
@@ -26,7 +26,7 @@ class AuditoriaService {
                 usuarioId: usuarioId,
                 accion: accion,
                 detalles: detalles
-            });
+            }, tx);
         } catch (error) {
             console.error(`Error al registrar auditoría [${accion}]: ${error.message}`);
             // No lanzamos el error para no afectar la operación principal
@@ -56,10 +56,15 @@ class AuditoriaService {
      * @param {number} idExpediente - ID del expediente afectado
      * @returns {Promise<Object>}
      */
-    async registrarExpediente(usuarioId, tipoAccion, idExpediente) {
-        const accion = `${tipoAccion} de expediente`;
-        const detalles = `${tipoAccion.toLowerCase()} de expediente ${idExpediente}`;
-        return this.registrar(usuarioId, accion, detalles);
+    async registrarExpediente(usuarioId, tipoAccion, datos, tx = null) {
+        const accion = `${tipoAccion} DE EXPEDIENTE`;
+
+        const idExp = typeof datos === 'object' ? datos.idExpediente : datos;
+        const detallesAdicionales = datos.detalles || `Proceso de ${tipoAccion.toLowerCase()}`;
+        
+        const detallesFinales = `Expediente ID: ${idExp}. ${detallesAdicionales}`;
+        
+        return this.registrar(usuarioId, accion, detallesFinales, tx);
     }
 
     /**

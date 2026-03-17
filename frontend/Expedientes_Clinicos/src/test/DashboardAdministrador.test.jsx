@@ -1,35 +1,36 @@
 import { render, screen } from "@testing-library/react";
 import { describe, test, expect, vi } from "vitest";
-import { DashboardAdministrador } from "../features/dashboard/components/DashboardAdministrador";
+import { DashboardFeature } from "../features/dashboard/components/DashboardFeature";
 import { MemoryRouter } from "react-router-dom";
 
 /* ---------------- MOCKS ---------------- */
 
-// Mock AuthContext
-vi.mock("@/features/auth/AuthContext", () => ({
+// Mock useAuth
+vi.mock("@/features/auth/useAuth", () => ({
   useAuth: () => ({
     user: {
       nombre: "Juan",
-      apellido: "Perez"
+      apellido: "Perez",
+      rol: "ADMINISTRADOR"
     }
   })
 }));
 
-// Mock hook del dashboard
-vi.mock("../features/dashboard/hooks/useAdminDashboard", () => ({
-  useAdminDashboard: () => ({
+// Mock hook de dashboard nuevo
+vi.mock("../features/dashboard/hooks/useDashboardData", () => ({
+  useDashboardData: () => ({
     loading: false,
-    estadisticas: {
-      usuariosActivos: 10,
-      eventosHoy: 5,
-      medicamentos: 20,
-      tiposExamen: 8
-    },
+    tarjetas: [
+      { id: "usuarios", valor: 10, pie: "usuarios conectados" },
+      { id: "auditoria", valor: 5, pie: "eventos hoy" },
+      { id: "medicamentos", valor: 20, pie: "catálogo" },
+      { id: "examenes", valor: 8, pie: "tipos" }
+    ],
     actividad: [
       {
         usuario: "admin",
         accion: "Creó un usuario",
-        hora: "10:30"
+        fecha: "2026-03-16T10:30:00.000Z"
       }
     ]
   })
@@ -37,11 +38,11 @@ vi.mock("../features/dashboard/hooks/useAdminDashboard", () => ({
 
 // Mock componentes UI (para evitar dependencias visuales)
 vi.mock("@/components/ui/card", () => ({
-  Card: ({ children }) => <div>{children}</div>,
-  CardContent: ({ children }) => <div>{children}</div>,
-  CardHeader: ({ children }) => <div>{children}</div>,
-  CardTitle: ({ children }) => <div>{children}</div>,
-  CardDescription: ({ children }) => <div>{children}</div>
+  Card: ({ children, ...props }) => <div {...props}>{children}</div>,
+  CardContent: ({ children, ...props }) => <div {...props}>{children}</div>,
+  CardHeader: ({ children, ...props }) => <div {...props}>{children}</div>,
+  CardTitle: ({ children, ...props }) => <div {...props}>{children}</div>,
+  CardDescription: ({ children, ...props }) => <div {...props}>{children}</div>
 }));
 
 /* ---------------- TESTS ---------------- */
@@ -52,7 +53,7 @@ describe("DashboardAdministrador", () => {
 
     render(
       <MemoryRouter>
-        <DashboardAdministrador />
+        <DashboardFeature onNavigate={vi.fn()} />
       </MemoryRouter>
     );
 
@@ -66,14 +67,14 @@ describe("DashboardAdministrador", () => {
 
     render(
       <MemoryRouter>
-        <DashboardAdministrador />
+        <DashboardFeature onNavigate={vi.fn()} />
       </MemoryRouter>
     );
 
     expect(screen.getByText("Usuarios Activos")).toBeInTheDocument();
-    expect(screen.getByText("Eventos Hoy")).toBeInTheDocument();
+    expect(screen.getByText("Eventos de Auditoría")).toBeInTheDocument();
     expect(screen.getAllByText("Medicamentos")[0]).toBeInTheDocument();
-    expect(screen.getByText("Tipos de Examen")).toBeInTheDocument();
+    expect(screen.getAllByText("Exámenes")[0]).toBeInTheDocument();
 
   });
 
@@ -81,12 +82,28 @@ describe("DashboardAdministrador", () => {
 
     render(
       <MemoryRouter>
-        <DashboardAdministrador />
+        <DashboardFeature onNavigate={vi.fn()} />
       </MemoryRouter>
     );
 
     expect(screen.getByText("Creó un usuario")).toBeInTheDocument();
-    expect(screen.getByText("10:30")).toBeInTheDocument();
+    expect(screen.getByText("admin")).toBeInTheDocument();
+
+  });
+
+  test("navega al seleccionar un modulo", () => {
+
+    const onNavigate = vi.fn();
+
+    render(
+      <MemoryRouter>
+        <DashboardFeature onNavigate={onNavigate} />
+      </MemoryRouter>
+    );
+
+    screen.getByText("Usuarios").click();
+
+    expect(onNavigate).toHaveBeenCalledWith("/usuarios");
 
   });
 

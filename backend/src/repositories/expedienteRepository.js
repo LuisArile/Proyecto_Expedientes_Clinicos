@@ -33,31 +33,12 @@ class expedienteRepository {
     async crear(data, tx = null) {
         const client = tx || prisma;
         try {
-            // El numeroExpediente ya viene generado o validado desde el Service
-
-            // // Generar numeroExpediente con formato EXP-YYYY-NNNNN
-            // const anioActual = new Date().getFullYear();
-            
-            // // Contar los expedientes del año actual
-            // const expedientesDelAnio = await prisma.expediente.count({
-            //     where: {
-            //         numeroExpediente: {
-            //             startsWith: `EXP-${anioActual}`
-            //         }
-            //     }
-            // });
-            
-            // // Generar el número incremental (01, 02, 03, etc)
-            // const numeroIncremental = String(expedientesDelAnio + 1).padStart(5, '0');
-            // const numeroExpediente = `EXP-${anioActual}-${numeroIncremental}`;
-            
-            // Mapear estado de string a número
             const estadoNumerico = this._mapearEstado(data.estado || 'activo');
             
             const resultado = await client.expediente.create({
                 data: {
                     idPaciente: data.idPaciente,
-                    numeroExpediente: numeroExpediente,
+                    numeroExpediente: data.numeroExpediente,
                     estado: estadoNumerico,
                     observaciones: data.observaciones || null,
                     fechaCreacion: new Date(),
@@ -172,6 +153,37 @@ class expedienteRepository {
             throw new Error(`Error al eliminar expediente: ${error.message}`);
         }
     }
+
+    async contarCreadosHoy(usuarioId = null, accionFiltro = 'CREACIÓN DE EXPEDIENTE') {
+        const inicioHoy = new Date();
+        inicioHoy.setHours(0, 0, 0, 0);
+        const finHoy = new Date();
+        finHoy.setHours(23, 59, 59, 999);
+
+        if (!usuarioId) {
+            return await prisma.expediente.count({
+                where: {
+                    fechaCreacion: {
+                        gte: inicioHoy,
+                        lte: finHoy
+                    }
+                }
+            });
+        }
+        return await prisma.auditoria.count({
+            where: {
+                usuarioId: Number(usuarioId),
+                accion: {
+                    contains: accionFiltro
+                },
+                fecha: {
+                    gte: inicioHoy,
+                    lte: finHoy
+                }
+            }
+        });
+    }
 }
+
 
 module.exports = expedienteRepository;

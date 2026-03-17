@@ -1,3 +1,5 @@
+const prisma = require('../config/prisma');
+
 class expedienteService {
     constructor(expedienteRepository, pacienteRepository, auditoriaService) {
         this.expedienteRepository = expedienteRepository;
@@ -60,7 +62,7 @@ class expedienteService {
                     await this.auditoriaService.registrarExpediente(usuarioId, "CREACIÓN", {
                         idExpediente: expedienteCreado.idExpediente,
                         dniPaciente: pacienteCreado.dni,
-                        accion: "Creación de paciente y apertura de expediente clínico"
+                        detalles: "Creación de paciente y apertura de expediente clínico"
                     }, tx);
                 }
 
@@ -158,7 +160,7 @@ class expedienteService {
      */
     async buscarGlobal(filtroDto, usuarioId = null) {
         try {
-            const { termino, pagina, limite } = filtroDto;
+            const { termino, criterio, pagina, limite } = filtroDto;
 
             const skip = (pagina - 1) * limite;
      
@@ -169,8 +171,8 @@ class expedienteService {
                 }).catch(err => console.error("Error auditoría búsqueda:", err));
             }
 
-            const resultados = await this.pacienteRepository.buscarPaciente(termino, limite, skip);
-            const total = await this.pacienteRepository.contarBusqueda(termino);
+            const resultados = await this.pacienteRepository.buscarPaciente(termino, criterio, limite, skip);
+            const total = await this.pacienteRepository.contarBusqueda(termino, criterio);
 
             return {
                 resultados,

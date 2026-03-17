@@ -7,21 +7,25 @@ class UsuarioRepository {
     async crear(data) {
         try {
 
-            const hashedPassword = await bcrypt.hash(data.clave, 10);
-
             const resultado = await prisma.usuario.create({
                 data: {
                     nombre: data.nombre,
                     apellido: data.apellido,
                     correo: data.correo,
                     nombreUsuario: data.nombreUsuario,
-                    clave: hashedPassword,
-                    rol: data.rol,
+                    clave: data.clave,
+                    idRol: Number(data.idRol),
                     activo: true
-                }
+                },
+                include: { rol: true }
             });
 
-            return UsuarioBase.crearUsuario(resultado);
+            const usuarioConRol = {
+                ...resultado,
+                rolNombre: resultado.rol.nombre
+            };
+
+            return UsuarioBase.crearUsuario(usuarioConRol);
 
         } catch (error) {
             throw new Error(`Error al crear usuario: ${error.message}`);
@@ -31,10 +35,13 @@ class UsuarioRepository {
     async obtenerTodos() {
         try {
             const resultados = await prisma.usuario.findMany({
-                include: { auditorias: true }
+                include: { auditorias: true, rol: true }
             });
 
-            return UsuarioBase.crearUsuarios(resultados);
+            return UsuarioBase.crearUsuarios(resultados.map(r => ({
+                ...r,
+                rolNombre: r.rol.nombre
+            })));
 
         } catch (error) {
             throw new Error(`Error al obtener usuarios: ${error.message}`);
@@ -44,12 +51,30 @@ class UsuarioRepository {
     async filtrarNombreUsuario(nombreUsuario) {
         try {
             const data = await prisma.usuario.findUnique({
-                where: { nombreUsuario }
+                where: { nombreUsuario },
+                include: { 
+                    rol: {
+                        include: {
+                            permisos: {
+                                include: { permiso: true }
+                            }
+                        }
+                    }
+                }
             });
 
-            return data ? UsuarioBase.crearUsuario(data) : null;
+            if (!data) return null;
+
+            const usuarioConRol = {
+                ...data,
+                rolNombre: data.rol?.nombre || "SIN_ROL",
+                permisos: data.rol?.permisos?.map(p => p.permiso.nombre) || []
+            };
+
+            return UsuarioBase.crearUsuario(usuarioConRol);
 
         } catch (error) {
+            // Este es el error que ves en tu consola actualmente
             throw new Error(`Error al buscar usuario: ${error.message}`);
         }
     }
@@ -79,6 +104,34 @@ class UsuarioRepository {
 
         } catch (error) {
             console.error('Error al registrar auditoría:', error);
+        }
+    }
+
+    async obtenerPorId(userId) {
+        try {
+            return await prisma.usuario.findUnique({
+                where: { id: Number(userId) }
+            });
+
+        } catch (error) {
+            console.error("Error Prisma:", error);
+            throw error;
+        }
+    } 
+    
+    async actualizarPassword(userId, nuevaPassword) {
+        try {
+            return await prisma.usuario.update({
+                where: {
+                    id: userId
+                },
+                data: {
+                    clave: nuevaPassword
+                }
+            });
+        } catch (error) {
+            console.error("Error Prisma:", error);
+            throw error;
         }
     }
 }

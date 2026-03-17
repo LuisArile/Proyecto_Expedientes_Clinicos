@@ -1,29 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "../components/layout/dashboardLayout";
-import { useAuth } from "../features/auth/AuthContext";
-// Importar los dashboards específicos
-import { DashboardAdministrador } from "../features/dashboard/components/DashboardAdministrador";
-import { DashboardDoctor } from "../features/dashboard/components/DashboardDoctor";
-import { DashboardRecepcionista } from "../features/dashboard/components/DashboardRecepcionista";
-import { DashboardEnfermero } from "../features/dashboard/components/DashboardEnfermero";
-import { FormularioExpediente } from "../features/expedientes/components/FormularioExpediente";
+import { useAuth } from "@/features/auth/useAuth";
+import { Button } from "@/components/ui/button";
 
-import { BuscarPaciente } from "../features/expedientes/components/BuscarPaciente";
+import { DashboardFeature } from "../features/dashboard/components/DashboardFeature";
 import { Changepassword } from "../features/dashboard/components/Changepassword";
+import { GestionRoles } from "../features/admin/components/GestionRoles";
 
-// Mapeo de componentes
-const DASHBOARD_COMPONENTS = {
-  ADMINISTRADOR: DashboardAdministrador,
-  MEDICO: DashboardDoctor,
-  RECEPCIONISTA: DashboardRecepcionista,
-  ENFERMERO: DashboardEnfermero,
-};
+import { FormularioExpediente } from "../features/expedientes/components/FormularioExpediente";
+import { BuscarPaciente } from "../features/expedientes/components/BuscarPaciente";
+
+import { ConsultaMedica } from "../features/consultas/components/ConsultaMedica";
+
+import { FormularioRegistroPreclinico } from "../features/preclinica/components/FormularioRegistroPreclinico";
+import { ListaRegistrosPreclinicos } from "../features/preclinica/components/ListaRegistrosPreclinicos";
 
 export function Dashboard() {
   const { user } = useAuth();
-  const [currentView, setCurrentView] = useState("inicio");
+  
+  const [currentView, setCurrentView] = useState(() => {
+    return localStorage.getItem("sgec_view") || "inicio";
+  });
 
-  // Si no hay usuario todavía, mostramos carga para evitar errores de undefined
+  const [selectedPaciente, setSelectedPaciente] = useState(() => {
+    const saved = localStorage.getItem("sgec_selected_paciente");
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sgec_view", currentView);
+  }, [currentView]);
+
+  useEffect(() => {
+    if (selectedPaciente) {
+      localStorage.setItem("sgec_selected_paciente", JSON.stringify(selectedPaciente));
+    } else {
+      localStorage.removeItem("sgec_selected_paciente");
+    }
+  }, [selectedPaciente]);
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -32,68 +47,59 @@ export function Dashboard() {
     );
   }
 
-  const renderContent = () => {
-    // Normalizamos el rol a Mayúsculas para evitar errores de "Administrador" vs "ADMINISTRADOR"
-    const userRole = user.rol?.toUpperCase();
+  const handleNavigate = (view) => {
+    if (typeof view === 'string') setCurrentView(view);
+  };
 
-    // Lógica para el expediente
-    if (currentView === "crear-expediente") {
-      if (["RECEPCIONISTA", "ADMINISTRADOR"].includes(userRole)) {
+  const renderContent = () => {
+    const volverInicio = () => {
+      setSelectedPaciente(null);
+      setCurrentView("inicio");
+    };
+
+    switch (currentView) {
+      case "inicio":
+        return <DashboardFeature onNavigate={handleNavigate} />;
+      case "crear-expediente":
+        return <FormularioExpediente onVolver={volverInicio} onSuccess={volverInicio} />;
+      case "buscar-paciente":
         return (
-          <FormularioExpediente 
-            onSuccess={() => setCurrentView("inicio")}
-            onCancel={() => setCurrentView("inicio")} 
+          <BuscarPaciente onVolver={volverInicio} onVerExpediente={(paciente) => console.log("Abriendo:", paciente.codigo)} onConsultaMedica={(paciente) => { setSelectedPaciente(paciente); setCurrentView("consulta-medica"); }} />
+        );
+      case "preclinica":
+        return <FormularioRegistroPreclinico onVolver={volverInicio} onSuccess={volverInicio} />;
+      case "pacientes-evaluados":
+        return <ListaRegistrosPreclinicos onVolver={volverInicio} />;
+      case "consulta-medica":
+        if (!selectedPaciente) {
+          return (
+            <div className="p-10 text-center">
+              <p className="mb-4">No se ha seleccionado ningún paciente para la consulta.</p>
+              <Button onClick={() => setCurrentView("buscar-paciente")}>Ir a buscar paciente</Button>
+            </div>
+          );
+        }
+        return (
+          <ConsultaMedica 
+            paciente={selectedPaciente} 
+            onVolver={() => {
+              setSelectedPaciente(null);
+              setCurrentView("buscar-paciente");
+            }} 
+            onSuccess={volverInicio} 
           />
         );
-      }
-      return (
-        <div className="p-10 text-red-500 font-bold">
-          No tienes permiso para crear expedientes.
-        </div>
-      );
+      case "gestion-roles":
+        return <GestionRoles onVolver={volverInicio} />;
+      case "changepassword":
+        return <Changepassword onVolver={volverInicio} />;
+      default:
+        return <p className="p-10 text-center">Módulo en construcción...</p>;
     }
-
-    // Buscar Paciente
-    if (currentView === "buscar-paciente") {
-      return (
-        <BuscarPaciente 
-          onVolver={() => setCurrentView("inicio")} 
-          onVerExpediente={(paciente) => console.log("Abriendo:", paciente.codigo)}
-        />
-      )
-    }
-
-    //cambiar contraseña
-    if (currentView === "changepassword") {
-      return <Changepassword />;
-    }
-
-    // Seleccionar el Dashboard según el rol
-    const RoleDashboard = DASHBOARD_COMPONENTS[userRole];
-    if (RoleDashboard) {
-      return <RoleDashboard currentView={currentView} user={user} />;
-    }
-
-    // Caso de error: El rol no existe en nuestro objeto
-    return (
-      <div className="p-10 text-center">
-        <h2 className="text-xl font-bold text-red-600">Acceso Restringido</h2>
-        <p className="text-gray-600">El rol "{userRole || 'SIN ROL'}" no tiene un panel configurado.</p>
-        <button 
-          onClick={() => window.location.href = "/login"}
-          className="mt-4 text-blue-500 underline"
-        >
-          Volver al login
-        </button>
-      </div>
-    );
-  };   
+  };
 
   return (
-    <DashboardLayout
-      currentView={currentView}
-      onNavigate={(view) => setCurrentView(view)}
-    >
+    <DashboardLayout currentView={currentView} onNavigate={handleNavigate}>
       {renderContent()}
     </DashboardLayout>
   );

@@ -1,65 +1,36 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-// import { AuthProvider, useAuth } from "./features/auth/AuthContext";
-import { useAuth } from "./features/auth/AuthContext";
+import { useAuth } from "@/features/auth/useAuth";
 import { Dashboard } from "./pages/Dashboard";
 import { Login } from "./pages/Login";
-import { Changepassword } from "./features/dashboard/components/Changepassword";
 
-
-
-// Roles permitidos para acceder al dashboard
-const allowedRoles = ["RECEPCIONISTA", "ENFERMERO", "MEDICO", "ADMINISTRADOR"];
-
-function PrivateRoute({ children, allowedRoles }) {
+function PrivateRoute({ children}) {
   const { user } = useAuth();
 
-  if (!user) {
-    // No autenticado → login
-    return <Navigate to="/login" replace />;
-  }
+  if (!user) { return <Navigate to="/login" replace /> }
 
-  if (allowedRoles && !allowedRoles.includes(user.rol?.toUpperCase())) {
-    // Rol no permitido → login o página de acceso denegado
-    return <Navigate to="/login" replace />;
-  }
+  if (!user.rol) return <Navigate to="/login" replace />;
 
   return children;
 }
 
 function App() {
   return (
-    // <AuthProvider>
-      <Router>
-        <Routes>
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
 
-          <Route path="/" element={<Navigate to="/login" replace />} />
-
-          <Route path="/login" element={<Login />} />
-
-          <Route
-            path="/dashboard"
-            element={
-              // <PrivateRoute allowedRoles={allowedRoles}>
-              <PrivateRoute allowedRoles={["RECEPCIONISTA", "ENFERMERO", "MEDICO", "ADMINISTRADOR"]}>  
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/changepassword"
-            element={
-              <PrivateRoute allowedRoles={allowedRoles}>
-                <Changepassword />
-              </PrivateRoute>
-            }
-          />
-
-          <Route path="*" element={<Navigate to="/login" replace />} />
-
-        </Routes>
-      </Router>
-    // </AuthProvider>
+        <Route
+          path="/dashboard/*"
+          element={
+            <PrivateRoute>  
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+        
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </Router>
   );
 }
 

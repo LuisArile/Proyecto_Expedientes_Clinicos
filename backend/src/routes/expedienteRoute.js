@@ -19,28 +19,28 @@ const expedienteService = new ExpedienteService(expedienteRepository, pacienteRe
 const expedienteController = new ExpedienteController(expedienteService);
 
 // Crear expediente junto con datos del paciente (único endpoint de creación)
-router.post("/", validarToken, (req, res) => expedienteController.crearConPaciente(req, res));
+router.post("/", validarToken, (req, res,next) => expedienteController.crearConPaciente(req, res, next));
 
 // Obtener todos los expedientes
-router.get("/", (req, res) => expedienteController.obtenerTodos(req, res));
+router.get("/", (req, res,next) => expedienteController.obtenerTodos(req, res,next));
 
 // Búsqueda global (DNI, Nombre, Apellido)
 router.get('/buscar', 
     validarToken, 
-    (req, res) => expedienteController.buscarGlobal(req, res)
+    (req, res,next) => expedienteController.buscarGlobal(req, res,next)
 );
 
 // Obtener expediente de un paciente específico
-router.get("/paciente/:idPaciente", (req, res) => expedienteController.obtenerPorPaciente(req, res));
+router.get("/paciente/:idPaciente", (req, res,next) => expedienteController.obtenerPorPaciente(req, res,next));
 
 // Obtener expediente por ID
-router.get("/:idExpediente", (req, res) => expedienteController.obtenerPorId(req, res));
+router.get("/:idExpediente", (req, res,next) => expedienteController.obtenerPorId(req, res,next));
 
 // Actualizar expediente
-router.put("/:idExpediente", (req, res) => expedienteController.actualizar(req, res));
+router.put("/:idExpediente", (req, res,next) => expedienteController.actualizar(req, res,next));
 
 // Eliminar expediente
-router.delete("/:idExpediente", (req, res) => expedienteController.eliminar(req, res));
+router.delete("/:idExpediente", (req, res,next) => expedienteController.eliminar(req, res,next));
 
 // router.get('/:id', expedienteController.obtenerPorId);
 
