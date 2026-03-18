@@ -40,7 +40,7 @@ router.post('/expediente/:expedienteId',autorizarRol(['MEDICO']),(req, res,next)
 //Medicos y enfemeros pueden ver consultas de un expediente
 router.get('/expediente/:expedienteId',autorizarRol(['MEDICO', 'ENFERMERO']),(req, res,next) => consultaMedicaController.obtenerPorExpediente(req, res,next));
 
-//obtener un expediente en especifico
+//obtener un expediente en especifico, solo medico y enfermeros
 router.get('/:id',autorizarRol(['MEDICO', 'ENFERMERO']),(req, res,next) => consultaMedicaController.obtenerPorId(req, res,next));
 
 module.exports = router;

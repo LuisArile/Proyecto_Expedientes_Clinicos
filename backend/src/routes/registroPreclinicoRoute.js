@@ -1,7 +1,8 @@
-const autorizarRol = require("../middlewares/autorizarRol");
-const validarToken = require("../middlewares/inicioSesionMiddleware");
-const prisma = require("../config/prisma");
 const express = require("express"); 
+const validarToken = require("../middlewares/inicioSesionMiddleware");
+const autorizarRol = require("../middlewares/autorizarRol");
+const prisma = require("../config/prisma");
+
 
 
 const RegistroPreclinicoRepository = require("../repositories/registroPreclinicoRepositorio");
@@ -28,19 +29,28 @@ const registroPreclinicoController = new RegistroPreclinicoController(
 
 const router = express.Router();
 
-// validar Token
+// validar Token en todas las rutas
 router.use(validarToken);
 //router.use(autorizarRol(['ENFERMERO', 'MEDICO']));
 
 // Rutas
+
+//Registrar signos solo ENFERMEROS
 router.post("/expediente/:expedienteId",autorizarRol(['ENFERMERO']) , (req, res,next) => registroPreclinicoController.registrar(req, res,next));
+
+//Obtener todos los registros de un expediente solo ENFERMEROS y MEDICOS
 router.get("/expediente/:expedienteId", autorizarRol(['ENFERMERO', 'MEDICO']), (req, res,next) => registroPreclinicoController.obtenerPorExpediente(req, res,next));
+
+//Obtener el ultimo registro de un expediente solo ENFERMEROS y MEDICOS
 router.get("/expediente/:expedienteId/ultimo", autorizarRol(['ENFERMERO', 'MEDICO']), (req, res,next) => registroPreclinicoController.obtenerUltimoPorExpediente(req, res,next));
-router.post("/expediente/:expedienteId", autorizarRol(['ENFERMERO']), (req, res) => registroPreclinicoController.registrar(req, res));
-router.get("/todos", autorizarRol(['ENFERMERO', 'MEDICO', 'ADMINISTRADOR']), (req, res) => registroPreclinicoController.obtenerTodos(req, res));
-router.get("/conteo", autorizarRol(['ENFERMERO', 'MEDICO', 'ADMINISTRADOR']), (req, res) => registroPreclinicoController.contarTodos(req, res));
-router.get("/expediente/:expedienteId", autorizarRol(['ENFERMERO', 'MEDICO']), (req, res) => registroPreclinicoController.obtenerPorExpediente(req, res));
-router.get("/expediente/:expedienteId/ultimo", autorizarRol(['ENFERMERO', 'MEDICO']), (req, res) => registroPreclinicoController.obtenerUltimoPorExpediente(req, res));
+
+//obtener   todos los registros para panel solo ENFERMEROS ,MEDICOS, ADMINISTRADORES
+router.get("/todos", autorizarRol(['ENFERMERO', 'MEDICO', 'ADMINISTRADOR']), (req, res,next) => registroPreclinicoController.obtenerTodos(req, res,next));
+
+//Obtener conteo de registros solo ENFERMEROS ,MEDICOS, ADMINISTRADORES
+router.get("/conteo", autorizarRol(['ENFERMERO', 'MEDICO', 'ADMINISTRADOR']), (req, res,next) => registroPreclinicoController.contarTodos(req, res,next));
+
+
 
 module.exports = router;
 
