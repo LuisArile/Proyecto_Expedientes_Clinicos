@@ -56,9 +56,7 @@ class auditoriaRepository {
             },
             take: limite,
             orderBy: { fecha: 'desc' },
-            include: { 
-                usuario: { select: { nombre: true, apellido: true, nombreUsuario: true } } 
-            }
+            include: { usuario: { select: { nombre: true, apellido: true, nombreUsuario: true } } }
         });
     }
 }

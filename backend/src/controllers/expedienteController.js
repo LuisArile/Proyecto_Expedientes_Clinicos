@@ -1,4 +1,3 @@
-const BusquedaGlobalDTO = require('../dtos/BusquedaPacienteDTO');
 const { ErrorValidacion, ErrorNoEncontrado } = require("../utils/errores");
 const capturarAsync = require("../utils/capturarAsync");
 
@@ -130,24 +129,6 @@ class expedienteController {
         res.json({
             success: true,
             message: 'Expediente eliminado exitosamente'
-        });
-    });
-
-    // Búsqueda global
-    buscarGlobal = capturarAsync(async (req, res, next) => {
-        const filtroDto = new BusquedaGlobalDTO(req.query);
-        const usuarioId = req.usuario?.id;
-
-        // Validar término de búsqueda
-        if (!filtroDto.termino || filtroDto.termino.trim() === '') {
-            throw new ErrorValidacion('Debe proporcionar un término de búsqueda');
-        }
-
-        const resultados = await this.expedienteService.buscarGlobal(filtroDto, usuarioId);
-
-        res.json({
-            success: true,
-            data: resultados
         });
     });
 }

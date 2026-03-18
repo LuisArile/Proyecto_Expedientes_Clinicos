@@ -81,38 +81,3 @@ export async function eliminarExpediente(idExpediente) {
     throw error;
   }
 }
-
-/**
- * Buscar pacientes/expedientes por término de búsqueda
- * @param {string} termino - Término de búsqueda (nombre, DNI, Apellido)
- * @returns {Promise<Array>} Lista de resultados que coinciden con el término
- */
-// expedienteService.js
-export async function buscarPacientes(termino, criterio = "nombre", pagina = 1) {
-  try {
-    const response = await expedienteAPI.buscar({ termino, criterio, pagina });
-    
-    if (response.success) return response.data;
-    throw new Error(response.error || "Error al buscar");
-  } catch(error) {
-    console.error("Error en búsqueda de paciente:", error);
-    throw error;
-  }
-}
-
-/**
- * Validar si un número de identidad ya existe
- * @param {string} numeroIdentidad - Número de identidad del paciente
- * @returns {Promise<boolean>} true si existe, false si no
- */
-export async function validarIdentidadDuplicada(numeroIdentidad) {
-  try {
-    const resultados = await buscarPacientes(numeroIdentidad);
-    // const expedientes = await obtenerExpedientes();
-    // return resultados.some(exp => exp.paciente?.dni === numeroIdentidad);
-    return resultados.some(exp => exp.dni === numeroIdentidad);
-  } catch (error) {
-    console.error("Error al validar identidad:", error);
-    return false;
-  }
-}

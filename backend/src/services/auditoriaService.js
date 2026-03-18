@@ -93,6 +93,10 @@ class AuditoriaService {
         const detalles = `${tipoAccion.toLowerCase()} de ${entidad.toLowerCase()} ${idEntidad}`;
         return this.registrar(usuarioId, accion, detalles);
     }
+
+    async registrarBusqueda(usuarioId, termino){
+        return this.registrar(usuarioId, "BUSQUEDA", `Búsqueda global con término: ${termino}`);
+    }
 }
 
 module.exports = AuditoriaService;

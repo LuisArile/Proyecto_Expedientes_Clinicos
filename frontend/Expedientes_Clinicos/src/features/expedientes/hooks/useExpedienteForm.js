@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { crearExpediente, validarIdentidadDuplicada } from "../services/expedienteService";
+import { crearExpediente } from "../services/expedienteService";
+import { validarIdentidadDuplicada } from "../services/buscarPacienteService";
 
 export function useExpedienteForm() {
   const [loading, setLoading] = useState(false);

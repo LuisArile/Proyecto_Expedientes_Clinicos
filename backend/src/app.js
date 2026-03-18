@@ -10,7 +10,7 @@ const rolRouters = require("./routes/rolRoute")
 const permisoRouters = require("./routes/permisoRoute")
 const registroPreclinico=require("./routes/registroPreclinicoRoute")
 const consultaMedicaRouters=require("./routes/consultaMedicaRoute")
-
+const busquedaRouters = require("./routes/busquedaRoute");
 
 const manejadorErrores = require("./middlewares/manejoErrores")
 const estadisticasRoute = require("./routes/estadisticasRoute")
@@ -45,12 +45,10 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 app.use("/api/usuarios", usuarioRouters); //creacion de usuarios
-// app.use("/api/obtenerUsuarios", usuarioRouters); //obtener todos los usuarios
 
 app.use("/api/obtenerUsuarios", usuarioRouters); //obtener todos los usuarios
 
 app.use("/api", inicioSesionRouters); //inicio y cierre de sesion
-// app.use("/api/cierreSesion", inicioSesionRouters);
 
 app.use("/api/expedientes", expedienteRouters); // operaciones con expedientes
 
@@ -64,7 +62,7 @@ app.use("/api/consultaMedica", consultaMedicaRouters); //Consulta medicas
 
 app.use("/api/estadisticas", estadisticasRoute);
 
-
+app.use("/api/busqueda", busquedaRouters);
 
 app.use(manejadorErrores);
 module.exports=app;

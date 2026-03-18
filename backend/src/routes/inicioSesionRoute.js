@@ -11,18 +11,15 @@ const InicioSesionController= require("../controllers/inicioSesionController");
 
 const router= express.Router();
 
-const usuarioRepository = new UsuarioRepository(prisma);
+const usuarioRepository = new UsuarioRepository();
 const auditoriaRepository = new AuditoriaRepository(prisma);
 const auditoriaService = new AuditoriaService(auditoriaRepository);
 
 const inicioSesionService = new InicioSesionService(usuarioRepository, auditoriaService);
 const inicioSesionController = new InicioSesionController(inicioSesionService, auditoriaService);
 
-router.post("/login", (req, res) => 
-    inicioSesionController.inicioSesion(req, res));
+router.post("/login", (req, res, next) =>  inicioSesionController.inicioSesion(req, res, next));
 
-router.post("/logout", validarToken, (req, res) =>
-  inicioSesionController.cierreSesion(req, res)
-);
+router.post("/logout", validarToken, (req, res, next) => inicioSesionController.cierreSesion(req, res, next));
 
 module.exports=router;

@@ -29,8 +29,6 @@ describe("ExpedienteService", () => {
             obtenerPorDni: jest.fn(),
             obtenerPorId: jest.fn(),
             crear: jest.fn(),
-            buscarPaciente: jest.fn(),
-            contarBusqueda: jest.fn()
         };
 
         auditoriaService = {
@@ -57,17 +55,18 @@ describe("ExpedienteService", () => {
 
                 const tx = {
                     expediente: {
-                        count: jest.fn().mockResolvedValue(0)
+                        count: jest.fn().mockResolvedValue(5)
                     }
                 };
 
                 pacienteRepo.crear.mockResolvedValue({
                     idPaciente: 1,
-                    dni: "123"
+                    dni: "0801-1984-00248"
                 });
 
                 expedienteRepo.crear.mockResolvedValue({
-                    idExpediente: 10
+                    idExpediente: 10,
+                    numeroExpediente: "EXP-2026-00006"
                 });
 
                 return callback(tx);
@@ -82,8 +81,7 @@ describe("ExpedienteService", () => {
             expect(pacienteRepo.crear).toHaveBeenCalled();
             expect(expedienteRepo.crear).toHaveBeenCalled();
 
-            expect(resultado).toHaveProperty("paciente");
-            expect(resultado).toHaveProperty("expediente");
+            expect(resultado.expediente.numeroExpediente).toBe("EXP-2026-00006");
 
         });
 
@@ -92,8 +90,8 @@ describe("ExpedienteService", () => {
             pacienteRepo.obtenerPorDni.mockResolvedValue({ idPaciente: 1 });
 
             await expect(
-                service.crearConPaciente({ dni: "123" }, {}, 1)
-            ).rejects.toThrow("El paciente con DNI 123 ya existe");
+                service.crearConPaciente({ dni: "0801-1984-00248" }, {}, 1)
+            ).rejects.toThrow("El paciente con DNI 0801-1984-00248 ya existe");
 
         });
 
@@ -180,35 +178,4 @@ describe("ExpedienteService", () => {
         });
 
     });
-
-    describe("buscarGlobal", () => {
-
-        test("debe retornar resultados paginados", async () => {
-
-            const filtro = {
-                termino: "juan",
-                pagina: 1,
-                limite: 10
-            };
-
-            auditoriaService.registrarExpediente.mockResolvedValue(true);
-
-            pacienteRepo.buscarPaciente.mockResolvedValue([{ id: 1 }]);
-            pacienteRepo.contarBusqueda.mockResolvedValue(1);
-
-            const resultado = await service.buscarGlobal(filtro, 1);
-
-            expect(resultado.resultados).toEqual([{ id: 1 }]);
-
-            expect(resultado.paginacion).toEqual({
-                total: 1,
-                paginaActual: 1,
-                limite: 10,
-                totalPaginas: 1
-            });
-
-        });
-
-    });
-
 });

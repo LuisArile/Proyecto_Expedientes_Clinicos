@@ -33,6 +33,7 @@ class usuarioService{
         return usuario.toJSON();
 
         } catch (error) {
+            console.error(error);
             throw new Error (error.message)
         }
 
