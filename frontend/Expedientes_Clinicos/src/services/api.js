@@ -1,6 +1,10 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL  
-? `${import.meta.env.VITE_API_URL}/api` 
-  : "http://localhost:3000/api";
+const API_URL = import.meta.env.VITE_API_URL;
+console.log("API_URL:", API_URL);
+if (!API_URL) {
+  throw new Error("VITE_API_URL no está definida");
+}
+
+const API_BASE_URL = `${API_URL}/api`;
 
 const getHeaders = () => {
   const token = sessionStorage.getItem("token");
