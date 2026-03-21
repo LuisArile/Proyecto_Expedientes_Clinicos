@@ -151,42 +151,6 @@ class expedienteService {
             throw new Error(error.message);
         }
     }
-
-    /**
-     * Servicio para buscar pacientes/expedientes por un término general.
-     * @param {BusquedaPacienteDTO} filtroDto - Objeto con término, página y límite.
-     * @param {number} [usuarioId] - Opcional para registro de auditoría
-     * @returns {Promise<Array<Object>>}
-     */
-    async buscarGlobal(filtroDto, usuarioId = null) {
-        try {
-            const { termino, criterio, pagina, limite } = filtroDto;
-
-            const skip = (pagina - 1) * limite;
-     
-            if (usuarioId) {
-                this.auditoriaService.registrarExpediente(usuarioId, "BUSQUEDA", { 
-                    termino: termino,
-                    accion: "Búsqueda global de pacientes/expedientes"
-                }).catch(err => console.error("Error auditoría búsqueda:", err));
-            }
-
-            const resultados = await this.pacienteRepository.buscarPaciente(termino, criterio, limite, skip);
-            const total = await this.pacienteRepository.contarBusqueda(termino, criterio);
-
-            return {
-                resultados,
-                paginacion: {
-                    total,
-                    paginaActual: pagina,
-                    limite: limite,
-                    totalPaginas: Math.ceil(total / limite)
-                }
-            };
-        } catch (error) {
-            throw new Error(`Error en el servicio de búsqueda: ${error.message}`);
-        }
-    }
 }
 
 module.exports = expedienteService;

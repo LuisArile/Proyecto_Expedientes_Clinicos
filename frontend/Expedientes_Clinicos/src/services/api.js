@@ -68,12 +68,14 @@ export const expedienteAPI = {
   actualizar: (idExpediente, datos) =>
     apiCall(`/expedientes/${idExpediente}`, { method: "PUT", body: JSON.stringify(datos) }),
   eliminar: (idExpediente) => apiCall(`/expedientes/${idExpediente}`, { method: "DELETE"}),
-  buscar: ({ termino, criterio = "nombre", pagina = 1 }) =>
-    apiCall(`/expedientes/buscar?q=${encodeURIComponent(termino)}&pagina=${pagina}&limite=10&criterio=${criterio}`, {
-      method: "GET",
-    }),
 };
 
+export const buscarAPI = {
+  buscar: ({ termino, criterio = "nombre", pagina = 1, limite = 10 }) =>
+    apiCall(`/busqueda?q=${encodeURIComponent(termino)}&pagina=${pagina}&limite=${limite}&criterio=${criterio}`, {
+      method: "GET",
+    }),
+}
 /**
  * Métodos para consumir endpoints de roles
  */

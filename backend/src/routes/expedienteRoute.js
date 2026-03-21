@@ -26,12 +26,6 @@ router.post("/", validarToken,autorizarRol(['ENFERMERO','RECEPCIONISTA'])  , (re
 // Obtener todos los expedientes
 router.get("/", validarToken, (req, res,next) => expedienteController.obtenerTodos(req, res,next));
 
-// Búsqueda global (DNI, Nombre, Apellido)
-router.get('/buscar', 
-    validarToken, 
-    (req, res,next) => expedienteController.buscarGlobal(req, res,next)
-);
-
 // Obtener expediente de un paciente específico
 router.get("/paciente/:idPaciente", validarToken, (req, res,next) => expedienteController.obtenerPorPaciente(req, res,next));
 
@@ -43,7 +37,5 @@ router.put("/:idExpediente", validarToken, (req, res,next) => expedienteControll
 
 // Eliminar expediente
 router.delete("/:idExpediente", validarToken, (req, res,next) => expedienteController.eliminar(req, res,next));
-
-// router.get('/:id', expedienteController.obtenerPorId);
 
 module.exports = router;

@@ -11,7 +11,7 @@ const InicioSesionController= require("../controllers/inicioSesionController");
 
 const router= express.Router();
 
-const usuarioRepository = new UsuarioRepository(prisma);
+const usuarioRepository = new UsuarioRepository();
 const auditoriaRepository = new AuditoriaRepository(prisma);
 const auditoriaService = new AuditoriaService(auditoriaRepository);
 
