@@ -1,5 +1,5 @@
 
-const Usuario=require('../models/Usuario');
+const Usuario=require('../models/usuario');
 const Medico=require('../models/medico');
 const Administrador=require('../models/administrador');
 
