@@ -61,14 +61,38 @@ jobs:
       - name: Build project
         run: npm run build
 
-  deploy-backend:
-    name: Deploy Backend to Azure
+
+  docker-build:
+    name: Build Docker Images
     runs-on: ubuntu-latest
     needs: [backend-tests, frontend-tests]
 
     steps:
       - name: Clonar repositorio
         uses: actions/checkout@v4
+
+      - name: Build imagen backend
+        run: docker build -t backend-clinica ./backend
+
+      - name: Build imagen frontend
+        run: docker build -t frontend-clinica ./frontend
+
+      - name: Mostrar imágenes
+        run: docker images
+
+
+  deploy-backend:
+    name: Deploy Backend to Azure
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests, docker-build]
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar dependencias backend
+        working-directory: backend
+        run: npm install
 
       - name: Deploy a Azure App Service
         uses: azure/webapps-deploy@v2
