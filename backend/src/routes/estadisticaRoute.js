@@ -26,6 +26,6 @@ const recetaMedicaRepository = new RecetaMedicaRepository();
 const estadisticaService = new EstadisticaService(prisma, usuarioRepository, auditoriaRepository, pacienteRepository, expedienteRepository, consultaMedicaRepository, registroPreclinicoRepository, recetaMedicaRepository);
 const estadisticaController = new EstadisticaController(estadisticaService);
 
-router.get("/resumen", validarToken, (req, res) => estadisticaController.obtenerDashboard(req, res));
+router.get("/resumen", validarToken, (req, res, next) => estadisticaController.obtenerDashboard(req, res, next));
 
 module.exports = router;
