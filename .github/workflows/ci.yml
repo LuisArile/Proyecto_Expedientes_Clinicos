@@ -62,4 +62,4 @@ jobs:
         run: docker push clinicacontainerregistry.azurecr.io/backend-clinica:v1
 
       - name: Push frontend
-        run: docker push clinicacontainerregistry.azurecr.io/frontend-clinica:v1
+        run: docker push clinicacontainerregistry.azurecr.io/frontend-clinica:v2
