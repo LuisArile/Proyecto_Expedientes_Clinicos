@@ -16,14 +16,14 @@ const rolController = new RolController(rolService);
 router.use(validarToken);
 router.use(autorizarRol(['ADMINISTRADOR']));
 
-router.post("/", (req, res) => rolController.crear(req, res));
-router.get("/", (req, res) => rolController.obtenerTodos(req, res));
-router.get("/:idRol", (req, res) => rolController.obtenerPorId(req, res));
-router.put("/:idRol", (req, res) => rolController.actualizar(req, res));
-router.delete("/:idRol", (req, res) => rolController.eliminar(req, res));
+router.post("/", (req, res,next) => rolController.crear(req, res,next));
+router.get("/", (req, res,next) => rolController.obtenerTodos(req, res,next));
+router.get("/:idRol", (req, res,next) => rolController.obtenerPorId(req, res,next));
+router.put("/:idRol", (req, res,next) => rolController.actualizar(req, res,next));
+router.delete("/:idRol", (req, res,next) => rolController.eliminar(req, res,next));
 
 // Gestión de permisos por rol
-router.get("/:idRol/permisos", (req, res) => rolController.obtenerPermisos(req, res));
-router.put("/:idRol/permisos", (req, res) => rolController.asignarPermisos(req, res));
+router.get("/:idRol/permisos", (req, res,next) => rolController.obtenerPermisos(req, res,next));
+router.put("/:idRol/permisos", (req, res,next) => rolController.asignarPermisos(req, res,next));
 
 module.exports = router;

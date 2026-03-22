@@ -18,8 +18,11 @@ const auditoriaService = new AuditoriaService(auditoriaRepository);
 const inicioSesionService = new InicioSesionService(usuarioRepository, auditoriaService);
 const inicioSesionController = new InicioSesionController(inicioSesionService);
 
-router.post("/login", (req, res, next) =>  inicioSesionController.inicioSesion(req, res, next));
+router.post("/login", (req, res,next) => 
+    inicioSesionController.inicioSesion(req, res,next));
 
-router.post("/logout", validarToken, (req, res, next) => inicioSesionController.cierreSesion(req, res, next));
+router.post("/logout", validarToken, (req, res,next) =>
+  inicioSesionController.cierreSesion(req, res,next)
+);
 
 module.exports=router;

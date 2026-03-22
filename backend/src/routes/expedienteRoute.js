@@ -8,6 +8,8 @@ const AuditoriaService = require("../services/auditoriaService");
 const ExpedienteService = require("../services/expedienteService");
 const ExpedienteController = require("../controllers/expedienteController");
 const validarToken = require("../middlewares/inicioSesionMiddleware");
+const autorizarRol=require("../middlewares/autorizarRol");
+
 
 const router = express.Router();
 
@@ -19,21 +21,21 @@ const expedienteService = new ExpedienteService(expedienteRepository, pacienteRe
 const expedienteController = new ExpedienteController(expedienteService);
 
 // Crear expediente junto con datos del paciente (único endpoint de creación)
-router.post("/", validarToken, (req, res,next) => expedienteController.crearConPaciente(req, res, next));
+router.post("/", validarToken,autorizarRol(['ENFERMERO','RECEPCIONISTA'])  , (req, res,next) => expedienteController.crearConPaciente(req, res, next));
 
 // Obtener todos los expedientes
-router.get("/", (req, res,next) => expedienteController.obtenerTodos(req, res,next));
+router.get("/", validarToken, (req, res,next) => expedienteController.obtenerTodos(req, res,next));
 
 // Obtener expediente de un paciente específico
-router.get("/paciente/:idPaciente", (req, res,next) => expedienteController.obtenerPorPaciente(req, res,next));
+router.get("/paciente/:idPaciente", validarToken, (req, res,next) => expedienteController.obtenerPorPaciente(req, res,next));
 
 // Obtener expediente por ID
-router.get("/:idExpediente", (req, res,next) => expedienteController.obtenerPorId(req, res,next));
+router.get("/:idExpediente", validarToken, (req, res,next) => expedienteController.obtenerPorId(req, res,next));
 
 // Actualizar expediente
-router.put("/:idExpediente", (req, res,next) => expedienteController.actualizar(req, res,next));
+router.put("/:idExpediente", validarToken, (req, res,next) => expedienteController.actualizar(req, res,next));
 
 // Eliminar expediente
-router.delete("/:idExpediente", (req, res,next) => expedienteController.eliminar(req, res,next));
+router.delete("/:idExpediente", validarToken, (req, res,next) => expedienteController.eliminar(req, res,next));
 
 module.exports = router;

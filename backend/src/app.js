@@ -23,7 +23,8 @@ const app= express();
 const allowedOrigins = [
     process.env.FRONTEND_URL,
     'http://localhost:5173', // Desarrollo local
-    'http://localhost'        // Docker / Nginx
+    'http://localhost',        // Docker / Nginx
+    'https://clinica-frontend-cudebvakabgectfb.mexicocentral-01.azurewebsites.net' // URL de producción del frontend
 ];
 
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
