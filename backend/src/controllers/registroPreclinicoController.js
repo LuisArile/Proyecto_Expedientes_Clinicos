@@ -2,9 +2,8 @@ const { ErrorValidacion } = require("../utils/errores");
 const capturarAsync = require("../utils/capturarAsync");
 
 class registroPreclinicoController {
-    constructor(registroPreclinicoService, auditoriaService) {
+    constructor(registroPreclinicoService) {
         this.registroPreclinicoService = registroPreclinicoService;
-        this.auditoriaService = auditoriaService;
     }
 
     registrar = capturarAsync(async (req, res) => {
@@ -22,15 +21,6 @@ class registroPreclinicoController {
             expedienteId,
             enfermeroId,
             datos
-        );
-
-        await this.auditoriaService.registrar(
-            enfermeroId,
-            "REGISTRO_PRECLINICO",
-            {
-                expedienteId,
-                signosRegistrados: Object.keys(datos).join(', ')
-            }
         );
 
         res.status(201).json({

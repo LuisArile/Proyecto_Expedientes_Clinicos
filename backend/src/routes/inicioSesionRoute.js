@@ -16,7 +16,7 @@ const auditoriaRepository = new AuditoriaRepository(prisma);
 const auditoriaService = new AuditoriaService(auditoriaRepository);
 
 const inicioSesionService = new InicioSesionService(usuarioRepository, auditoriaService);
-const inicioSesionController = new InicioSesionController(inicioSesionService, auditoriaService);
+const inicioSesionController = new InicioSesionController(inicioSesionService);
 
 router.post("/login", (req, res, next) =>  inicioSesionController.inicioSesion(req, res, next));
 

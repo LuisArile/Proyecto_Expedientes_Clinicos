@@ -21,10 +21,7 @@ const registroPreclinicoService = new RegistroPreclinicoService(
     expedienteRepository,
     auditoriaService
 );
-const registroPreclinicoController = new RegistroPreclinicoController(
-    registroPreclinicoService,
-    auditoriaService
-);
+const registroPreclinicoController = new RegistroPreclinicoController(registroPreclinicoService);
 
 const router = express.Router();
 

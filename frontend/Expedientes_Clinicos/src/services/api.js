@@ -134,3 +134,8 @@ export const consultaMedicaAPI = {
   obtenerPorId: (id) =>
     apiCall(`/consultaMedica/${id}`, { method: "GET" })
 }
+
+export const auditoriaAPI = {
+  obtenerTodos: () => apiCall("/auditoria", { method: "GET" }),
+  obtenerEstadisticas: () => apiCall("/auditoria/estadisticas", { method: "GET" }),
+};

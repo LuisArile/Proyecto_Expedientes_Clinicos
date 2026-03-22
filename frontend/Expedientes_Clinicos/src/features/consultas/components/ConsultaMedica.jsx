@@ -47,7 +47,7 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
         Icon={Stethoscope} onVolver={onVolver} userName={user?.nombre} systemName="Módulo de Atención Clínica"
       />
 
-      <main className="max-w-5xl mx-auto px-4 mt-6 space-y-6">
+      <main className="min-h-screen bg-slate-50/50 p-6 space-y-6">
         <Card className="border-purple-100 shadow-sm bg-white/50 backdrop-blur-sm">
           <CardHeader className="py-4">
             <div className="flex justify-between items-center">

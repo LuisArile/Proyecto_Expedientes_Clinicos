@@ -3,32 +3,20 @@ const { ErrorValidacion, ErrorNoAutorizado } = require("../utils/errores");
 const capturarAsync = require("../utils/capturarAsync");
 
 class inicioSesionController {
-    constructor(inicioSesionService, auditoriaService) {
+    constructor(inicioSesionService) {
         this.inicioSesionService = inicioSesionService;
-        this.auditoriaService = auditoriaService;
     }
 
     inicioSesion = capturarAsync(async (req, res) => {
         const { nombreUsuario, clave } = req.body;
 
-        if (!nombreUsuario || !nombreUsuario.trim()) {
-            throw new ErrorValidacion('El nombre de usuario es obligatorio');
-        }
-        if (!clave) {
-            throw new ErrorValidacion('La contraseña es obligatoria');
+        if (!nombreUsuario.trim() || !clave) {
+            throw new ErrorValidacion('El nombre de usuario y contraseña son obligatorio');
         }
 
         const resultado = await this.inicioSesionService.inicioSesion(nombreUsuario, clave);
         
-        if (!resultado) {
-            throw new ErrorNoAutorizado('Credenciales incorrectas');
-        }
-
-        await this.auditoriaService.registrarSesion(
-            resultado.id, 
-            "INICIO_SESION", 
-            nombreUsuario
-        );
+        if (!resultado) throw new ErrorNoAutorizado('Credenciales incorrectas');
 
         const tokenPayload = {
             id: resultado.id,
@@ -52,16 +40,9 @@ class inicioSesionController {
     cierreSesion = capturarAsync(async (req, res) => {
         const usuarioId = req.usuario?.id;
 
-        if (!usuarioId) {
-            throw new ErrorNoAutorizado('No hay una sesión activa');
-        }
+        if (!usuarioId) throw new ErrorNoAutorizado('No hay una sesión activa');
 
         const resultado = await this.inicioSesionService.cierreSesion(usuarioId);
-        
-        await this.auditoriaService.registrarSesion(
-            usuarioId, 
-            "CIERRE_SESION"
-        );
 
         res.json({ 
             success: true, 

@@ -1,6 +1,7 @@
 class PermisoService {
-    constructor(permisoRepository) {
+    constructor(permisoRepository, auditoriaService) {
         this.permisoRepository = permisoRepository;
+        this.auditoriaService = auditoriaService;
     }
 
     async crear(data) {
@@ -41,7 +42,15 @@ class PermisoService {
             }
         }
 
-        return await this.permisoRepository.actualizar(idPermiso, { nombre: data.nombre.toUpperCase() });
+        const actualizado = await this.permisoRepository.actualizar(idPermiso, { nombre: data.nombre.toUpperCase() });
+
+        await this.auditoriaService.registrar(
+            usuarioId, 
+            'ACTUALIZACION_PERMISO', 
+            `ID Permiso: ${idPermiso} a ${data.nombre}`
+        );
+
+        return actualizado;
     }
 
     async eliminar(idPermiso) {
@@ -49,7 +58,15 @@ class PermisoService {
         if (!permiso) {
             throw new Error('Permiso no encontrado');
         }
-        return await this.permisoRepository.eliminar(idPermiso);
+        const eliminado = await this.permisoRepository.eliminar(idPermiso);
+
+        await this.auditoriaService.registrar(
+            usuarioId, 
+            'ELIMINACION_PERMISO', 
+            `ID Permiso: ${idPermiso}`
+        );
+
+        return eliminado;
     }
 }
 

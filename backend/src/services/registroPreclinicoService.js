@@ -1,6 +1,5 @@
 const prisma = require('../config/prisma');
 
-
 class registroPreclinicoService {
     constructor(repository, expedienteRepository, auditoriaService) {
         this.repository = repository;
@@ -9,24 +8,26 @@ class registroPreclinicoService {
     }
 
     async registrar(expedienteId, enfermeroId, datos) {
-        try {
-            // Verificar que el expediente existe
-            const expediente = await this.expedienteRepository.obtenerPorId(expedienteId);
-            if (!expediente) {
-                throw new Error('Expediente no encontrado');
-            }
+        const expediente = await this.expedienteRepository.obtenerPorId(expedienteId);
+        if (!expediente) throw new Error('Expediente no encontrado');
 
-            // Crear el registro
-            const registro = await this.repository.crear({
+        // Crear el registro
+        const registro = await this.repository.crear({
+            expedienteId,
+            enfermeroId,
+            ...datos
+        });
+
+        await this.auditoriaService.registrarAccionMedica(
+            enfermeroId, 
+            'REGISTRO_PRECLINICO',
+            {
                 expedienteId,
-                enfermeroId,
-                ...datos
-            });
+                signosRegistrados: Object.keys(datos).join(', ')
+            }
+        );
 
-            return registro;
-        } catch (error) {
-            throw new Error(`Error al registrar: ${error.message}`);
-        }
+        return registro;
     }
 
     async obtenerPorExpediente(expedienteId) {

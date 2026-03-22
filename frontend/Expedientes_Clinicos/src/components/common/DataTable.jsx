@@ -7,17 +7,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/components/ui/utils";
 
 export function DataTable({ columns, data, emptyMessage = "No se encontraron resultados." }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="relative w-full">
       <Table>
-        <TableHeader className="bg-gray-50">
-          <TableRow className="bg-gray-50 hover:bg-gray-50">
+        <TableHeader className="sticky top-0 z-10 bg-slate-50 shadow-sm">
+          <TableRow className="hover:bg-slate-50 border-b">
             {columns.map((column, index) => (
               <TableHead 
                 key={index} 
-                className={column.className}
+                className={cn(
+                  "h-12 px-4 text-left align-middle font-bold text-slate-600 uppercase text-[11px] tracking-wider",
+                  column.className
+                )}
               >
                 {column.header}
               </TableHead>
@@ -29,11 +33,10 @@ export function DataTable({ columns, data, emptyMessage = "No se encontraron res
             data.map((row, rowIndex) => (
               <TableRow 
                 key={rowIndex}
-                className={"hover:bg-blue-50 transition-colors"}
+                className={"hover:bg-blue-50/50 transition-colors border-b border-slate-100"}
               >
                 {columns.map((column, colIndex) => (
-                  <TableCell key={colIndex} className={column.cellClassName}>
-                    
+                  <TableCell key={colIndex} className={cn("p-4", column.cellClassName)}>
                     {column.render ? column.render(row) : row[column.accessorKey]}
                   </TableCell>
                 ))}

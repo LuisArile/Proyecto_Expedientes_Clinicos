@@ -1,6 +1,6 @@
-const EstadisticasService = require("../src/services/estadisticasService");
+const EstadisticaService = require("../src/services/estadisticaService");
 
-describe("EstadisticasService", () => {
+describe("EstadisticaService", () => {
 
     let service;
     let mockPrisma;
@@ -9,7 +9,7 @@ describe("EstadisticasService", () => {
     let mockPacienteRepo;
     let mockExpedienteRepo;
 
-    const crearServicio = () => new EstadisticasService(
+    const crearServicio = () => new EstadisticaService(
         mockPrisma,
         mockUsuarioRepo,
         mockAuditoriaRepo,
@@ -61,7 +61,7 @@ describe("EstadisticasService", () => {
             const mockData = { tarjetas: [], actividad: [] };
             
             const obtenerAdminDataSpy = jest
-                .spyOn(EstadisticasService.prototype, "obtenerAdminData")
+                .spyOn(EstadisticaService.prototype, "obtenerAdminData")
                 .mockResolvedValue(mockData);
 
             service = crearServicio();
@@ -77,7 +77,7 @@ describe("EstadisticasService", () => {
             const mockData = { tarjetas: [], actividad: [] };
             
             const obtenerRecepcionistaDataSpy = jest
-                .spyOn(EstadisticasService.prototype, "obtenerRecepcionistaData")
+                .spyOn(EstadisticaService.prototype, "obtenerRecepcionistaData")
                 .mockResolvedValue(mockData);
 
             service = crearServicio();
@@ -93,7 +93,7 @@ describe("EstadisticasService", () => {
             const mockData = { tarjetas: [], actividad: [] };
             
             const obtenerMedicoDataSpy = jest
-                .spyOn(EstadisticasService.prototype, "obtenerMedicoData")
+                .spyOn(EstadisticaService.prototype, "obtenerMedicoData")
                 .mockResolvedValue(mockData);
 
             service = crearServicio();
@@ -109,7 +109,7 @@ describe("EstadisticasService", () => {
             const mockData = { tarjetas: [], actividad: [] };
             
             const obtenerEnfermeroDataSpy = jest
-                .spyOn(EstadisticasService.prototype, "obtenerEnfermeroData")
+                .spyOn(EstadisticaService.prototype, "obtenerEnfermeroData")
                 .mockResolvedValue(mockData);
 
             service = crearServicio();
@@ -125,7 +125,7 @@ describe("EstadisticasService", () => {
             const mockData = { tarjetas: [], actividad: [] };
             
             const obtenerAdminDataSpy = jest
-                .spyOn(EstadisticasService.prototype, "obtenerAdminData")
+                .spyOn(EstadisticaService.prototype, "obtenerAdminData")
                 .mockResolvedValue(mockData);
 
             service = crearServicio();

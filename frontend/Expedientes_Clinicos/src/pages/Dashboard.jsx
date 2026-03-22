@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
 import { DashboardLayout } from "../components/layout/dashboardLayout";
 import { useAuth } from "@/features/auth/useAuth";
 import { Button } from "@/components/ui/button";
 
 import { DashboardFeature } from "../features/dashboard/components/DashboardFeature";
 import { Changepassword } from "../features/dashboard/components/Changepassword";
-import { GestionRoles } from "../features/admin/components/GestionRoles";
-
+const GestionRoles = lazy(() => import("../features/admin/components/GestionRoles").then(module => ({ default: module.GestionRoles })));
 import { FormularioExpediente } from "../features/expedientes/components/FormularioExpediente";
 import { BuscarPaciente } from "../features/expedientes/components/BuscarPaciente";
-
-import { ConsultaMedica } from "../features/consultas/components/ConsultaMedica";
-
-import { FormularioRegistroPreclinico } from "../features/preclinica/components/FormularioRegistroPreclinico";
+const ConsultaMedica = lazy(() => import("../features/consultas/components/ConsultaMedica").then(module => ({ default: module.ConsultaMedica })));
+const FormularioRegistroPreclinico = lazy(() => import("../features/preclinica/components/FormularioRegistroPreclinico").then(module => ({ default: module.FormularioRegistroPreclinico })));
 import { ListaRegistrosPreclinicos } from "../features/preclinica/components/ListaRegistrosPreclinicos";
+const Auditoria = lazy(() => import("../features/admin/components/Auditoria").then(module => ({ default: module.Auditoria })));
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -52,6 +50,7 @@ export function Dashboard() {
   };
 
   const renderContent = () => {
+    console.log("Vista actual:", currentView);
     const volverInicio = () => {
       setSelectedPaciente(null);
       setCurrentView("inicio");
@@ -93,6 +92,8 @@ export function Dashboard() {
         return <GestionRoles onVolver={volverInicio} />;
       case "changepassword":
         return <Changepassword onVolver={volverInicio} />;
+      case "auditoria":
+        return <Auditoria onVolver={volverInicio} />;
       default:
         return <p className="p-10 text-center">Módulo en construcción...</p>;
     }
@@ -100,7 +101,14 @@ export function Dashboard() {
 
   return (
     <DashboardLayout currentView={currentView} onNavigate={handleNavigate}>
-      {renderContent()}
+      <Suspense fallback={
+        <div className="flex items-center justify-center p-10">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2">Cargando módulo...</span>
+        </div>
+      }>
+        {renderContent()}
+      </Suspense>
     </DashboardLayout>
   );
 }

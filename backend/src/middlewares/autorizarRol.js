@@ -1,7 +1,7 @@
 const prisma = require('../config/prisma');
 
 const autorizarRol = (rolesPermitidos) => {
-    return async (req, res, siguiente) => {
+    return async (req, res, next) => {
         const usuario = req.usuario;
 
         if (!usuario || !usuario.idRol) {
@@ -25,7 +25,7 @@ const autorizarRol = (rolesPermitidos) => {
         }
 
         req.usuario.rolNombre = rol.nombre;
-        siguiente();
+        next();
     };
 };
 

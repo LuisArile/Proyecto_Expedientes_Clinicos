@@ -73,6 +73,37 @@ class consultaMedicaRepository {
             throw new Error(`Error al obtener consulta: ${error.message}`);
         }
     }
+
+    async contarConsultasHoy(medicoId = null) {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        return await prisma.consultaMedica.count({
+            where: {
+                fechaConsulta: { gte: hoy },
+                ...(medicoId && { medicoId: Number(medicoId) })
+            }
+        });
+    }
+
+    async contarEvaluadosHoy() {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        return await prisma.consultaMedica.count({
+            where: { fechaRegistro: { gte: hoy } }
+        });
+    }
+
+    async obtenerRecientesPorMedico(medicoId = null, limite = 10) {
+        return await prisma.consultaMedica.findMany({
+            where: medicoId ? { medicoId: Number(medicoId) } : {},
+            take: limite,
+            orderBy: { fechaConsulta: 'desc' },
+            include: {
+                expediente: { include: { paciente: true } }
+            }
+        });
+    }
 }
 
 module.exports = consultaMedicaRepository;

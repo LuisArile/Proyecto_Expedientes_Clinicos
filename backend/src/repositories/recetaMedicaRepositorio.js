@@ -34,6 +34,20 @@ class recetaMedicaRepository {
             throw new Error(`Error al crear recetas: ${error.message}`);
         }
     }
+
+    async contarRecetasHoy(medicoId = null) {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        return await prisma.recetaMedica.count({
+            where: {
+                consulta: {
+                    fechaConsulta: { gte: hoy },
+                    ...(medicoId && { medicoId: Number(medicoId) })
+                }
+            }
+        });
+    }
 }
 
 module.exports = recetaMedicaRepository;
