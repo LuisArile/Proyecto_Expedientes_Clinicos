@@ -53,13 +53,13 @@ jobs:
             -p ${{ secrets.ACR_PASSWORD }}
 
       - name: Build backend
-        run: docker build -t clinicacontainerregistry.azurecr.io/backend-clinica:v2 ./backend
+        run: docker build -t clinicacontainerregistry.azurecr.io/backend-clinica:v3 ./backend
 
       - name: Build frontend
-        run: docker build -t clinicacontainerregistry.azurecr.io/frontend-clinica:v2 ./frontend
+        run: docker build -t clinicacontainerregistry.azurecr.io/frontend-clinica:v3 ./frontend
 
       - name: Push backend
-        run: docker push clinicacontainerregistry.azurecr.io/backend-clinica:v2
+        run: docker push clinicacontainerregistry.azurecr.io/backend-clinica:v3
 
       - name: Push frontend
-        run: docker push clinicacontainerregistry.azurecr.io/frontend-clinica:v2
+        run: docker push clinicacontainerregistry.azurecr.io/frontend-clinica:v3
