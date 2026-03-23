@@ -18,7 +18,7 @@ const authState = {
   logout: mockLogout
 };
 
-vi.mock("@/features/auth/useAuth", () => ({
+vi.mock("@/features/auth/hooks/useAuth", () => ({
   useAuth: () => authState
 }));
 
