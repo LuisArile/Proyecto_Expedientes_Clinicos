@@ -16,10 +16,10 @@ const permisoController = new PermisoController(permisoService);
 router.use(validarToken);
 router.use(autorizarRol(['ADMINISTRADOR']));
 
-router.post("/", (req, res) => permisoController.crear(req, res));
-router.get("/", (req, res) => permisoController.obtenerTodos(req, res));
-router.get("/:idPermiso", (req, res) => permisoController.obtenerPorId(req, res));
-router.put("/:idPermiso", (req, res) => permisoController.actualizar(req, res));
-router.delete("/:idPermiso", (req, res) => permisoController.eliminar(req, res));
+router.post("/", (req, res,next) => permisoController.crear(req, res,next));
+router.get("/", (req, res,next) => permisoController.obtenerTodos(req, res,next));
+router.get("/:idPermiso", (req, res,next) => permisoController.obtenerPorId(req, res,next));
+router.put("/:idPermiso", (req, res,next) => permisoController.actualizar(req, res,next));
+router.delete("/:idPermiso", (req, res,next) => permisoController.eliminar(req, res,next));
 
 module.exports = router;

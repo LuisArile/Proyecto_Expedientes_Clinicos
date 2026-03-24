@@ -3,17 +3,18 @@ FROM node:22 AS build
 WORKDIR /app
 
 COPY Expedientes_Clinicos/package*.json ./
-
-RUN npm ci
+RUN npm install
 
 COPY Expedientes_Clinicos .
-
 RUN npm run build
 
-FROM nginx:stable-alpine
+# Serve
+FROM nginx:alpine
 
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+# Config nginx (opcional pero recomendado)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# IMPORTANTE: ruta correcta
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80

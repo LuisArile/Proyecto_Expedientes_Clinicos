@@ -20,6 +20,6 @@ const expedienteRepo = new ExpedienteRepository();
 const estadisticasService = new EstadisticasService(prisma, usuarioRepo, auditoriaRepo, pacienteRepo, expedienteRepo);
 const estadisticasController = new EstadisticasController(estadisticasService);
 
-router.get("/resumen", validarToken, (req, res) => estadisticasController.obtenerDashboard(req, res));
+router.get("/resumen", validarToken, (req, res,next) => estadisticasController.obtenerDashboard(req, res,next));
 
 module.exports = router;

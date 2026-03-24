@@ -18,6 +18,7 @@ class inicioSesionController {
             throw new ErrorValidacion('La contraseña es obligatoria');
         }
 
+    try{
         const resultado = await this.inicioSesionService.inicioSesion(nombreUsuario, clave);
         
         if (!resultado) {
@@ -47,6 +48,9 @@ class inicioSesionController {
             mensaje: 'Inicio de sesión exitoso',
             data: resultado 
         });
+    }catch (error) {
+            throw new ErrorNoAutorizado(error.message);
+        }
     });
 
     cierreSesion = capturarAsync(async (req, res) => {
@@ -56,18 +60,22 @@ class inicioSesionController {
             throw new ErrorNoAutorizado('No hay una sesión activa');
         }
 
-        const resultado = await this.inicioSesionService.cierreSesion(usuarioId);
-        
-        await this.auditoriaService.registrarSesion(
-            usuarioId, 
-            "CIERRE_SESION"
-        );
+        try{
+            const resultado = await this.inicioSesionService.cierreSesion(usuarioId);
+            
+            await this.auditoriaService.registrarSesion(
+                usuarioId, 
+                "CIERRE_SESION"
+            );
 
-        res.json({ 
-            success: true, 
-            mensaje: 'Sesión cerrada exitosamente',
-            data: resultado 
-        });
+            res.json({ 
+                success: true, 
+                mensaje: 'Sesión cerrada exitosamente',
+                data: resultado 
+            });
+        }catch (error) {
+            throw new ErrorNoAutorizado(error.message);
+        }
     });
 }
 

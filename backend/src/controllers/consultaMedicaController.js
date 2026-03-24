@@ -1,4 +1,4 @@
-const { ErrorValidacion, ErrorNoEncontrado, ErrorProhibido } = require('../utils/errores');
+const {ErrorNoEncontrado } = require('../utils/errores');
 const capturarAsync = require('../utils/capturarAsync');
 
 class consultaMedicaController {
@@ -7,7 +7,7 @@ class consultaMedicaController {
     }
 
     registrar = capturarAsync(async (req, res, next) => {
-        try {
+        
             const { expedienteId } = req.params;
             const medicoId = req.usuario.id;
             const datos = req.body;
@@ -23,13 +23,11 @@ class consultaMedicaController {
                 message: 'Consulta médica registrada exitosamente',
                 data: resultado
             });
-        } catch (error) {
-            throw new ErrorValidacion(error.message);
-        }
+        
     });
 
     obtenerPorExpediente = capturarAsync(async (req, res, next) => {
-        try {
+       
             const { expedienteId } = req.params;
 
             const consultas = await this.consultaMedicaService.obtenerPorExpediente(expedienteId);
@@ -38,13 +36,11 @@ class consultaMedicaController {
                 success: true,
                 data: consultas
             });
-        } catch (error) {
-            throw new ErrorValidacion(error.message);
-        }
+        
     });
 
     obtenerPorId = capturarAsync(async (req, res, next) => {
-        try {
+        
             const { id } = req.params;
 
             const consulta = await this.consultaMedicaService.obtenerPorId(id);
@@ -57,12 +53,7 @@ class consultaMedicaController {
                 success: true,
                 data: consulta
             });
-        } catch (error) {
-            if (error instanceof ErrorNoEncontrado) {
-                throw error;
-            }
-            throw new ErrorValidacion(error.message);
-        }
+            
     });
 }
 

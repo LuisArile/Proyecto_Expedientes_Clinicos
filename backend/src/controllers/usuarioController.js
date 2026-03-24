@@ -1,4 +1,4 @@
-const { ErrorValidacion, ErrorNoAutorizado } = require("../utils/errores");
+const { ErrorValidacion, ErrorNoAutorizado,ErrorNoEncontrado } = require("../utils/errores");
 const capturarAsync = require("../utils/capturarAsync");
 
 class usuarioController {
