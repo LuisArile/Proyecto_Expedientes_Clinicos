@@ -46,11 +46,10 @@ class usuarioService{
         const usuario= await this.usuarioRepository.crear(data);
 
         if(usuario&&usuario.id){
-            //registrar accion 
-            await this.usuarioRepository.registrarAccionUsuario(
+            await this.auditoriaService.registrarUsuario(
             usuarioCreadorId,
             'USUARIO_CREADO',
-            `Se creó el usuario ${usuario.nombreUsuario} con rol ID ${usuario.idRol}`
+            usuario
         );
     }
             return usuario;
@@ -73,12 +72,20 @@ class usuarioService{
 
     }
 
-     async actualizar(id, data, usuarioActualId) {
+    async actualizar(id, data, usuarioActualId) {
         
             const usuarioExistente = await this.usuarioRepository.obtenerPorId(id);
             if (!usuarioExistente) {
                 throw new ErrorNoEncontrado('usuario');
             }
+
+            //
+            if (data.correo && data.correo !== usuarioExistente.correo) {
+            const correoExistente = await this.usuarioRepository.obtenerPorCorreo(data.correo);
+            if (correoExistente) {
+                throw new ErrorConflicto('El correo ya está registrado por otro usuario');
+            }
+        }
 
             // Si se actualiza el nombre de usuario, verificar que no esté en uso
             if (data.nombreUsuario && data.nombreUsuario !== usuarioExistente.nombreUsuario) {
@@ -97,10 +104,10 @@ class usuarioService{
             const usuario = await this.usuarioRepository.actualizar(id, data);
 
             // Registrar auditoría
-            await this.usuarioRepository.registrarAccionUsuario(
+            await this.auditoriaService.registrarUsuario(
                 usuarioActualId,
-                'USUARIO_ACTUALIZADO',
-                { usuarioId: id, camposModificados: Object.keys(data) }
+                'ACTUALIZACION',
+                id
             );
 
             return usuario;
@@ -120,11 +127,11 @@ class usuarioService{
             await this.usuarioRepository.eliminar(id);
             
 
-                // Registrar auditoría
-            await this.usuarioRepository.registrarAccionUsuario(
+            // Registrar auditoría
+            await this.auditoriaService.registrarUsuario(
                 usuarioActualId,
-                'USUARIO_ELIMINADO',
-                { usuarioId: id, usuarioNombre: usuario.nombreUsuario }
+                'ELIMINACION',
+                id
             );
 
             return true;
@@ -151,7 +158,7 @@ class usuarioService{
 
         // Generar hash de la nueva contraseña
         const hashedPassword = await Encriptador.encriptar(newPassword);
-       
+
         // Actualizar contraseña en la base de datos
         const resultado = await this.usuarioRepository.actualizarPassword(userId, hashedPassword);
         

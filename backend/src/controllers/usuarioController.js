@@ -58,6 +58,11 @@ crear = capturarAsync(async (req, res) => {
     actualizar = capturarAsync(async (req, res) => {
         const { id } = req.params;
 
+        //solo admin pueden tener acceso
+        if(req.usuario.idRol !==1){
+            throw new ErrorNoAutorizado('Solo administradores pueden acceder');
+        }
+
         if (!id) {
             throw new ErrorValidacion('El ID del usuario es obligatorio');
         }
