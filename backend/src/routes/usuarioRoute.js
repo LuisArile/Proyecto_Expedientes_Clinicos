@@ -19,6 +19,8 @@ const usuarioService    = new  UsuarioService(usuarioRepository, auditoriaServic
 const usuarioController = new  UsuarioController(usuarioService);
 
 
+router.put("/change-password", authMiddleware,(req,res)=> usuarioController.cambiarPassword(req,res));
+
 router.use(validarToken);
 router.use(autorizarRol(['ADMINISTRADOR']));
 //RUTAS USUARIOS
@@ -39,7 +41,6 @@ router.put("/:id", (req, res,next) => usuarioController.actualizar(req, res,next
 router.delete("/:id", (req,res,next)=> usuarioController.eliminar(req,res,next));
 
 
-router.put("/change-password", authMiddleware,(req,res)=> usuarioController.cambiarPassword(req,res));
 
 
 module.exports=router;

@@ -1,6 +1,6 @@
 const bcrypt=require('bcrypt');
 const Encriptador= require('../utils/encritador');
-const { ErrorConflicto,ErrorValidacion } = require('../utils/errores');
+const { ErrorConflicto,ErrorValidacion, ErrorNoEncontrado } = require('../utils/errores');
 
 
 class usuarioService{
@@ -27,7 +27,7 @@ class usuarioService{
             throw new ErrorValidacion('El rol es obligatorio');
         }
 
-          const correoExistente = await this.usuarioRepository.obtenerPorCorreo(data.correo);
+        const correoExistente = await this.usuarioRepository.obtenerPorCorreo(data.correo);
         if (correoExistente) {
             throw new ErrorConflicto('El correo ya está registrado');
         }
@@ -67,7 +67,7 @@ class usuarioService{
 
             const usuario = await this.usuarioRepository.obtenerPorId(id);
             if (!usuario) {
-                throw new ErrorValidacion('Usuario no encontrado');
+                throw new ErrorValidacion('Usuario');
             }
             return usuario;
 
@@ -77,14 +77,14 @@ class usuarioService{
         
             const usuarioExistente = await this.usuarioRepository.obtenerPorId(id);
             if (!usuarioExistente) {
-                throw new Error('Usuario no encontrado');
+                throw new ErrorNoEncontrado('usuario');
             }
 
             // Si se actualiza el nombre de usuario, verificar que no esté en uso
             if (data.nombreUsuario && data.nombreUsuario !== usuarioExistente.nombreUsuario) {
                 const existeNombre = await this.usuarioRepository.filtrarNombreUsuario(data.nombreUsuario);
                 if (existeNombre) {
-                    throw new Error('El nombre de usuario ya está registrado');
+                    throw new ErrorConflicto('El nombre de usuario ya está registrado');
                 }
             }
 
@@ -113,7 +113,7 @@ class usuarioService{
         
             const usuario = await this.usuarioRepository.obtenerPorId(id);
             if (!usuario) {
-                throw new Error('Usuario no encontrado');
+                throw new ErrorNoEncontrado('Usuario');
             }
 
             //eliminamos
