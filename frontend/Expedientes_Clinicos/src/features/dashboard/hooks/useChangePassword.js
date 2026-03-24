@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { securityService } from "../services/securityService";
-import { useAuth } from "@/features/auth/useAuth";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { validatePasswordSchema } from '@/utils/passwordValidator';
 
 export function useChangePassword() {

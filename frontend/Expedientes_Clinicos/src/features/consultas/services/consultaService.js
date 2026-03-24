@@ -7,16 +7,15 @@ export async function registrarConsultaMedica(idExpediente, datos) {
             diagnostico: {
                 id: `DIAG-${Date.now()}`,
                 descripcion: datos.diagnostico || "",
-                tipo: datos.tipoDiagnostico.toUpperCase()
+                tipo: (datos.tipoDiagnostico|| "PRESUNTIVO").toUpperCase()
             },
             observaciones: datos.observacionesClinicas || "",
-            tipoConsulta: (datos.diagnostico?.tipo || datos.tipoDiagnostico || "PRESUNTIVO").toUpperCase(),
             
-            recetas: (datos.recetas || datos.medicamentos || []).map(med => ({
-                medicamento: med.medicamento || med.nombre,
+            recetas: (datos.medicamentos || []).map(med => ({
+                medicamento: med.nombre,
                 dosis: med.dosis,
                 duracion: med.duracion,
-                indicaciones: med.frecuencia || med.indicaciones
+                indicaciones: med.frecuencia || ""
             }))
         };
 
