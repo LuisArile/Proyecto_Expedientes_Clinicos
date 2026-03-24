@@ -1,16 +1,24 @@
 name: CI/CD Pipeline
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
+
+  push:
+    branches: [ main ]
+
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Escribe "deploy" para confirmar'
+        required: true
 
 jobs:
 
   backend-tests:
     name: Backend Tests (Jest)
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     defaults:
       run:
         working-directory: backend
@@ -27,6 +35,7 @@ jobs:
   frontend-tests:
     name: Frontend Tests (Vitest)
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     defaults:
       run:
         working-directory: frontend/Expedientes_Clinicos
@@ -45,56 +54,55 @@ jobs:
   docker-build-deploy:
     name: Build, Push & Deploy
     runs-on: ubuntu-latest
+
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.confirm == 'deploy'
+
     needs: [backend-tests, frontend-tests]
 
     steps:
+      
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
 
-      #  TAG dinámico (commit SHA)
       - name: Set image tag
         run: echo "TAG=${{ github.sha }}" >> $GITHUB_ENV
 
-      #  Login a ACR
       - name: Login to ACR
         run: |
           docker login clinicacontainerregistry.azurecr.io \
             -u ${{ secrets.ACR_USERNAME }} \
             -p ${{ secrets.ACR_PASSWORD }}
 
-      #  Build backend
       - name: Build backend image
         run: |
           docker build \
             -t clinicacontainerregistry.azurecr.io/backend-clinica:${{ env.TAG }} \
             ./backend
 
-      #  Build frontend
       - name: Build frontend image
         run: |
           docker build \
             -t clinicacontainerregistry.azurecr.io/frontend-clinica:${{ env.TAG }} \
             ./frontend
 
-      #  Push backend
       - name: Push backend image
         run: |
           docker push clinicacontainerregistry.azurecr.io/backend-clinica:${{ env.TAG }}
 
-      #  Push frontend
       - name: Push frontend image
         run: |
           docker push clinicacontainerregistry.azurecr.io/frontend-clinica:${{ env.TAG }}
 
-      #  Deploy backend (SIN az login debido a pemisos limitados de suscripción de estudiantes)
-      - name: Deploy backend to Azure
+      - name: Deploy backend
         uses: azure/webapps-deploy@v2
         with:
           app-name: clinica-backend
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND }}
           images: clinicacontainerregistry.azurecr.io/backend-clinica:${{ env.TAG }}
 
-      #  Deploy frontend (SIN az login debido a pemisos limitados de suscripción de estudiantes)
-      - name: Deploy frontend to Azure
+      - name: Deploy frontend
         uses: azure/webapps-deploy@v2
         with:
           app-name: clinica-frontend
