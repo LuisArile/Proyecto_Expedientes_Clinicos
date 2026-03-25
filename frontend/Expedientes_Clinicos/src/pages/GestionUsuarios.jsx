@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Users, UserPlus, Search, Loader2, CheckCircle2, Power, Mail, Edit } from "lucide-react";
 import { DialogoEnvioCredenciales } from '../features/admin/components/DialogoEnvioCredenciales';
-import { TablaUsuarios } from '../features/admin/components/TablaUsuarios';
 
 import { DataTable } from "@/components/common/DataTable";
 import { PageHeader } from "@/components/layout/PageHeader";
