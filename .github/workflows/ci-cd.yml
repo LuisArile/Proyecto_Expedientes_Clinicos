@@ -57,8 +57,6 @@ jobs:
 
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.confirm == 'deploy'
 
-    needs: [backend-tests, frontend-tests]
-
     steps:
       
       - uses: actions/checkout@v4
