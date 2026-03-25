@@ -4,45 +4,36 @@ const prisma = require('../config/prisma');
 class UsuarioRepository {
 
     async crear(data) {
-        
+        const usuario = await prisma.usuario.create({
+            data: {
+                nombre: data.nombre,
+                apellido: data.apellido,
+                correo: data.correo,
+                nombreUsuario: data.nombreUsuario,
+                clave: data.clave,
+                idRol: Number(data.idRol),
+                especialidad: data.especialidad || null,                    
+            },
+            include: { rol: true }
+        });
 
-            const usuario = await prisma.usuario.create({
-                data: {
-                    nombre: data.nombre,
-                    apellido: data.apellido,
-                    correo: data.correo,
-                    nombreUsuario: data.nombreUsuario,
-                    clave: data.clave,
-                    idRol: Number(data.idRol),
-                    especialidad: data.especialidad || null,
-                    activo: true,
-                    
-                },
-                include: { rol: true }
-            });
-
-            return {usuario, rolNombre:usuario.rol?.nombre};
-
+        return {usuario, rolNombre:usuario.rol?.nombre};
     }
 
     async obtenerTodos() {
+        const usuarios = await prisma.usuario.findMany({
+            include: { auditorias: true, rol: true }
+        });
 
-            const usuarios = await prisma.usuario.findMany({
-                include: { auditorias: true, rol: true }
-            });
-
-            return usuarios.map(r => ({
-                ...r,
-                rolNombre: r.rol.nombre
-            }));
-
-        
+        return usuarios.map(r => ({
+            ...r,
+            rolNombre: r.rol.nombre
+        }));        
     }
-
     
     async actualizar(id,data) {
     
-         const actualizarData = {};
+        const actualizarData = {};
         
         if (data.nombre !== undefined) actualizarData.nombre = data.nombre;
         if (data.apellido !== undefined) actualizarData.apellido = data.apellido;
@@ -52,26 +43,23 @@ class UsuarioRepository {
         if (data.especialidad !== undefined) actualizarData.especialidad = data.especialidad;
         if (data.activo !== undefined) actualizarData.activo = data.activo;
         if (data.idRol !== undefined) actualizarData.idRol = Number(data.idRol);
+        if (data.debeCambiarPasword !== undefined) actualizarData.debeCambiarPasword = data.debeCambiarPassword;
 
-            const usuario = await prisma.usuario.update({
-                where: {id:Number(id)},
-                data: actualizarData,
-                include: { rol: true }
-            });
+        const usuario = await prisma.usuario.update({
+            where: {id:Number(id)},
+            data: actualizarData,
+            include: { rol: true }
+        });
 
-            return {usuario, rolNombre:usuario.rol?.nombre};
-
-        
+        return {usuario, rolNombre:usuario.rol?.nombre};        
     }
 
     async eliminar(id) {
-        
-            await prisma.usuario.delete({
-                where: { id: Number(id) }
-            });
-            return true;
+        await prisma.usuario.delete({
+            where: { id: Number(id) }
+        });
+        return true;
     }
-
 
     async filtrarNombreUsuario(nombreUsuario) {
         try {
@@ -164,7 +152,4 @@ class UsuarioRepository {
     });
 }
 }
-
-
-
 module.exports = UsuarioRepository;

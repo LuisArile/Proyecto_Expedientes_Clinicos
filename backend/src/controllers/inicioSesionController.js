@@ -18,26 +18,27 @@ class inicioSesionController {
             
             if (!resultado) throw new ErrorNoAutorizado('Credenciales incorrectas');
 
-            const tokenPayload = {
-                id: resultado.id,
-                idRol: resultado.idRol
-            };
+            // const tokenPayload = {
+            
+            //     id: resultado.id,
+            //     idRol: resultado.idRol
+            // };
 
-            const token = jwt.sign(
-                tokenPayload, 
-                process.env.JWT_SECRET || 'tu_clave_secreta', 
-                { expiresIn: '8h' }
-            );
+            // const token = jwt.sign(
+            //     tokenPayload, 
+            //     process.env.JWT_SECRET || 'tu_clave_secreta', 
+            //     { expiresIn: '8h' }
+            // );
 
             res.json({ 
                 success: true, 
-                token,
+                token: resultado.token,
                 mensaje: 'Inicio de sesión exitoso',
                 data: resultado 
             });
         }catch (error) {
-                throw new ErrorNoAutorizado(error.message);
-            }
+            throw new ErrorNoAutorizado(error.message);
+        }
     });
 
 
