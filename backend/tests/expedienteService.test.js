@@ -29,6 +29,7 @@ describe("ExpedienteService", () => {
             obtenerPorDni: jest.fn(),
             obtenerPorId: jest.fn(),
             crear: jest.fn(),
+            actualizar: jest.fn(),
         };
 
         auditoriaService = {
@@ -143,20 +144,153 @@ describe("ExpedienteService", () => {
 
     describe("actualizar", () => {
 
-        test("debe actualizar expediente", async () => {
+        test("debe actualizar solo datos del expediente (sin paciente)", async () => {
 
-            expedienteRepo.obtenerPorId.mockResolvedValue({ idExpediente: 1 });
+            expedienteRepo.obtenerPorId.mockResolvedValue({ idExpediente: 1, idPaciente: 5 });
 
             expedienteRepo.actualizar.mockResolvedValue({
-                estado: "Activo"
+                idExpediente: 1,
+                estado: true,
+                observaciones: "Actualizado"
             });
 
-            const resultado = await service.actualizar(1, { estado: "Activo" });
+            const resultado = await service.actualizar(
+                1,
+                { estado: true, observaciones: "Actualizado" },
+                1  // usuarioId
+            );
 
+            expect(expedienteRepo.obtenerPorId).toHaveBeenCalledWith(1);
             expect(expedienteRepo.actualizar)
-                .toHaveBeenCalledWith(1, { estado: "Activo" });
+                .toHaveBeenCalledWith(1, { estado: true, observaciones: "Actualizado" });
+            expect(auditoriaService.registrarExpediente).toHaveBeenCalled();
+            expect(resultado.estado).toBe(true);
 
-            expect(resultado.estado).toBe("Activo");
+        });
+
+        test("debe actualizar datos de paciente usando transacción", async () => {
+
+            // Mock para el primer obtenerPorId (al inicio del método)
+            expedienteRepo.obtenerPorId.mockResolvedValueOnce({
+                idExpediente: 1,
+                idPaciente: 5,
+                paciente: { dni: "0801-1984-00248" }
+            });
+
+            pacienteRepo.obtenerPorDni.mockResolvedValue(null);
+
+            pacienteRepo.actualizar.mockResolvedValue({
+                idPaciente: 5,
+                nombre: "Juan Carlos",
+                apellido: "Pérez"
+            });
+
+            expedienteRepo.actualizar.mockResolvedValue({
+                idExpediente: 1,
+                idPaciente: 5
+            });
+
+            // Mock para el segundo obtenerPorId (al final, después de la transacción)
+            expedienteRepo.obtenerPorId.mockResolvedValueOnce({
+                idExpediente: 1,
+                idPaciente: 5,
+                paciente: {
+                    idPaciente: 5,
+                    nombre: "Juan Carlos",
+                    apellido: "Pérez"
+                }
+            });
+
+            prisma.$transaction.mockImplementation(async (callback) => {
+                const tx = {};
+                return callback(tx);
+            });
+
+            const resultado = await service.actualizar(
+                1,
+                {
+                    paciente: {
+                        nombre: "Juan Carlos",
+                        apellido: "Pérez"
+                    }
+                },
+                1  // usuarioId
+            );
+
+            expect(prisma.$transaction).toHaveBeenCalled();
+            expect(pacienteRepo.actualizar).toHaveBeenCalled();
+            expect(auditoriaService.registrarExpediente).toHaveBeenCalled();
+            expect(expedienteRepo.obtenerPorId).toHaveBeenCalledTimes(2);
+            expect(resultado.paciente.nombre).toBe("Juan Carlos");
+
+        });
+
+        test("debe lanzar error si el DNI ya existe en otro paciente", async () => {
+
+            expedienteRepo.obtenerPorId.mockResolvedValue({
+                idExpediente: 1,
+                idPaciente: 5
+            });
+
+            pacienteRepo.obtenerPorDni.mockResolvedValue({
+                idPaciente: 10  // Diferente al paciente actual
+            });
+
+            await expect(
+                service.actualizar(
+                    1,
+                    {
+                        paciente: {
+                            dni: "0801-1984-99999"  // DNI que pertenece a otro paciente
+                        }
+                    },
+                    1
+                )
+            ).rejects.toThrow("El paciente con DNI 0801-1984-99999 ya existe");
+
+        });
+
+        test("debe permitir actualizar el mismo DNI del paciente", async () => {
+
+            expedienteRepo.obtenerPorId.mockResolvedValue({
+                idExpediente: 1,
+                idPaciente: 5,
+                paciente: { dni: "0801-1984-00248" }
+            });
+
+            // El mismo DNI retorna el mismo paciente
+            pacienteRepo.obtenerPorDni.mockResolvedValue({
+                idPaciente: 5  // Mismo que el expediente
+            });
+
+            pacienteRepo.actualizar.mockResolvedValue({
+                idPaciente: 5,
+                dni: "0801-1984-00248"
+            });
+
+            prisma.$transaction.mockImplementation(async (callback) => {
+                const tx = {};
+                return callback(tx);
+            });
+
+            expedienteRepo.obtenerPorId.mockResolvedValueOnce({
+                idExpediente: 1,
+                idPaciente: 5,
+                paciente: { dni: "0801-1984-00248" }
+            });
+
+            const resultado = await service.actualizar(
+                1,
+                {
+                    paciente: {
+                        dni: "0801-1984-00248"
+                    }
+                },
+                1
+            );
+
+            expect(prisma.$transaction).toHaveBeenCalled();
+            expect(resultado).toBeDefined();
 
         });
 
