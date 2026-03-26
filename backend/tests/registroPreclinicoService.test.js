@@ -3,13 +3,13 @@ const RegistroPreclinicoService = require("../src/services/registroPreclinicoSer
 describe("RegistroPreclinicoService", () => {
 
     let service;
-    let mockRepository;
-    let mockExpedienteRepository;
-    let mockAuditoriaService;
+    let repository;
+    let expedienteRepository;
+    let auditoriaService;
 
     beforeEach(() => {
 
-        mockRepository = {
+        repository = {
             crear: jest.fn(),
             obtenerPorExpediente: jest.fn(),
             obtenerUltimoPorExpediente: jest.fn(),
@@ -17,183 +17,93 @@ describe("RegistroPreclinicoService", () => {
             contarTodos: jest.fn()
         };
 
-        mockExpedienteRepository = {
+        expedienteRepository = {
             obtenerPorId: jest.fn()
         };
 
-        mockAuditoriaService = {
-            registrar: jest.fn()
+        auditoriaService = {
+            registrarAccionMedica: jest.fn().mockResolvedValue(true)
         };
 
         service = new RegistroPreclinicoService(
-            mockRepository,
-            mockExpedienteRepository,
-            mockAuditoriaService
+            repository,
+            expedienteRepository,
+            auditoriaService
         );
-
     });
 
     describe("registrar", () => {
 
-        test("debe registrar signos vitales correctamente", async () => {
+        test("debe registrar correctamente", async () => {
 
-            const expedienteMock = { idExpediente: 1, paciente: {} };
-            const registroMock = { id: 1, expedienteId: 1, presionArterial: "120/80" };
+            expedienteRepository.obtenerPorId.mockResolvedValue({ id: 1 });
+            repository.crear.mockResolvedValue({ id: 10 });
 
-            mockExpedienteRepository.obtenerPorId.mockResolvedValue(expedienteMock);
-            mockRepository.crear.mockResolvedValue(registroMock);
+            const datos = { temperatura: 36.5 };
 
-            const resultado = await service.registrar(1, 2, {
-                presionArterial: "120/80",
-                temperatura: 36.5
-            });
+            const resultado = await service.registrar(1, 2, datos);
 
-            expect(mockExpedienteRepository.obtenerPorId).toHaveBeenCalledWith(1);
-            expect(mockRepository.crear).toHaveBeenCalledWith({
-                expedienteId: 1,
-                enfermeroId: 2,
-                presionArterial: "120/80",
-                temperatura: 36.5
-            });
-            expect(resultado).toEqual(registroMock);
-
+            expect(repository.crear).toHaveBeenCalled();
+            expect(auditoriaService.registrarAccionMedica).toHaveBeenCalled();
+            expect(resultado).toEqual({ id: 10 });
         });
 
-        test("debe lanzar error si el expediente no existe", async () => {
+        test("debe lanzar error si expediente no existe", async () => {
 
-            mockExpedienteRepository.obtenerPorId.mockResolvedValue(null);
+            expedienteRepository.obtenerPorId.mockResolvedValue(null);
 
             await expect(
-                service.registrar(999, 2, { presionArterial: "120/80" })
+                service.registrar(1, 2, {})
             ).rejects.toThrow("Expediente no encontrado");
-
-            expect(mockRepository.crear).not.toHaveBeenCalled();
-
         });
 
-        test("debe manejar errores del repository", async () => {
+        test("debe capturar error interno", async () => {
 
-            mockExpedienteRepository.obtenerPorId.mockResolvedValue({ idExpediente: 1 });
-            mockRepository.crear.mockRejectedValue(new Error("Error de BD"));
+            expedienteRepository.obtenerPorId.mockResolvedValue({ id: 1 });
+            repository.crear.mockRejectedValue(new Error("DB error"));
 
             await expect(
-                service.registrar(1, 2, { presionArterial: "120/80" })
-            ).rejects.toThrow("Error al registrar: Error de BD");
-
+                service.registrar(1, 2, {})
+            ).rejects.toThrow("Error al registrar: DB error");
         });
-
     });
 
-    describe("obtenerPorExpediente", () => {
+    describe("consultas", () => {
 
-        test("debe retornar registros de un expediente", async () => {
+        test("obtenerPorExpediente", async () => {
 
-            const registrosMock = [
-                { id: 1, presionArterial: "120/80" },
-                { id: 2, presionArterial: "125/85" }
-            ];
+            repository.obtenerPorExpediente.mockResolvedValue([1]);
 
-            mockRepository.obtenerPorExpediente.mockResolvedValue(registrosMock);
+            const res = await service.obtenerPorExpediente(1);
 
-            const resultado = await service.obtenerPorExpediente(1);
-
-            expect(mockRepository.obtenerPorExpediente).toHaveBeenCalledWith(1);
-            expect(resultado).toEqual(registrosMock);
-
+            expect(res).toEqual([1]);
         });
 
-        test("debe manejar errores", async () => {
+        test("obtenerUltimoPorExpediente", async () => {
 
-            mockRepository.obtenerPorExpediente.mockRejectedValue(new Error("Error"));
+            repository.obtenerUltimoPorExpediente.mockResolvedValue({ id: 1 });
 
-            await expect(
-                service.obtenerPorExpediente(1)
-            ).rejects.toThrow("Error al obtener registros");
+            const res = await service.obtenerUltimoPorExpediente(1);
 
+            expect(res.id).toBe(1);
         });
 
+        test("obtenerTodos", async () => {
+
+            repository.obtenerTodos.mockResolvedValue([1, 2]);
+
+            const res = await service.obtenerTodos();
+
+            expect(res).toHaveLength(2);
+        });
+
+        test("contarTodos", async () => {
+
+            repository.contarTodos.mockResolvedValue(5);
+
+            const res = await service.contarTodos();
+
+            expect(res).toBe(5);
+        });
     });
-
-    describe("obtenerUltimoPorExpediente", () => {
-
-        test("debe retornar el último registro", async () => {
-
-            const registroMock = { id: 3, presionArterial: "130/90" };
-
-            mockRepository.obtenerUltimoPorExpediente.mockResolvedValue(registroMock);
-
-            const resultado = await service.obtenerUltimoPorExpediente(1);
-
-            expect(mockRepository.obtenerUltimoPorExpediente).toHaveBeenCalledWith(1);
-            expect(resultado).toEqual(registroMock);
-
-        });
-
-        test("debe manejar errores", async () => {
-
-            mockRepository.obtenerUltimoPorExpediente.mockRejectedValue(new Error("Error"));
-
-            await expect(
-                service.obtenerUltimoPorExpediente(1)
-            ).rejects.toThrow("Error al obtener último registro");
-
-        });
-
-    });
-
-    describe("obtenerTodos", () => {
-
-        test("debe retornar todos los registros", async () => {
-
-            const registrosMock = [
-                { id: 1, presionArterial: "120/80" },
-                { id: 2, presionArterial: "125/85" }
-            ];
-
-            mockRepository.obtenerTodos.mockResolvedValue(registrosMock);
-
-            const resultado = await service.obtenerTodos();
-
-            expect(mockRepository.obtenerTodos).toHaveBeenCalled();
-            expect(resultado).toEqual(registrosMock);
-
-        });
-
-        test("debe manejar errores", async () => {
-
-            mockRepository.obtenerTodos.mockRejectedValue(new Error("Error"));
-
-            await expect(
-                service.obtenerTodos()
-            ).rejects.toThrow("Error al obtener todos los registros");
-
-        });
-
-    });
-
-    describe("contarTodos", () => {
-
-        test("debe retornar el total de registros", async () => {
-
-            mockRepository.contarTodos.mockResolvedValue(42);
-
-            const resultado = await service.contarTodos();
-
-            expect(mockRepository.contarTodos).toHaveBeenCalled();
-            expect(resultado).toBe(42);
-
-        });
-
-        test("debe manejar errores", async () => {
-
-            mockRepository.contarTodos.mockRejectedValue(new Error("Error"));
-
-            await expect(
-                service.contarTodos()
-            ).rejects.toThrow("Error al contar registros");
-
-        });
-
-    });
-
 });

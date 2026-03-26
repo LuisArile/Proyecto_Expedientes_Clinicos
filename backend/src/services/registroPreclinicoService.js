@@ -8,26 +8,34 @@ class registroPreclinicoService {
     }
 
     async registrar(expedienteId, enfermeroId, datos) {
-        const expediente = await this.expedienteRepository.obtenerPorId(expedienteId);
-        if (!expediente) throw new Error('Expediente no encontrado');
+        try {
+            const expediente = await this.expedienteRepository.obtenerPorId(expedienteId);
+            if (!expediente) throw new Error('Expediente no encontrado');
 
-        // Crear el registro
-        const registro = await this.repository.crear({
-            expedienteId,
-            enfermeroId,
-            ...datos
-        });
-
-        await this.auditoriaService.registrarAccionMedica(
-            enfermeroId, 
-            'REGISTRO_PRECLINICO',
-            {
+            const registro = await this.repository.crear({
                 expedienteId,
-                signosRegistrados: Object.keys(datos).join(', ')
-            }
-        );
+                enfermeroId,
+                ...datos
+            });
 
-        return registro;
+            try {
+                await this.auditoriaService.registrarAccionMedica(
+                    enfermeroId,
+                    'REGISTRO_PRECLINICO',
+                    {
+                        expedienteId,
+                        signosRegistrados: Object.keys(datos).join(', ')
+                    }
+                );
+            } catch (auditError) {
+                console.error("Error auditoría:", auditError);
+            }
+
+            return registro;
+
+        } catch (error) {
+            throw new Error(`Error al registrar: ${error.message}`);
+        }
     }
 
     async obtenerPorExpediente(expedienteId) {

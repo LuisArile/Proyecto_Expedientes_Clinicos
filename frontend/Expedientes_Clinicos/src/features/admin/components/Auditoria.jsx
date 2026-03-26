@@ -79,7 +79,7 @@ export function Auditoria({ onVolver }) {
       className: "text-center",
       render: (log) => (
         <Button 
-          variant="ghost" size="icon" className="rounded-full hover:bg-blue-100 text-blue-600"
+          aria-label="ver-detalles" variant="ghost" size="icon" className="rounded-full hover:bg-blue-100 text-blue-600"
           onClick={() => { setEventoSeleccionado(log); setModalDetallesAbierto(true); }}
         >
           <FileText className="h-4 w-4" />

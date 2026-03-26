@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, test, expect, vi, beforeEach } from "vitest";
-import { Changepassword } from "../features/dashboard/components/Changepassword";
+import { Changepassword } from "@/features/dashboard/components/Changepassword";
 import { MemoryRouter } from "react-router-dom";
-import { AuthContext } from "@/features/auth/AuthContext";
+import { AuthContext } from "@/features/auth/components/AuthContext";
 import { securityService } from "@/features/dashboard/services/securityService";
 
 /* ---------------- MOCKS ---------------- */

@@ -11,9 +11,14 @@ class InicioSesionService {
     async inicioSesion(nombreUsuario, clave) {
 
         const usuario = await this.usuarioRepository.filtrarNombreUsuario(nombreUsuario);
+
+        if (!usuario) {
+            throw new Error('Credenciales incorrectas');
+        }
+
         const claveValida = await bcrypt.compare(clave, usuario.clave);
 
-        if (!usuario || !claveValida) {
+        if (!claveValida) {
             throw new Error('Credenciales incorrectas');
         }
 
