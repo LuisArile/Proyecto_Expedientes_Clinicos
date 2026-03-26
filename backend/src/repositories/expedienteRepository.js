@@ -154,6 +154,50 @@ class expedienteRepository {
         }
     }
 
+    /**
+     * Obtiene los expedientes creados hoy con información del paciente
+     * @param {number} limite - Cantidad de expedientes a retornar
+     * @param {number} usuarioId - ID del usuario (no utilizado actualmente)
+     * @returns {Promise<Array>} Array de expedientes con datos del paciente
+     */
+    async obtenerCreadosHoyConPaciente(limite = 6, usuarioId = null) {
+        const inicioHoy = new Date();
+        inicioHoy.setHours(0, 0, 0, 0);
+        const finHoy = new Date();
+        finHoy.setHours(23, 59, 59, 999);
+
+        try {
+            const expedientes = await prisma.expediente.findMany({
+                where: {
+                    fechaCreacion: {
+                        gte: inicioHoy,
+                        lte: finHoy
+                    }
+                },
+                include: { 
+                    paciente: {
+                        select: {
+                            idPaciente: true,
+                            nombre: true,
+                            apellido: true,
+                            dni: true,
+                            sexo: true,
+                            fechaNacimiento: true,
+                            correo: true,
+                            telefono: true
+                        }
+                    }
+                },
+                orderBy: { fechaCreacion: 'desc' },
+                take: limite
+            });
+
+            return expedientes;
+        } catch (error) {
+            throw new Error(`Error al obtener expedientes creados hoy: ${error.message}`);
+        }
+    }
+
     async contarCreadosHoy(usuarioId = null, accionFiltro = 'CREACIÓN DE EXPEDIENTE') {
         const inicioHoy = new Date();
         inicioHoy.setHours(0, 0, 0, 0);
