@@ -28,7 +28,7 @@ export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica }) 
 
     const columns = useMemo( () => {
         const rol = user?.rol?.toUpperCase();
-        const esPersonalAutorizado = rol === "MEDICO" || rol === "ADMIN";
+        const esPersonalAutorizado = rol === "MEDICO" || rol === "ADMINISTRADOR" || rol === "ADMIN";
         return [
             {
                 header: "Código de Expediente",
