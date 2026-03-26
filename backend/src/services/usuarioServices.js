@@ -24,11 +24,12 @@ class usuarioService{
         if (!data.clave) {
             throw new ErrorValidacion('La contraseña es obligatoria');
         }
-        if (data.clave.length < 8) {
-            throw new ErrorValidacion('La contraseña debe tener al menos 8 caracteres');
-        }
         if (!data.idRol) {
             throw new ErrorValidacion('El rol es obligatorio');
+        }
+
+        if (data.idRol === 2 && !data.especialidad) {
+            throw new ErrorValidacion('La especialidad es obligatoria para médicos');
         }
 
         const correoExistente = await this.usuarioRepository.obtenerPorCorreo(data.correo);
@@ -36,12 +37,13 @@ class usuarioService{
             throw new ErrorConflicto('El correo ya está registrado');
         }
 
-        const existeNombre=await this.usuarioRepository.filtrarNombreUsuario(data.nombreUsuario);
+        const existeNombre = await this.usuarioRepository.filtrarNombreUsuario(data.nombreUsuario);
+        if(existeNombre) throw new ErrorConflicto('El nombre de usuario ya esta registrado');
+
+        if (data.clave.length < 8) {
+            throw new ErrorValidacion('La contraseña debe tener al menos 8 caracteres');
+        }
         
-        if(existeNombre) throw new ErrorConflicto ('El nombre de usuario ya esta registrado');
-
-        if (data.idRol === 2 && !data.especialidad) {throw new ErrorValidacion('La especialidad es obligatoria para médicos');}
-
         //encriptamos clave
         data.clave= await Encriptador.encriptar(data.clave);
 
@@ -73,13 +75,12 @@ class usuarioService{
 
     async actualizar(id, data, usuarioActualId) {
         
-            const usuarioExistente = await this.usuarioRepository.obtenerPorId(id);
-            if (!usuarioExistente) {
-                throw new ErrorNoEncontrado('usuario');
-            }
+        const usuarioExistente = await this.usuarioRepository.obtenerPorId(id);
+        if (!usuarioExistente) {
+            throw new ErrorNoEncontrado('usuario');
+        }
 
-            //
-            if (data.correo && data.correo !== usuarioExistente.correo) {
+        if (data.correo && data.correo !== usuarioExistente.correo) {
             const correoExistente = await this.usuarioRepository.obtenerPorCorreo(data.correo);
             if (correoExistente) {
                 throw new ErrorConflicto('El correo ya está registrado por otro usuario');
@@ -98,22 +99,43 @@ class usuarioService{
             throw new ErrorValidacion('No puedes inactivar tu propia cuenta');
         }
 
-        const nuevoRol = data.idRol || usuarioExistente.idRol;
+        const nuevoRol = data.idRol ? Number(data.idRol) : usuarioExistente.idRol;
         const especialidad = data.especialidad || usuarioExistente.especialidad;
         if (Number(nuevoRol) === 2 && !especialidad) {
             throw new ErrorValidacion('La especialidad es obligatoria para médicos');
         }
 
-        const usuario = await this.usuarioRepository.actualizar(id, data);
+        const camposCambiados = [];
+        const camposMapeo = {
+            nombre: 'Nombre',
+            apellido: 'Apellido',
+            correo: 'Correo',
+            idRol: 'Rol',
+            activo: 'Estado',
+            especialidad: 'Especialidad'
+        };
 
-            // Registrar auditoría
-            await this.auditoriaService.registrarUsuario(
-                usuarioActualId,
-                'ACTUALIZACION',
-                id
+        Object.keys(camposMapeo).forEach(key => {
+            if (data[key] !== undefined && String(data[key]) !== String(usuarioExistente[key])) {
+                camposCambiados.push(camposMapeo[key]);
+            }
+        });
+
+        const usuarioActualizado = await this.usuarioRepository.actualizar(id, data);
+
+        if (camposCambiados.length > 0) {
+            const detalles = `Usuario modificado: ${usuarioExistente.nombreUsuario}. ` +
+                            `Campos: ${camposCambiados.join(', ')}. ` +
+                            `Responsable ID: ${usuarioActualId}`;
+            
+            await this.auditoriaService.registrar(
+                usuarioActualId, 
+                'ACTUALIZACION_USUARIO', 
+                detalles
             );
+        }
 
-        return usuario;
+        return usuarioActualizado;
     }
 
     //eliminar Usuario
