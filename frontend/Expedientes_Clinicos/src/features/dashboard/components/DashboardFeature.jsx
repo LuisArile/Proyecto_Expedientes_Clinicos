@@ -137,6 +137,27 @@ export function DashboardFeature({ onNavigate }) {
                                     accent={config.accentColor} 
                                     bg={config.bgAccent}
                                     statusLabel={config.statusLabel}
+                                    onClick={() => {
+                                        if (item.idExpediente) {
+                                            // Construir el objeto del paciente para la navegación
+                                            const pacienteData = {
+                                                idPaciente: item.idPaciente,
+                                                nombre: item.paciente?.nombre || '',
+                                                apellido: item.paciente?.apellido || '',
+                                                dni: item.paciente?.dni || '',
+                                                telefono: item.paciente?.telefono || '',
+                                                correo: item.paciente?.correo || '',
+                                                sexo: item.paciente?.sexo || '',
+                                                fechaNacimiento: item.paciente?.fechaNacimiento || '',
+                                                direccion: item.paciente?.direccion || '',
+                                                expedientes: item.expedientes || {}
+                                            };
+                                            onNavigate({
+                                                view: 'ver-expediente',
+                                                paciente: pacienteData
+                                            });
+                                        }
+                                    }}
                                 />
                             ))
                         ) : (
@@ -170,15 +191,21 @@ export function DashboardFeature({ onNavigate }) {
     );
     }
 
-    function ListItem({ item, accent, bg }) {
+    function ListItem({ item, accent, bg, onClick }) {
 
         const horaFormateada = item.fecha ? new Date(item.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--";
+        
+        // Usar icono de documento para expedientes, reloj para auditoría
+        const IconComponent = item.idExpediente ? FileText : Clock;
 
         return (
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-white transition-all">
+            <div 
+                onClick={onClick}
+                className={`flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 transition-all ${onClick ? 'hover:bg-blue-50 hover:border-blue-300 hover:shadow-sm cursor-pointer' : 'hover:bg-white'}`}
+            >
                 <div className="flex items-center gap-3">
                     <div className={`h-10 w-10 ${bg} rounded-full flex items-center justify-center`}>
-                        <Clock className={`h-5 w-5 ${accent}`} />
+                        <IconComponent className={`h-5 w-5 ${accent}`} />
                     </div>
                     <div>
                         <p className="font-medium text-gray-900">{item.primaryText || item.usuario || item.nombre}</p>
