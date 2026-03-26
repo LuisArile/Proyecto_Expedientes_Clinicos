@@ -11,6 +11,8 @@ export function useUsuarioForm(id) {
         result: { success: false, title: "", message: "" } 
     });
 
+    const isEdit = Boolean(id);
+
     useEffect(() => {
         const cargarDataNecesaria = async () => {
             setLoading(true);
@@ -32,23 +34,38 @@ export function useUsuarioForm(id) {
         cargarDataNecesaria();
     }, [id]);
 
+    const construirPayload = (data) => {
+        if (isEdit) {
+            return {
+                nombre: data.nombre,
+                correo: data.correo,
+                idRol: Number(data.idRol),
+                activo: String(data.activo) === "true",
+                especialidad: data.especialidad
+            };
+        }
+        return data;
+    };
+
     const enviarFormulario = async (data) => {
         setLoading(true);
         try {
-            if (!id) data.clave = "temp12345"; 
+            let payload = construirPayload(data);
 
-            if (id) {
-                await usuarioService.update(id, data);
+            if (!id) payload.clave = "temp12345"
+
+           if (isEdit) {
+                await usuarioService.update(id, payload);
             } else {
-                await usuarioService.create(data);
+                await usuarioService.create(payload);
             }
 
             setModal({
                 open: true,
                 result: {
                     success: true,
-                    title: id ? "¡Actualización Exitosa!" : "¡Registro Exitoso!",
-                    message: id 
+                    title: isEdit ? "Actualización Exitosa" : "Registro Exitoso",
+                    message: isEdit 
                         ? "Los datos han sido actualizados."
                         : "Usuario creado. Se enviaron credenciales al correo."
                 }

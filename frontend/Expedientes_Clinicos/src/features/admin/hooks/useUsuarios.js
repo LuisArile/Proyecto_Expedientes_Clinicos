@@ -10,13 +10,13 @@ export const useUsuarios = () => {
 
     const cargarUsuarios = async () => {
         try {
-        setLoading(true);
-        const data = await usuarioService.getAll();
-        setUsuarios(data);
+            setLoading(true);
+            const data = await usuarioService.getAll();
+            setUsuarios(data);
         } catch (error) {
-        toast.error("No se pudieron cargar los usuarios");
+            toast.error("No se pudieron cargar los usuarios");
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
     };
 
@@ -24,9 +24,9 @@ export const useUsuarios = () => {
 
     const usuariosFiltrados = useMemo(() => {
         return usuarios.filter(u => 
-        u.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-        u.nombreUsuario.toLowerCase().includes(busqueda.toLowerCase()) ||
-        u.correo.toLowerCase().includes(busqueda.toLowerCase())
+            u.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+            u.nombreUsuario.toLowerCase().includes(busqueda.toLowerCase()) ||
+            u.correo.toLowerCase().includes(busqueda.toLowerCase())
         );
     }, [usuarios, busqueda]);
 

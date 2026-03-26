@@ -102,11 +102,14 @@ describe("Componente Auditoria", () => {
         const btnDetalles = screen.getByRole("button", { name: /ver-detalles/i });
         fireEvent.click(btnDetalles);
 
-        const tituloModal = await screen.findByText(/Detalle del Evento/i);
-        expect(tituloModal).toBeInTheDocument();
+        expect(await screen.findByText(/Detalle del Evento/i)).toBeInTheDocument();
 
-        expect(screen.getByText("LOG-001")).toBeInTheDocument();
-        expect(screen.getByText(mockEventos[0].detalles)).toBeInTheDocument();
+        const idEvento = await screen.findByText(/LOG-001/i);
+        await screen.findByText(mockEventos[0].detalles);
+        const detallesEvento = await screen.findByText(mockEventos[0].detalles);
+
+        expect(idEvento).toBeInTheDocument();
+        expect(detallesEvento).toBeInTheDocument();
     });
 
     test("debe llamar a onVolver cuando se presiona el botón de regresar", () => {
