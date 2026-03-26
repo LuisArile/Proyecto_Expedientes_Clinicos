@@ -135,6 +135,7 @@ class usuarioController {
         res.json(resultado);
     });
 
+}
 /*
     obtenerPorId = capturarAsync(async (req, res) => {
         const { idRol } = req.params;
@@ -237,6 +238,6 @@ class usuarioController {
     
     */
 
-}
+// }
 
 module.exports = usuarioController;
