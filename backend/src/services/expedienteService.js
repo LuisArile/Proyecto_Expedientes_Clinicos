@@ -124,13 +124,70 @@ class expedienteService {
      * @param {number} idExpediente 
      * @param {Object} data 
      */
-    async actualizar(idExpediente, data) {
+    async actualizar(idExpediente, data, usuarioId = null) {
         try {
             const expediente = await this.expedienteRepository.obtenerPorId(idExpediente);
             if (!expediente) {
                 throw new Error(`El expediente con ID ${idExpediente} no existe`);
             }
-            return await this.expedienteRepository.actualizar(idExpediente, data);
+
+            const datosPaciente = data?.paciente || null;
+            const datosExpediente = {
+                estado: data?.estado,
+                observaciones: data?.observaciones
+            };
+
+            if (datosPaciente?.dni) {
+                const pacienteConMismoDni = await this.pacienteRepository.obtenerPorDni(datosPaciente.dni);
+                if (pacienteConMismoDni && Number(pacienteConMismoDni.idPaciente) !== Number(expediente.idPaciente)) {
+                    throw new Error(`El paciente con DNI ${datosPaciente.dni} ya existe`);
+                }
+            }
+
+            const camposPacienteActualizados = datosPaciente
+                ? Object.keys(datosPaciente).filter((key) => datosPaciente[key] !== undefined)
+                : [];
+
+            const camposExpedienteActualizados = Object.keys(datosExpediente).filter(
+                (key) => datosExpediente[key] !== undefined
+            );
+
+            if (camposPacienteActualizados.length === 0) {
+                const actualizado = await this.expedienteRepository.actualizar(idExpediente, datosExpediente);
+
+                if (usuarioId && this.auditoriaService && camposExpedienteActualizados.length > 0) {
+                    await this.auditoriaService.registrarExpediente(usuarioId, "ACTUALIZACIÓN", {
+                        idExpediente: expediente.idExpediente,
+                        detalles: `Actualización de datos del expediente. Campos: ${camposExpedienteActualizados.map((campo) => `expediente.${campo}`).join(', ')}`
+                    });
+                }
+
+                return actualizado;
+            }
+
+            await prisma.$transaction(async (tx) => {
+                if (camposPacienteActualizados.length > 0) {
+                    await this.pacienteRepository.actualizar(expediente.idPaciente, datosPaciente, tx);
+                }
+
+                if (camposExpedienteActualizados.length > 0) {
+                    await this.expedienteRepository.actualizar(idExpediente, datosExpediente, tx);
+                }
+
+                if (usuarioId && this.auditoriaService && (camposPacienteActualizados.length > 0 || camposExpedienteActualizados.length > 0)) {
+                    const detalleCampos = [
+                        ...camposPacienteActualizados.map((campo) => `paciente.${campo}`),
+                        ...camposExpedienteActualizados.map((campo) => `expediente.${campo}`)
+                    ];
+
+                    await this.auditoriaService.registrarExpediente(usuarioId, "ACTUALIZACIÓN", {
+                        idExpediente: expediente.idExpediente,
+                        detalles: `Actualización de datos del expediente. Campos: ${detalleCampos.join(', ')}`
+                    }, tx);
+                }
+            });
+
+            return await this.expedienteRepository.obtenerPorId(idExpediente);
         } catch (error) {
             throw new Error(error.message);
         }
