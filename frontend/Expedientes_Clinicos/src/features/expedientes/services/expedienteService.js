@@ -81,3 +81,21 @@ export async function eliminarExpediente(idExpediente) {
     throw error;
   }
 }
+
+/**
+ * Obtener expediente por ID de paciente
+ * @param {string|number} idPaciente - ID del paciente
+ * @returns {Promise<Object>} Datos del expediente
+ */
+export async function obtenerExpedientePorPaciente(idPaciente) {
+  try {
+    const response = await expedienteAPI.obtenerPorPaciente(idPaciente);
+    if (response.success) {
+      return response.data;
+    }
+    throw new Error(response.error);
+  } catch (error) {
+    console.error("Error al obtener expediente por paciente:", error);
+    throw error;
+  }
+}
