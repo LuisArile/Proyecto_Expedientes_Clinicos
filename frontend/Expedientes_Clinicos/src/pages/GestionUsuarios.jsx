@@ -9,13 +9,19 @@ import { DialogoEnvioCredenciales } from '../features/admin/components/DialogoEn
 
 import { DataTable } from "@/components/common/DataTable";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { useAuth } from "@/features/auth/hooks/useAuth"
 
 export function GestionUsuarios({ onNavigate, onVolver }) {
-    const { usuarios, loading, busqueda, setBusqueda, handleToggleStatus, handleSendCredentials, stats } = useUsuarios();
+    const { user: currentUser } = useAuth();
+    const { usuarios, loading, busqueda, setBusqueda, handleToggleStatus, handleSendCredentials } = useUsuarios();
 
     const [isMailModalOpen, setIsMailModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [sending, setSending] = useState(false);
+
+    const usuariosExcluyendoActual = useMemo(() => {
+        return usuarios.filter(u => u.id !== currentUser?.id);
+    }, [usuarios, currentUser]);
 
     const columns = useMemo(() => [
         {
@@ -48,7 +54,7 @@ export function GestionUsuarios({ onNavigate, onVolver }) {
         },
         {
             header: "Registro",
-            accessorKey: "fechaCreacion",
+            accessorKey: "updatedAt",
             render: (usuario) => (
                 <span className="text-sm text-gray-600">
                     {new Date(usuario.updatedAt).toLocaleDateString()}
@@ -63,6 +69,7 @@ export function GestionUsuarios({ onNavigate, onVolver }) {
                 <div className="flex justify-center gap-1">
                     <Button 
                         size="icon" variant="ghost" 
+                        title="Reenviar Credenciales"
                         className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
                         onClick={() => {
                             setSelectedUser(usuario);
@@ -73,7 +80,8 @@ export function GestionUsuarios({ onNavigate, onVolver }) {
                     </Button>
                     <Button 
                         size="icon" variant="ghost" 
-                        className="h-8 w-8 text-blue-600"
+                        title="Editar"
+                        className="h-8 w-8 text-blue-600 hover:bg-blue-50"
                         onClick={() => {
                             sessionStorage.setItem("edit_user_id", usuario.id);
                             onNavigate('formulario-usuario');
@@ -83,7 +91,8 @@ export function GestionUsuarios({ onNavigate, onVolver }) {
                     </Button>
                     <Button 
                         size="icon" variant="ghost" 
-                        className={`h-8 w-8 ${usuario.activo ? 'text-red-500' : 'text-green-500'}`}
+                        title={usuario.activo ? "Desactivar" : "Activar"}
+                        className={`h-8 w-8 ${usuario.activo ? 'text-red-500 hover:bg-red-50' : 'text-green-500 hover:bg-green-50'}`}
                         onClick={() => handleToggleStatus(usuario.id)}
                     >
                         <Power className="h-4 w-4" />
@@ -117,9 +126,9 @@ export function GestionUsuarios({ onNavigate, onVolver }) {
             <main className="min-h-screen bg-slate-50/50 p-6 space-y-6">
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <StatCard title="Total" value={stats.total} icon={<Users className="text-blue-600" />} />
-                    <StatCard title="Activos" value={stats.activos} icon={<CheckCircle2 className="text-green-600" />} color="text-green-600" />
-                    <StatCard title="Inactivos" value={stats.inactivos} icon={<Power className="text-red-600" />} color="text-red-600" />
+                    <StatCard title="Otros Usuarios" value={usuariosExcluyendoActual.length} icon={<Users className="text-blue-600" />} />
+                    <StatCard title="Activos" value={usuariosExcluyendoActual.filter(u => u.activo).length} icon={<CheckCircle2 className="text-green-600" />} color="text-green-600" />
+                    <StatCard title="Inactivos" value={usuariosExcluyendoActual.filter(u => !u.activo).length} icon={<Power className="text-red-600" />} color="text-red-600" />
                 </div>
 
                 <Card className="bg-white shadow-sm border-slate-200">
@@ -136,7 +145,7 @@ export function GestionUsuarios({ onNavigate, onVolver }) {
                                     sessionStorage.removeItem("edit_user_id");
                                     onNavigate('formulario-usuario');
                                 }}
-                                className="bg-blue-600 hover:bg-blue-700"
+                                className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
                             >
                                 <UserPlus className="h-4 w-4 mr-2" /> Nuevo Usuario
                             </Button>
@@ -145,7 +154,7 @@ export function GestionUsuarios({ onNavigate, onVolver }) {
                     <CardContent>
                         <DataTable 
                             columns={columns} 
-                            data={usuarios}
+                            data={usuariosExcluyendoActual}
                             searchPlaceholder="Buscar por nombre, usuario o correo..."
                             searchValue={busqueda}
                             onSearchChange={setBusqueda}
