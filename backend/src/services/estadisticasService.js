@@ -63,13 +63,9 @@ class EstadisticasService {
         const esAdmin = usuarioSesion.rol === 'ADMINISTRADOR' || usuarioSesion.idRol === 1;
         
         const usuarioIdFiltro = esAdmin ? null : Number(usuarioSesion.id);
-        const [expedientesHoy, actividadReciente] = await Promise.all([
+        const [expedientesHoy, expedientesRecientes] = await Promise.all([
             this.expedienteRepo.contarCreadosHoy(usuarioIdFiltro, 'CREACIÓN DE EXPEDIENTE'),
-            this.auditoriaRepo.buscarActividad({ 
-                accion: 'CREACIÓN DE EXPEDIENTE', 
-                fechaGte: inicioHoy,
-                ...(usuarioIdFiltro && { usuarioId: usuarioIdFiltro })
-            }, 6)
+            this.expedienteRepo.obtenerCreadosHoyConPaciente(6, usuarioIdFiltro)
         ]);
 
         return {
@@ -78,12 +74,24 @@ class EstadisticasService {
                 { id: 'expedientes', valor: expedientesHoy || 0, pie: "Creados hoy" },
                 { id: 'citas', valor: 0, pie: "Agendadas" }
             ],
-            actividad: actividadReciente.map(log => ({
-                id: log.id,
-                usuario: log.usuario ? `${log.usuario.nombre} ${log.usuario.apellido}` : "Sistema",
-                accion: log.accion,
-                fecha: log.fecha,
-                detalles: log.detalles
+            actividad: expedientesRecientes.map(exp => ({
+                id: exp.idExpediente,
+                idExpediente: exp.idExpediente,
+                idPaciente: exp.idPaciente,
+                numeroExpediente: exp.numeroExpediente,
+                primaryText: exp.paciente ? `${exp.paciente.nombre} ${exp.paciente.apellido}` : "Paciente desconocido",
+                secondaryText: `Expediente #${exp.numeroExpediente}`,
+                fecha: exp.fechaCreacion,
+                detalles: exp.paciente ? `DNI: ${exp.paciente.dni}` : "",
+                // Incluir datos completos del paciente para navegación
+                paciente: exp.paciente || {},
+                expedientes: {
+                    idExpediente: exp.idExpediente,
+                    numeroExpediente: exp.numeroExpediente,
+                    estado: exp.estado,
+                    fechaCreacion: exp.fechaCreacion,
+                    observaciones: exp.observaciones
+                }
             }))
         };
     }
