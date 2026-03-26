@@ -7,14 +7,6 @@ class usuarioController {
     }
 
 crear = capturarAsync(async (req, res) => {
-        const { nombre, apellido, correo, nombreUsuario, clave, idRol, especialidad } = req.body;
-        
-        if (!nombre || !apellido) throw new ErrorValidacion('nombre y apellido son obligatorio');
-        if (!correo) throw new ErrorValidacion('El correo es obligatorio');
-        if (!nombreUsuario) throw new ErrorValidacion('El nombre de usuario es obligatorio');
-        if (!clave) throw new ErrorValidacion('La contraseña es obligatoria');
-        if(!idRol) throw new ErrorValidacion('El rol es obligatorio');
-
         if (req.usuario.idRol !== 1) {
         throw new ErrorNoAutorizado('Solo los administradores pueden crear usuarios');
     }

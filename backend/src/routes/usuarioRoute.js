@@ -1,46 +1,46 @@
 const express = require("express");
 const prisma = require("../config/prisma");
 
-const UsuarioRepository= require("../repositories/usuarioRepositorio");
-const UsuarioService= require("../services/usuarioServices");
-const UsuarioController= require("../controllers/usuarioController");
+const UsuarioRepository = require("../repositories/usuarioRepositorio");
+const UsuarioService = require("../services/usuarioServices");
+const UsuarioController = require("../controllers/usuarioController");
 const AuditoriaRepository = require("../repositories/auditoriaRepositorio");
 const AuditoriaService = require("../services/auditoriaService");
 const authMiddleware = require("../middlewares/confirmarToken");
-const autorizarRol=require("../middlewares/autorizarRol");
-const validarToken=require("../middlewares/inicioSesionMiddleware");
+const autorizarRol = require("../middlewares/autorizarRol");
+const validarToken = require("../middlewares/inicioSesionMiddleware");
 
-const router= express.Router();
+// decoradores 
+const camposUnicos = require('../decoraciones/camposUnicosDecorador');
+const validacionesEntrada = require('../decoraciones/validacionesEntradaDecorador');
+
+const router = express.Router();
 
 const auditoriaRepository = new AuditoriaRepository(prisma);
 const auditoriaService = new AuditoriaService(auditoriaRepository);
-const usuarioRepository = new  UsuarioRepository(prisma);
-const usuarioService    = new  UsuarioService(usuarioRepository, auditoriaService);
-const usuarioController = new  UsuarioController(usuarioService);
+const usuarioRepository = new UsuarioRepository(prisma);
 
+// Crear servicio base
+let usuarioService = new UsuarioService(usuarioRepository, auditoriaService);
 
-router.put("/change-password", authMiddleware,(req,res)=> usuarioController.cambiarPassword(req,res));
+// Aplicar decoradores
+usuarioService = new validacionesEntrada(usuarioService);
+usuarioService = new camposUnicos(usuarioService, usuarioRepository);
 
+const usuarioController = new UsuarioController(usuarioService);
+
+// Ruta cambio de clave
+router.put("/change-password", authMiddleware, (req, res) => usuarioController.cambiarPassword(req, res));
+
+// Middlewares para todas las rutas siguientes
 router.use(validarToken);
 router.use(autorizarRol(['ADMINISTRADOR']));
-//RUTAS USUARIOS
 
-//Crear Usuario, solo administrador tiene acceso.
-router.post("/", (req,res,next)=> usuarioController.crear(req,res,next));
+// RUTAS USUARIOS
+router.post("/", (req, res, next) => usuarioController.crear(req, res, next));
+router.get("/", (req, res, next) => usuarioController.obtenerTodos(req, res, next));
+router.get("/:id", (req, res, next) => usuarioController.obtenerPorId(req, res, next));
+router.put("/:id", (req, res, next) => usuarioController.actualizar(req, res, next));
+router.delete("/:id", (req, res, next) => usuarioController.eliminar(req, res, next));
 
-//obtenemos lista de  usuarios.
-router.get("/", (req,res,next)=> usuarioController.obtenerTodos(req,res,next));
-
-//obtenemos usuario por id.
-router.get("/:id", (req,res,next)=> usuarioController.obtenerPorId(req,res,next));
-
-//actualizar usuario
-router.put("/:id", (req, res,next) => usuarioController.actualizar(req, res,next));
-
-//eliminar usuario
-router.delete("/:id", (req,res,next)=> usuarioController.eliminar(req,res,next));
-
-
-
-
-module.exports=router;
+module.exports = router;
