@@ -1,31 +1,30 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo, Suspense, useCallback, useEffect } from "react";
 import { DashboardLayout } from "../components/layout/dashboardLayout";
-import { useAuth } from "@/features/auth/useAuth";
-import { Button } from "@/components/ui/button";
 
-import { DashboardFeature } from "../features/dashboard/components/DashboardFeature";
-import { Changepassword } from "../features/dashboard/components/Changepassword";
-import { GestionRoles } from "../features/admin/components/GestionRoles";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
-import { FormularioExpediente } from "../features/expedientes/components/FormularioExpediente";
-import { BuscarPaciente } from "../features/expedientes/components/BuscarPaciente";
-
-import { ConsultaMedica } from "../features/consultas/components/ConsultaMedica";
-
-import { FormularioRegistroPreclinico } from "../features/preclinica/components/FormularioRegistroPreclinico";
-import { ListaRegistrosPreclinicos } from "../features/preclinica/components/ListaRegistrosPreclinicos";
+import { LoaderModulo } from "../components/ui/loaderModulo";
+import { getView } from "../features/dashboard/utils/verRegistro";
 
 export function Dashboard() {
   const { user } = useAuth();
-  
+
+  const [selectedPaciente, setSelectedPaciente] = useState(() => {
+    const saved = localStorage.getItem("sgec_selected_paciente");
+    try { return saved ? JSON.parse(saved) : null; } catch { return null; }
+  });
+
   const [currentView, setCurrentView] = useState(() => {
     return localStorage.getItem("sgec_view") || "inicio";
   });
 
-  const [selectedPaciente, setSelectedPaciente] = useState(() => {
-    const saved = localStorage.getItem("sgec_selected_paciente");
-    return saved ? JSON.parse(saved) : null;
-  });
+  const effectiveView = useMemo(() => {
+    const protectedViews = ["consulta-medica", "ver-expediente"];
+    if (protectedViews.includes(currentView) && !selectedPaciente) {
+      return "buscar-paciente";
+    }
+    return currentView;
+  }, [currentView, selectedPaciente]);
 
   useEffect(() => {
     localStorage.setItem("sgec_view", currentView);
@@ -39,68 +38,38 @@ export function Dashboard() {
     }
   }, [selectedPaciente]);
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Cargando sesión...</p>
-      </div>
-    );
-  }
+  const volverInicio = useCallback(() => {
+    setSelectedPaciente(null);
+    setCurrentView("inicio");
+  }, []);
 
-  const handleNavigate = (view) => {
-    if (typeof view === 'string') setCurrentView(view);
-  };
+  const handleConsultaMedica = useCallback((p) => {
+    setSelectedPaciente(p);
+    setCurrentView("consulta-medica");
+  }, []);
+  console.log("Estado actual del Dashboard:", { currentView, selectedPaciente });
+  const viewConfig = getView(effectiveView);
+  const Component = viewConfig.component;
+  
+  const commonProps = useMemo(() => ({
+    onVolver: volverInicio,
+    onSuccess: volverInicio,
+    paciente: selectedPaciente,
+    onVerExpediente: (p) => { setSelectedPaciente(p); setCurrentView("ver-expediente"); },
+    onConsultaMedica: handleConsultaMedica,
+    onNavigate: setCurrentView
+  }), [selectedPaciente, volverInicio, handleConsultaMedica]);
 
-  const renderContent = () => {
-    const volverInicio = () => {
-      setSelectedPaciente(null);
-      setCurrentView("inicio");
-    };
-
-    switch (currentView) {
-      case "inicio":
-        return <DashboardFeature onNavigate={handleNavigate} />;
-      case "crear-expediente":
-        return <FormularioExpediente onVolver={volverInicio} onSuccess={volverInicio} />;
-      case "buscar-paciente":
-        return (
-          <BuscarPaciente onVolver={volverInicio} onVerExpediente={(paciente) => console.log("Abriendo:", paciente.codigo)} onConsultaMedica={(paciente) => { setSelectedPaciente(paciente); setCurrentView("consulta-medica"); }} />
-        );
-      case "preclinica":
-        return <FormularioRegistroPreclinico onVolver={volverInicio} onSuccess={volverInicio} />;
-      case "pacientes-evaluados":
-        return <ListaRegistrosPreclinicos onVolver={volverInicio} />;
-      case "consulta-medica":
-        if (!selectedPaciente) {
-          return (
-            <div className="p-10 text-center">
-              <p className="mb-4">No se ha seleccionado ningún paciente para la consulta.</p>
-              <Button onClick={() => setCurrentView("buscar-paciente")}>Ir a buscar paciente</Button>
-            </div>
-          );
-        }
-        return (
-          <ConsultaMedica 
-            paciente={selectedPaciente} 
-            onVolver={() => {
-              setSelectedPaciente(null);
-              setCurrentView("buscar-paciente");
-            }} 
-            onSuccess={volverInicio} 
-          />
-        );
-      case "gestion-roles":
-        return <GestionRoles onVolver={volverInicio} />;
-      case "changepassword":
-        return <Changepassword onVolver={volverInicio} />;
-      default:
-        return <p className="p-10 text-center">Módulo en construcción...</p>;
-    }
-  };
+  if (!user) return <LoaderModulo />;
 
   return (
-    <DashboardLayout currentView={currentView} onNavigate={handleNavigate}>
-      {renderContent()}
+    <DashboardLayout currentView={effectiveView} onNavigate={setCurrentView}>
+      <Suspense fallback={<LoaderModulo />}>
+        <Component 
+          key={`${effectiveView}-${selectedPaciente?.dni || 'sin-paciente'}`} 
+          {...commonProps} 
+        />
+      </Suspense>
     </DashboardLayout>
   );
 }

@@ -3,43 +3,31 @@ const Encriptador= require('../utils/encritador');
 
 
 class usuarioService{
-    constructor(usuarioRepository){
+    constructor(usuarioRepository, auditoriaService){
         this.usuarioRepository=usuarioRepository;
+        this.auditoriaService = auditoriaService;
     }
 
-    async  crear(data) {
+    async crear(data, usuarioCreadorId) {
 
-        try {
-          const existeNombre=await this.usuarioRepository.filtrarNombreUsuario(data.nombreUsuario);
-          if(existeNombre){
-            throw new Error (`El nombre de usuario ya esta registrado : ${error.message}`)
-          }
+        const existeNombre=await this.usuarioRepository.filtrarNombreUsuario(data.nombreUsuario);
+        if(existeNombre) throw new Error (`El nombre de usuario ya esta registrado : ${error.message}`);
 
-          //encriptacion
-
-         data.clave= await Encriptador.encriptar(data.clave);
-
-
-
+        data.clave= await Encriptador.encriptar(data.clave);
         const usuario= await this.usuarioRepository.crear(data);
 
         if(usuario&&usuario.id){
             //registrar accion 
-        await this.usuarioRepository.registrarAccionUsuario(usuario.id,'USUARIO_CREADO',
-            {idRol:data.idRol}
-        );
-    }
-
-        return usuario.toJSON();
-
-        } catch (error) {
-            console.error(error);
-            throw new Error (error.message)
+            await this.usuarioRepository.registrarAccionUsuario(
+                usuarioCreadorId,
+                'USUARIO_CREADO',
+                `Se creó el usuario ${usuario.nombreUsuario} con rol ID ${data.idRol}`
+            );
         }
-
+        return usuario.toJSON();
     }
 
-  async obtenerTodos() {
+    async obtenerTodos() {
         try {
             const usuarios = await this.usuarioRepository.obtenerTodos();
             return usuarios.map(u => u.toJSON());
@@ -69,6 +57,8 @@ class usuarioService{
         // Actualizar contraseña en la base de datos
         const resultado = await this.usuarioRepository.actualizarPassword(userId, hashedPassword);
         
+        await this.auditoriaService.registrar(userId, 'CAMBIO_PASSWORD', 'El usuario actualizó su contraseña');
+
         return { mensaje: "Contraseña actualizada correctamente" };
     }
 }

@@ -62,17 +62,13 @@ class UsuarioRepository {
                     }
                 }
             });
-
             if (!data) return null;
 
-            const usuarioConRol = {
+            return UsuarioBase.crearUsuario({
                 ...data,
                 rolNombre: data.rol?.nombre || "SIN_ROL",
                 permisos: data.rol?.permisos?.map(p => p.permiso.nombre) || []
-            };
-
-            return UsuarioBase.crearUsuario(usuarioConRol);
-
+            });
         } catch (error) {
             // Este es el error que ves en tu consola actualmente
             throw new Error(`Error al buscar usuario: ${error.message}`);
@@ -88,22 +84,6 @@ class UsuarioRepository {
 
         } catch (error) {
             throw new Error('Error al actualizar acceso');
-        }
-    }
-
-    async registrarAccionUsuario(usuarioId, accion, detalles = {}) {
-        try {
-            return await prisma.auditoria.create({
-                data: {
-                    usuarioId: usuarioId ? Number(usuarioId) : null,
-                    accion: accion,
-                    detalles: JSON.stringify(detalles),
-                    fecha: new Date()
-                }
-            });
-
-        } catch (error) {
-            console.error('Error al registrar auditoría:', error);
         }
     }
 

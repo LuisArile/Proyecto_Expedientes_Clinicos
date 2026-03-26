@@ -163,6 +163,26 @@ class registroPreclinicoRepository {
             throw new Error(`Error al contar registros: ${error.message}`);
         }
     }
+
+    async contarEvaluadosHoy(enfermeroId) {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        return await prisma.registroPreclinico.count({
+            where: {
+                fechaRegistro: { gte: hoy },
+                ...(enfermeroId && { enfermeroId: Number(enfermeroId) })
+            }
+        });
+    }
+
+    async obtenerRecientes(enfermeroId = null, limite = 10) {
+        return await prisma.registroPreclinico.findMany({
+            where: enfermeroId ? { enfermeroId: Number(enfermeroId) } : {},
+            take: limite,
+            orderBy: { fechaRegistro: 'desc' },
+            include: { expediente: { include: { paciente: true } } }
+        });
+    }    
 }
 
 module.exports = registroPreclinicoRepository;

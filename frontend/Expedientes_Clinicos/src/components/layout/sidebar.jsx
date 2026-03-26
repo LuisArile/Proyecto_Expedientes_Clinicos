@@ -1,29 +1,21 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/features/auth/useAuth";
-import { ROLE_STRATEGIES } from "@/constants/roles"
+import { useAuth } from "../../features/auth/hooks/useAuth";
 import { ALL_MENU_ITEMS } from "@/constants/allMenuItems";
+import { Hospital, LogOut, KeyRound } from "lucide-react";
 
-import {
-  Hospital, LogOut, KeyRound
-} from "lucide-react";
+import { useRoleConfig } from "../../features/auth/hooks/useRoleConfig";
 
 export function Sidebar({ currentView, onNavigate  }) {
-  const { user, logout } = useAuth();
-  
+  const { user, logout, checkPermission } = useAuth();
+  const roleConfig = useRoleConfig(user?.rol);
+
   if (!user) return null;
-
-  const roleKey = user.rol?.toUpperCase();
   
-  const menuItems = ALL_MENU_ITEMS.filter(item => {
-    return user.permisos?.includes(item.permission) || item.permission === "default";
-  });
-
-  const roleConfig = ROLE_STRATEGIES[roleKey] || { 
-    label: roleKey, 
-    color: "bg-gray-100 text-gray-800" 
-  };
+  const menuItems = ALL_MENU_ITEMS.filter(item => 
+    item.permission === "default" || checkPermission(item.permission)
+  );
 
   return (
     <div className="flex flex-col h-screen w-64 bg-white border-r border-gray-200 shadow-lg">
@@ -44,68 +36,49 @@ export function Sidebar({ currentView, onNavigate  }) {
       <div className="p-4 border-b border-gray-200 bg-gray-50">
         <div className="flex items-center gap-3 mb-2">
           <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-            <span className="text-blue-700 font-semibold text-sm">
-              {user.nombre
-                ?.split(" ")
-                .map((n) => n[0])
-                .join("")
-                .substring(0, 2)}
-            </span>
+            {user.nombre?.charAt(0)}{user.apellido?.charAt(0)}
           </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-gray-900">
-              {user.nombre} {user.apellido}
-            </p>
-            <p className="text-xs text-gray-500">@{user.nombreUsuario}</p>
+          <div className="flex-1 overflow-hidden">
+            <p className="text-sm font-semibold text-gray-900 truncate">{user.nombre} {user.apellido}</p>
+            <p className="text-xs text-gray-500 truncate">@{user.nombreUsuario}</p>
           </div>
         </div>
-        <Badge
-          variant="outline"
-          className={`text-xs px-2 py-1 ${roleConfig.color}`}
-        >
+        <Badge variant="outline" className={`text-xs px-2 py-1 ${roleConfig.color}`}>
           {roleConfig.label}
         </Badge>
       </div>
 
       {/* Menu Items */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="space-y-1">
+      <nav className="flex-1 overflow-y-auto p-4">
           <p className="text-xs font-semibold text-gray-500 mb-3 px-3">
             MENÚ PRINCIPAL
           </p>
-          {menuItems.length > 0 ? (
-            menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = currentView === item.id;
-
+          { menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentView === item.id;
             return (
-              <button
-                key={item.id}
-                onClick={() => onNavigate(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                  isActive
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                }`}
-              >
-                <Icon className={`h-5 w-5 ${isActive ? "text-white" : "text-gray-500"}`} />
-                <div className="flex-1 text-left">
-                  <p className="text-sm font-medium">
-                    {item.label}
-                  </p>
-                  {item.description && !isActive && (
-                    <p className="text-xs text-gray-500">{item.description}</p>
-                  )}
-                </div>
-              </button>
-            );
-          })
-          ) : (
-            <p className="text-sm text-gray-500 px-3"> 
-              No tienes permisos asignados.</p>
-          )}
-          </div>
-        </div>
+                <button
+                  key={item.id}
+                  onClick={() => onNavigate(item.id)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                    isActive
+                      ? "bg-blue-600 text-white shadow-md"
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                >
+                  <Icon className={`h-5 w-5 ${isActive ? "text-white" : "text-gray-500"}`} />
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-medium">
+                      {item.label}
+                    </p>
+                    {item.description && !isActive && (
+                      <p className="text-xs text-gray-500">{item.description}</p>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+      </nav>
 
       {/* Logout Button */}
       <div className="p-5 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-white">

@@ -16,15 +16,11 @@ class consultaMedicaService {
             return errores;
         }
         
-        if (!diagnostico.id) {
-            errores.push('El ID del diagnóstico es requerido');
-        }
-        if (!diagnostico.descripcion) {
-            errores.push('La descripción es requerida');
-        }
-        if (!diagnostico.tipo) {
-            errores.push('El tipo (PRESUNTIVO/DEFINITIVO) es requerido');
-        }
+        if (!diagnostico.id) errores.push('El ID del diagnóstico es requerido');
+        
+        if (!diagnostico.descripcion) errores.push('La descripción es requerida');
+
+        if (!diagnostico.tipo) errores.push('El tipo (PRESUNTIVO/DEFINITIVO) es requerido');
         
         return errores;
     }
@@ -54,7 +50,7 @@ class consultaMedicaService {
             const errDiag = this.validarDiagnostico(datos.diagnostico);
             if (errDiag.length > 0) throw new Error(errDiag.join(', '));
 
-            // Si es definitiv se requiere recetas
+            // Si es definitivo se requiere recetas
             if (datos.diagnostico.tipo === 'DEFINITIVO') {
                 const errRec = this.validarRecetas(datos.recetas);
                 if (errRec.length > 0) throw new Error(errRec.join(', '));
@@ -78,10 +74,11 @@ class consultaMedicaService {
                 }
 
                 // Registrar en Auditoría 
-                await this.auditoriaService?.registrar(
+                await this.auditoriaService?.registrarAccionMedica(
                     medicoId,
-                    'CONSULTA_MEDICA_REGISTRADA',
-                    `Consulta para expediente ${expedienteId}`
+                    'CONSULTA_MEDICA',
+                    `Consulta para expediente ${expedienteId}`, 
+                    tx
                 );
 
                 return consulta;

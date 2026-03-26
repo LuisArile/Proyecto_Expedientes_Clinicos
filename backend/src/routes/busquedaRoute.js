@@ -10,14 +10,14 @@ const AuditoriaService = require('../services/auditoriaService');
 const BusquedaRepository = require('../repositories/busquedaRepository'); 
 const AuditoriaRepository = require('../repositories/auditoriaRepositorio');
 
-const auditoriaRepo = new AuditoriaRepository(prisma);
-const busquedaRepo = new BusquedaRepository();
+const auditoriaRepository = new AuditoriaRepository(prisma);
+const busquedaRepository = new BusquedaRepository();
 
-const auditoriaService = new AuditoriaService(auditoriaRepo);
-const busquedaService = new BusquedaService(busquedaRepo, auditoriaService); 
+const auditoriaService = new AuditoriaService(auditoriaRepository);
+const busquedaService = new BusquedaService(busquedaRepository, auditoriaService); 
 
-const controller = new BusquedaController(busquedaService);
+const busquedaController = new BusquedaController(busquedaService);
 
-router.get('/', validarToken, (req, res, next) => controller.buscarGlobal(req, res, next));
+router.get('/', validarToken, (req, res, next) => busquedaController.buscarGlobal(req, res, next));
 
 module.exports = router;

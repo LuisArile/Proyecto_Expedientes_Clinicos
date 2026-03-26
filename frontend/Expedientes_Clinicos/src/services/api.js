@@ -33,10 +33,13 @@ export const apiCall = async (endpoint, options = {}) => {
         throw new Error(`Error del servidor (${response.status})`);
       }
 
-    if (!response.ok) throw new Error(data.error || "Error en la solicitud");
+    if (!response.ok) {
+      console.error("Error detallado del servidor:", data);
+      throw new Error(data.error || "Error en la solicitud");
+    }
     return data;
   } catch (error) {
-    console.error("Error API:", error);
+    console.error("Detalle del error servidor:", error.response?.data);
     throw error;
   }
 };
@@ -138,3 +141,8 @@ export const consultaMedicaAPI = {
   obtenerPorId: (id) =>
     apiCall(`/consultaMedica/${id}`, { method: "GET" })
 }
+
+export const auditoriaAPI = {
+  obtenerTodos: () => apiCall("/auditoria", { method: "GET" }),
+  obtenerEstadisticas: () => apiCall("/auditoria/estadisticas", { method: "GET" }),
+};

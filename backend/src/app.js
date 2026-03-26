@@ -11,9 +11,10 @@ const permisoRouters = require("./routes/permisoRoute")
 const registroPreclinico=require("./routes/registroPreclinicoRoute")
 const consultaMedicaRouters=require("./routes/consultaMedicaRoute")
 const busquedaRouters = require("./routes/busquedaRoute");
+const estadisticaRouters = require("./routes/estadisticaRoute")
+const auditoriaRouters = require("./routes/auditoriaRoute");
 
 const manejadorErrores = require("./middlewares/manejoErrores")
-const estadisticasRoute = require("./routes/estadisticasRoute")
 
 
 const app= express();
@@ -65,10 +66,11 @@ app.use("/api/registroPreclinico", registroPreclinico); //gestion de registro de
 
 app.use("/api/consultaMedica", consultaMedicaRouters); //Consulta medicas
 
-
-app.use("/api/estadisticas", estadisticasRoute);
+app.use("/api/estadisticas", estadisticaRouters);
 
 app.use("/api/busqueda", busquedaRouters);
+
+app.use("/api/auditoria", auditoriaRouters);
 
 app.use(manejadorErrores);
 module.exports=app;
