@@ -98,16 +98,19 @@ class expedienteController {
     
     actualizar = capturarAsync(async (req, res, next) => {
         const { idExpediente } = req.params;
-        const { estado, observaciones } = req.body;
+        const { estado, observaciones, paciente } = req.body;
 
         if (!idExpediente) {
             throw new ErrorValidacion('El ID del expediente es obligatorio');
         }
 
+        const usuarioId = req.usuario?.id;
+
         const resultado = await this.expedienteService.actualizar(idExpediente, {
             estado,
-            observaciones
-        });
+            observaciones,
+            paciente
+        }, usuarioId);
 
         res.json({
             success: true,
