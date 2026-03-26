@@ -9,6 +9,7 @@ import { GestionRoles } from "../features/admin/components/GestionRoles";
 
 import { FormularioExpediente } from "../features/expedientes/components/FormularioExpediente";
 import { BuscarPaciente } from "../features/expedientes/components/BuscarPaciente";
+import { VistaExpedientePaciente } from "../features/expedientes/components/VistaExpedientePaciente";
 
 import { ConsultaMedica } from "../features/consultas/components/ConsultaMedica";
 
@@ -47,8 +48,20 @@ export function Dashboard() {
     );
   }
 
-  const handleNavigate = (view) => {
-    if (typeof view === 'string') setCurrentView(view);
+  const handleNavigate = (viewOrData) => {
+    // Si es un string, solo cambiar la vista
+    if (typeof viewOrData === 'string') {
+      setCurrentView(viewOrData);
+      return;
+    }
+
+    // Si es un objeto con view y paciente, establecer el paciente y cambiar vista
+    if (typeof viewOrData === 'object' && viewOrData.view) {
+      if (viewOrData.paciente) {
+        setSelectedPaciente(viewOrData.paciente);
+      }
+      setCurrentView(viewOrData.view);
+    }
   };
 
   const renderContent = () => {
@@ -64,7 +77,38 @@ export function Dashboard() {
         return <FormularioExpediente onVolver={volverInicio} onSuccess={volverInicio} />;
       case "buscar-paciente":
         return (
-          <BuscarPaciente onVolver={volverInicio} onVerExpediente={(paciente) => console.log("Abriendo:", paciente.codigo)} onConsultaMedica={(paciente) => { setSelectedPaciente(paciente); setCurrentView("consulta-medica"); }} />
+          <BuscarPaciente
+            onVolver={volverInicio}
+            onVerExpediente={(paciente) => {
+              setSelectedPaciente(paciente);
+              setCurrentView("ver-expediente");
+            }}
+            onConsultaMedica={(paciente) => {
+              setSelectedPaciente(paciente);
+              setCurrentView("consulta-medica");
+            }}
+          />
+        );
+      case "ver-expediente":
+        if (!selectedPaciente) {
+          return (
+            <div className="p-10 text-center">
+              <p className="mb-4">No se ha seleccionado ningún paciente para ver el expediente.</p>
+              <Button onClick={() => setCurrentView("buscar-paciente")}>Ir a buscar paciente</Button>
+            </div>
+          );
+        }
+        return (
+          <VistaExpedientePaciente
+            pacienteSeleccionado={selectedPaciente}
+            onVolver={() => setCurrentView("buscar-paciente")}
+            onActualizado={(expedienteActualizado) => {
+              const pacienteActualizado = expedienteActualizado?.paciente
+                ? { ...expedienteActualizado.paciente, expedientes: expedienteActualizado }
+                : selectedPaciente;
+              setSelectedPaciente(pacienteActualizado);
+            }}
+          />
         );
       case "preclinica":
         return <FormularioRegistroPreclinico onVolver={volverInicio} onSuccess={volverInicio} />;
