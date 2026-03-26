@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-import { useAuth } from "@/features/auth/useAuth";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { FormField } from "@/components/common/FormField";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useChangePassword } from "../hooks/useChangePassword";

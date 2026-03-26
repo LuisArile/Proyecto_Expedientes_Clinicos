@@ -6,37 +6,44 @@ if (!API_URL) {
 
 const API_BASE_URL = `${API_URL}/api`;
 
-const getHeaders = () => {
+const getHeaders = (customHeaders = {}) => {
   const token = sessionStorage.getItem("token");
+
   return {
     "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...customHeaders,
   };
 };
 
 export const apiCall = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
-  const headers = getHeaders();
+
+  const headers = getHeaders(options.headers);
 
   try {
     const response = await fetch(url, {
+      method: options.method || "GET",
       headers,
-      ...options,
+      body: options.body || null,
     });
 
     const contentType = response.headers.get("content-type");
-      let data;
+    let data;
     
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        throw new Error(`Error del servidor (${response.status})`);
-      }
+    if (contentType && contentType.includes("application/json")) {
+      data = await response.json();
+    } else {
+      throw new Error(`Error del servidor (${response.status})`);
+    }
 
-    if (!response.ok) throw new Error(data.error || "Error en la solicitud");
+    if (!response.ok) {
+      console.error("Error detallado del servidor:", data);
+      throw new Error(data.error || "Error en la solicitud");
+    }
     return data;
   } catch (error) {
-    console.error("Error API:", error);
+    console.error("Detalle del error servidor:", error.response?.data);
     throw error;
   }
 };
@@ -55,6 +62,16 @@ export const seguridadAPI = {
       method: "PUT",
       body: JSON.stringify({ userId, currentPassword, newPassword }),
     }),
+};
+
+export const usuarioAPI = {
+  obtenerTodos: () => apiCall("/usuarios", { method: "GET" }),
+  obtenerPorId: (id) => apiCall(`/usuarios/${id}`, { method: "GET" }),
+  crear: (data) => apiCall("/usuarios", { method: "POST", body: JSON.stringify(data) }),
+  actualizar: (id, data) => apiCall(`/usuarios/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  eliminar: (id) => apiCall(`/usuarios/${id}`, { method: "DELETE" }),
+  alternarEstado: (id) => apiCall(`/usuarios/${id}/status`, { method: "PATCH" }),
+  enviarCredenciales: (id) => apiCall(`/usuarios/${id}/enviar-credenciales`, { method: "POST" }),
 };
 
 /**

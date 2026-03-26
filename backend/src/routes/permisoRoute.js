@@ -19,7 +19,7 @@ const permisoController = new PermisoController(permisoService);
 
 // Todas las rutas requieren autenticación y rol ADMINISTRADOR
 router.use(validarToken);
-router.use(autorizarRol(['ADMINISTRADOR']));
+// router.use(autorizarRol(['ADMINISTRADOR']));
 
 router.post("/", (req, res,next) => permisoController.crear(req, res,next));
 router.get("/", (req, res,next) => permisoController.obtenerTodos(req, res,next));

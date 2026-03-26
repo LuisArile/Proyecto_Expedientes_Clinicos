@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
@@ -80,7 +79,7 @@ export function Auditoria({ onVolver }) {
       className: "text-center",
       render: (log) => (
         <Button 
-          variant="ghost" size="icon" className="rounded-full hover:bg-blue-100 text-blue-600"
+          aria-label="ver-detalles" variant="ghost" size="icon" className="rounded-full hover:bg-blue-100 text-blue-600"
           onClick={() => { setEventoSeleccionado(log); setModalDetallesAbierto(true); }}
         >
           <FileText className="h-4 w-4" />

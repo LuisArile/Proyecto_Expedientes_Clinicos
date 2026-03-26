@@ -1,32 +1,55 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { registrarConsultaMedica } from "../services/consultaService";
 import { toast } from "sonner";
 
 export const useConsultaMedica = (pacienteId, formMethods) => {
 
     const [guardando, setGuardando] = useState(false);
+    const [modal, setModal] = useState({ open: false, result: { success: false, message: "" } });
 
-    const [modal, setModal] = useState({
-        open: false,
-        result: { success: false, message: "" }
-    });
-
-    const STORAGE_KEY = `borrador_consulta_${ pacienteId }`;
     const { reset, watch } = formMethods;
     const formValues = watch();
+    const STORAGE_KEY = pacienteId ? `borrador_consulta_${pacienteId}` : null;
+    
+    const isRestoring = useRef(false);
+    const hasLoaded = useRef(false);
 
-    // Cargar borrador
     useEffect(() => {
+        if (!STORAGE_KEY || hasLoaded.current) return;
+
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved && reset) reset(JSON.parse(saved));
-    }, [reset, STORAGE_KEY]);
-
-    // Persistir borrador
-    useEffect(() => {
-        if (formValues?.diagnostico || formValues?.medicamentos?.length > 0) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
+        if (saved) {
+            isRestoring.current = true;
+            try {
+                const timer = setTimeout(() => {
+                    reset(JSON.parse(saved));
+                    hasLoaded.current = true;
+                    setTimeout(() => { isRestoring.current = false; }, 300);
+                }, 50);
+                return () => clearTimeout(timer);
+            } catch (e) {
+                console.error("Error al cargar borrador", e);
+                isRestoring.current = false;
+            }
         }
-    }, [formValues, STORAGE_KEY]);   
+    }, [STORAGE_KEY, reset]);
+
+    useEffect(() => {
+        if (!STORAGE_KEY || isRestoring.current) return;
+
+        const tieneContenido = formValues?.diagnostico?.trim() || 
+                               (formValues?.medicamentos && formValues.medicamentos.length > 0);
+                      
+        if (!tieneContenido) return;
+
+        const timeoutId = setTimeout(() => {
+            if (!isRestoring.current) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
+            }
+        }, 1000);
+
+        return () => clearTimeout(timeoutId);
+    }, [formValues, STORAGE_KEY]);
     
     const guardarConsulta = async (expedienteId, data) => {
         setGuardando(true);

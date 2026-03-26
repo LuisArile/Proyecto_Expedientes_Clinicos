@@ -19,13 +19,18 @@ const manejadorErrores = require("./middlewares/manejoErrores")
 
 const app= express();
 
+
+app.get("/", (req, res) => {
+    res.status(200).send("API funcionando correctamente");
+});
+
 // Lista de orígenes permitidos
 const allowedOrigins = [
-    process.env.FRONTEND_URL,
+    process.env.FRONTEND_URL || '',
     'http://localhost:5173', // Desarrollo local
     'http://localhost',        // Docker / Nginx
     'https://clinica-frontend-cudebvakabgectfb.mexicocentral-01.azurewebsites.net' // URL de producción del frontend
-];
+].filter(Boolean);
 
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 

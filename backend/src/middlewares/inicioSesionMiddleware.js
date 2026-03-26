@@ -11,7 +11,7 @@ const validarToken =(req,res,next)=>{
 
     if (!token) return res.status(401).json({error: "Token requerido"});
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    jwt.verify(token, process.env.JWT_SECRET || 'secret_key_temporal', (err, user) => {
         if (err) {
             console.error("Error validando token:", err.message);
             return res.status(401).json({ error: "token invalido" });

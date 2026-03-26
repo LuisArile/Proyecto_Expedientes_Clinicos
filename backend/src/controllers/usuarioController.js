@@ -6,7 +6,7 @@ class usuarioController {
         this.usuarioService = usuarioService;
     }
 
-crear = capturarAsync(async (req, res) => {
+    crear = capturarAsync(async (req, res) => {
         const { nombre, apellido, correo, nombreUsuario, clave, idRol, especialidad } = req.body;
         
         if (!nombre || !apellido) throw new ErrorValidacion('nombre y apellido son obligatorio');
@@ -18,8 +18,6 @@ crear = capturarAsync(async (req, res) => {
         if (req.usuario.idRol !== 1) {
         throw new ErrorNoAutorizado('Solo los administradores pueden crear usuarios');
     }
-
-
         const usuario = await this.usuarioService.crear(req.body, req.usuario.id);
         
         res.status(201).json({
@@ -102,7 +100,7 @@ crear = capturarAsync(async (req, res) => {
     //cambio de clave
     cambiarPassword = capturarAsync(async (req, res) => {
         const { currentPassword, newPassword } = req.body;
-        const userId = req.user?.id || req.usuario?.id;
+        const userId = req.usuario?.id;
 
         if (!userId) {
             throw new ErrorNoAutorizado('No se encontró información del usuario');
@@ -125,7 +123,17 @@ crear = capturarAsync(async (req, res) => {
         });
     });
 
+    alternarEstado = capturarAsync(async (req, res, next) => {
+        const { id } = req.params;
+        const resultado = await this.usuarioService.alternarEstado(id);
+        res.json(resultado);
+    }); 
 
+    enviarCredenciales = capturarAsync(async (req, res, next) => {
+        const { id } = req.params;
+        const resultado = await this.usuarioService.enviarCredenciales(id);
+        res.json(resultado);
+    });
 
 /*
     obtenerPorId = capturarAsync(async (req, res) => {

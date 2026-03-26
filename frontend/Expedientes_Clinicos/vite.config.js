@@ -5,6 +5,7 @@ import path from "path"
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: "/",
   plugins: [
     react(),
     tailwindcss(),
@@ -26,7 +27,10 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    setupFiles: "./src/test/setup.js"
+    setupFiles: "./src/test/setup.js",
+    env: {
+      VITE_API_URL: 'http://localhost:3000'
+    }
   }
 
 })

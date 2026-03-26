@@ -3,17 +3,22 @@ class BusquedaService {
         if (!busquedaRepository || typeof busquedaRepository.buscarPacientesYExpedientes !== 'function') {
             console.error("Error: busquedaRepository no tiene los métodos necesarios");
         }
+
         this.busquedaRepository = busquedaRepository;
         this.auditoriaService = auditoriaService;
     }
 
     async buscarPacientes(filtroDto, usuarioId = null) {
         const { termino, criterio, pagina, limite } = filtroDto;
+
         const skip = (pagina - 1) * limite;
 
         if (usuarioId) {
-            this.auditoriaService.registrarBusqueda(usuarioId, termino)
-                .catch(err => console.error("Error auditoría:", err));
+            try {
+                await this.auditoriaService.registrarBusqueda(usuarioId, termino);
+            } catch (err) {
+                console.error("Error auditoría:", err);
+            }
         }
 
         const [resultados, total] = await Promise.all([
@@ -31,4 +36,5 @@ class BusquedaService {
         };
     }
 }
+
 module.exports = BusquedaService;

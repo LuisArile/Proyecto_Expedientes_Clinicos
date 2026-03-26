@@ -1,8 +1,8 @@
 import React from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 
 import { toast } from "sonner";
-import { useAuth } from "@/features/auth/useAuth";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useConsultaMedica } from "../hooks/useConsultaMedica";
 import { Stethoscope, FileText, Save, Clock, Pill, Plus, Trash2, Loader2 } from "lucide-react";
 
@@ -20,25 +20,34 @@ import { StatusModal } from "@/components/common/StatusModal";
 
 export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
   const { user } = useAuth();
-  
+
   const methods = useForm({
-        defaultValues: { diagnostico: "", tipoDiagnostico: "", observacionesClinicas: "", medicamentos: [] }
+    defaultValues: { diagnostico: "", tipoDiagnostico: "", observacionesClinicas: "", medicamentos: [] }
   });
 
-  const { register, handleSubmit, control, setValue, watch, formState: { errors } } = methods;
+  const { register, handleSubmit, control, setValue, formState: { errors } } = methods;
   const { fields, append, remove } = useFieldArray({ control, name: "medicamentos" });
-    
-  const tipoDiag = watch("tipoDiagnostico")
+  const tipoDiag = useWatch({ control, name: "tipoDiagnostico" });
 
-  const { guardarConsulta, guardando, modal, setModal } = useConsultaMedica( paciente?.id || paciente?.dni, methods, onSuccess );
+  const { guardarConsulta, guardando, modal, setModal } = useConsultaMedica( paciente?.dni || null, methods, onSuccess );
 
   const alEnviar = async (data) => {
-    const idExpediente = paciente?.expedientes?.idExpediente || paciente?.idExpediente;
+    const idExpediente = paciente?.expedientes?.idExpediente;
     if (!idExpediente) return toast.error("No se pudo identificar el expediente");
 
     await guardarConsulta(idExpediente, data);
 
   };
+
+  if (!paciente) {
+    return (
+      <div className="p-10 text-center">
+        <Loader2 className="animate-spin mx-auto h-10 w-10 text-purple-600" />
+        <p className="mt-4 text-gray-500">Cargando datos del paciente...</p>
+        <Button onClick={onVolver} variant="ghost" className="mt-2">Volver</Button>
+      </div>
+    );
+  }  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-gray-50 pb-10">
