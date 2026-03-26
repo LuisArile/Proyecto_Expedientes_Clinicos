@@ -5,7 +5,6 @@ describe("AuditoriaService", () => {
     let mockRepository;
 
     beforeEach(() => {
-        // Limpiamos los mocks antes de cada test
         mockRepository = {
             crear: jest.fn(),
             obtenerTodos: jest.fn(),
@@ -26,7 +25,7 @@ describe("AuditoriaService", () => {
                 usuarioId: 1,
                 accion: "INICIO_SESION",
                 detalles: "detalle prueba"
-            }, "mock-tx"); // Validamos que propaga la transacción
+            }, "mock-tx");
 
             expect(resultado).toEqual(registroMock);
         });
@@ -39,7 +38,7 @@ describe("AuditoriaService", () => {
         });
 
         test("debe manejar errores del repository sin lanzar excepción", async () => {
-            // Silenciamos el console.error para que el output del test esté limpio
+
             const spyError = jest.spyOn(console, 'error').mockImplementation(() => {});
             
             mockRepository.crear.mockRejectedValue(new Error("DB error"));
@@ -63,7 +62,7 @@ describe("AuditoriaService", () => {
         });
 
         test("registrarExpediente debe manejar tanto IDs como objetos de datos", async () => {
-            // Caso 1: Pasando ID directo
+
             await service.registrarExpediente(1, "Creacion", 10, "tx-123");
             expect(mockRepository.crear).toHaveBeenCalledWith(
                 {
@@ -74,7 +73,6 @@ describe("AuditoriaService", () => {
                 "tx-123"
             );
 
-            // Caso 2: Pasando objeto con detalles específicos
             await service.registrarExpediente(1, "Actualizacion", {
                 idExpediente: 5,
                 detalles: "Cambio de diagnóstico"

@@ -32,7 +32,7 @@ export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica }) 
                 header: "Código de Expediente",
                 render: (p) => (
                     <span className="font-mono text-sm text-blue-600">
-                        {p.expedientes?.numeroExpediente || p.codigo || "SIN EXP"}
+                        {p.expedientes?.numeroExpediente}
                     </span>
                 ),
             },
@@ -48,7 +48,7 @@ export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica }) 
                 header: "Identidad",
                 render: (p) => (
                     <span className="text-gray-600">
-                        {p.dni || p.identidad || "N/A"}
+                        {p.dni}
                     </span>
                 ),
             },

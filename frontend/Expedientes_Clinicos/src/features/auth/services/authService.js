@@ -6,14 +6,13 @@ export const authService = {
         const result = await authAPI.login(nombreUsuario, clave);
 
         if (result.success && result.data) {
-            const userData = result.data;
 
-            sessionStorage.setItem("user", JSON.stringify(userData));
             sessionStorage.setItem("token", result.token);
+            sessionStorage.setItem("user", JSON.stringify(result.data));
 
             return {
             success: true,
-            user: userData,
+            user: result.data,
             };
         }
 
@@ -31,12 +30,12 @@ export const authService = {
 
     async logout() {
         try {
-        await authAPI.logout();
+            await authAPI.logout();
         } catch (error) {
-        console.error("Error al cerrar sesión:", error);
+            console.error("Error al cerrar sesión:", error);
         } finally {
-        sessionStorage.removeItem("user");
-        sessionStorage.removeItem("token");
+            sessionStorage.removeItem("user");
+            sessionStorage.removeItem("token");
         }
     },
 };

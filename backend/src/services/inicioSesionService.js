@@ -25,7 +25,7 @@ class InicioSesionService {
         await this.usuarioRepository.actualizarUltimoAcceso(usuario.id);
 
         await this.auditoriaService.registrarSesion(usuario.id, "INICIO_SESION", usuario.nombreUsuario);
-
+        
         const token = jwt.sign(
             { id: usuario.id, idRol: usuario.idRol, rol: usuario.rolNombre },
             process.env.JWT_SECRET || 'secret_key_temporal',
