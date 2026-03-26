@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt');
 const prisma = require('../config/prisma');
 
 class UsuarioRepository {
@@ -12,12 +11,13 @@ class UsuarioRepository {
                 nombreUsuario: data.nombreUsuario,
                 clave: data.clave,
                 idRol: Number(data.idRol),
-                especialidad: data.especialidad || null,                    
+                especialidad: data.especialidad || null,
+                activo: true,
             },
             include: { rol: true }
         });
 
-        return {usuario, rolNombre:usuario.rol?.nombre};
+        return { usuario, rolNombre: usuario.rol?.nombre };
     }
 
     async obtenerTodos() {
@@ -28,11 +28,10 @@ class UsuarioRepository {
         return usuarios.map(r => ({
             ...r,
             rolNombre: r.rol.nombre
-        }));        
+        }));
     }
-    
-    async actualizar(id,data) {
-    
+
+    async actualizar(id, data) {
         const actualizarData = {};
         
         if (data.nombre !== undefined) actualizarData.nombre = data.nombre;
@@ -46,12 +45,12 @@ class UsuarioRepository {
         if (data.debeCambiarPasword !== undefined) actualizarData.debeCambiarPasword = data.debeCambiarPassword;
 
         const usuario = await prisma.usuario.update({
-            where: {id:Number(id)},
+            where: { id: Number(id) },
             data: actualizarData,
             include: { rol: true }
         });
 
-        return {usuario, rolNombre:usuario.rol?.nombre};        
+        return { usuario, rolNombre: usuario.rol?.nombre };
     }
 
     async eliminar(id) {
@@ -62,94 +61,63 @@ class UsuarioRepository {
     }
 
     async filtrarNombreUsuario(nombreUsuario) {
-        try {
-            const data = await prisma.usuario.findUnique({
-                where: { nombreUsuario },
-                include: { 
-                    rol: {
-                        include: {
-                            permisos: {
-                                include: { permiso: true }
-                            }
+        const data = await prisma.usuario.findUnique({
+            where: { nombreUsuario },
+            include: { 
+                rol: {
+                    include: {
+                        permisos: {
+                            include: { permiso: true }
                         }
                     }
                 }
-            });
-            if (!data) return null;
+            }
+        });
+        
+        if (!data) return null;
 
-            return{ 
-                id: data.id,
-                nombre: data.nombre,
-                apellido: data.apellido,
-                correo: data.correo,
-                nombreUsuario: data.nombreUsuario,
-                clave: data.clave,
-                idRol: data.idRol,
-                activo: data.activo,
-                rolNombre: data.rol?.nombre || "SIN_ROL",
-                permisos: data.rol?.permisos?.map(p => p.permiso.nombre) || [],
-                ultimoAcceso: data.ultimoAcceso,
-                createdAt: data.createdAt,
-                updatedAt: data.updatedAt
-            };
-
-        } catch (error) {
-            throw new Error(`Error al buscar usuario: ${error.message}`);
-        }
+        return { 
+            id: data.id,
+            nombre: data.nombre,
+            apellido: data.apellido,
+            correo: data.correo,
+            nombreUsuario: data.nombreUsuario,
+            clave: data.clave,
+            idRol: data.idRol,
+            activo: data.activo,
+            rolNombre: data.rol?.nombre || "SIN_ROL",
+            permisos: data.rol?.permisos?.map(p => p.permiso.nombre) || [],
+            ultimoAcceso: data.ultimoAcceso,
+            createdAt: data.createdAt,
+            updatedAt: data.updatedAt
+        };
     }
 
     async actualizarUltimoAcceso(id) {
-        try {
-            return await prisma.usuario.update({
-                where: { id: Number(id) },
-                data: { ultimoAcceso: new Date() }
-            });
-
-        } catch (error) {
-            throw new Error('Error al actualizar acceso');
-        }
+        return await prisma.usuario.update({
+            where: { id: Number(id) },
+            data: { ultimoAcceso: new Date() }
+        });
     }
 
     async obtenerPorId(userId) {
-        
-            return await prisma.usuario.findUnique({
-                where: { id: Number(userId) },
-                include: { rol: true }
-            });
-
-    } 
-
-    async registrarAccionUsuario(usuarioId, accion, detalles = {}) {
-        return await prisma.auditoria.create({
-            data: {
-                usuarioId: usuarioId ? Number(usuarioId) : null,
-                accion: accion,
-                detalles: typeof detalles === 'object' ? JSON.stringify(detalles) : detalles,
-                fecha: new Date()
-            }
+        return await prisma.usuario.findUnique({
+            where: { id: Number(userId) },
+            include: { rol: true }
         });
     }
-    
+
     async actualizarPassword(userId, nuevaPassword) {
-        try {
-            return await prisma.usuario.update({
-                where: {
-                    id: userId
-                },
-                data: {
-                    clave: nuevaPassword
-                }
-            });
-        } catch (error) {
-            console.error("Error Prisma:", error);
-            throw error;
-        }
+        return await prisma.usuario.update({
+            where: { id: userId },
+            data: { clave: nuevaPassword }
+        });
     }
 
     async obtenerPorCorreo(correo) {
-    return await prisma.usuario.findUnique({
-        where: { correo }
-    });
-}
+        return await prisma.usuario.findUnique({
+            where: { correo }
+        });
+    }
 }
 module.exports = UsuarioRepository;
