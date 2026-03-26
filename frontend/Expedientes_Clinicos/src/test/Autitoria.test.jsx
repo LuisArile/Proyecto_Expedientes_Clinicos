@@ -104,7 +104,8 @@ describe("Componente Auditoria", () => {
 
         expect(await screen.findByText(/Detalle del Evento/i)).toBeInTheDocument();
 
-        const idEvento = await screen.findByText("LOG-001");
+        const idEvento = await screen.findByText(/LOG-001/i);
+        await screen.findByText(mockEventos[0].detalles);
         const detallesEvento = await screen.findByText(mockEventos[0].detalles);
 
         expect(idEvento).toBeInTheDocument();
