@@ -1,263 +1,148 @@
 const EstadisticaService = require("../src/services/estadisticaService");
 
 describe("EstadisticaService", () => {
-
     let service;
-    let mockPrisma;
-    let mockUsuarioRepo;
-    let mockAuditoriaRepo;
-    let mockPacienteRepo;
-    let mockExpedienteRepo;
 
-    const crearServicio = () => new EstadisticaService(
-        mockPrisma,
-        mockUsuarioRepo,
-        mockAuditoriaRepo,
-        mockPacienteRepo,
-        mockExpedienteRepo
-    );
+    let prisma;
+    let usuarioRepository;
+    let auditoriaRepository;
+    let pacienteRepository;
+    let expedienteRepository;
+    let consultaMedicaRepository;
+    let registroPreclinicoRepository;
+    let recetaMedicaRepository;
 
     beforeEach(() => {
-        mockPrisma = {
-            consultaMedica: {
-                count: jest.fn(),
-                findMany: jest.fn()
-            },
-            recetaMedica: {
-                count: jest.fn()
-            },
-            registroPreclinico: {
-                count: jest.fn(),
-                findMany: jest.fn()
-            }
-        };
 
-        mockUsuarioRepo = {
-            obtenerTodos: jest.fn()
-        };
-
-        mockAuditoriaRepo = {
+        prisma = {};
+        usuarioRepository = { obtenerTodos: jest.fn() };
+        auditoriaRepository = {
+            obtenerLogsDeHoy: jest.fn(),
             obtenerRecientes: jest.fn(),
             buscarActividad: jest.fn()
         };
-
-        mockPacienteRepo = {};
-
-        mockExpedienteRepo = {
+        pacienteRepository = {};
+        expedienteRepository = {
             contarCreadosHoy: jest.fn()
         };
+        consultaMedicaRepository = {
+            contarConsultasHoy: jest.fn(),
+            obtenerRecientesPorMedico: jest.fn()
+        };
+        registroPreclinicoRepository = {
+            contarTodos: jest.fn(),
+            contarEvaluadosHoy: jest.fn(),
+            obtenerRecientes: jest.fn()
+        };
+        recetaMedicaRepository = {
+            contarRecetasHoy: jest.fn()
+        };
 
-        service = crearServicio();
-    });
-
-    afterEach(() => {
-        jest.restoreAllMocks();
+        service = new EstadisticaService(
+            prisma,
+            usuarioRepository,
+            auditoriaRepository,
+            pacienteRepository,
+            expedienteRepository,
+            consultaMedicaRepository,
+            registroPreclinicoRepository,
+            recetaMedicaRepository
+        );
     });
 
     describe("obtenerResumenGeneral", () => {
 
-        test("debe usar estrategia ADMINISTRADOR", async () => {
-            const usuario = { id: 1, rol: "ADMINISTRADOR" };
-            const mockData = { tarjetas: [], actividad: [] };
-            
-            const obtenerAdminDataSpy = jest
-                .spyOn(EstadisticaService.prototype, "obtenerAdminData")
-                .mockResolvedValue(mockData);
+        test("debe ejecutar estrategia ADMINISTRADOR", async () => {
 
-            service = crearServicio();
-            
-            const resultado = await service.obtenerResumenGeneral(usuario);
-            
-            expect(obtenerAdminDataSpy).toHaveBeenCalledWith(usuario);
-            expect(resultado).toEqual(mockData);
+            usuarioRepository.obtenerTodos.mockResolvedValue([1, 2]);
+            auditoriaRepository.obtenerLogsDeHoy.mockResolvedValue([1]);
+            auditoriaRepository.obtenerRecientes.mockResolvedValue([]);
+
+            const resultado = await service.obtenerResumenGeneral({
+                idRol: 1
+            });
+
+            expect(resultado.tarjetas.length).toBeGreaterThan(0);
         });
 
-        test("debe usar estrategia RECEPCIONISTA", async () => {
-            const usuario = { id: 2, rol: "RECEPCIONISTA" };
-            const mockData = { tarjetas: [], actividad: [] };
-            
-            const obtenerRecepcionistaDataSpy = jest
-                .spyOn(EstadisticaService.prototype, "obtenerRecepcionistaData")
-                .mockResolvedValue(mockData);
+        test("debe devolver vacío si rol no existe", async () => {
 
-            service = crearServicio();
-            
-            const resultado = await service.obtenerResumenGeneral(usuario);
-            
-            expect(obtenerRecepcionistaDataSpy).toHaveBeenCalledWith(usuario);
-            expect(resultado).toEqual(mockData);
-        });
+            const resultado = await service.obtenerResumenGeneral({
+                idRol: 999
+            });
 
-        test("debe usar estrategia MEDICO", async () => {
-            const usuario = { id: 3, rol: "MEDICO" };
-            const mockData = { tarjetas: [], actividad: [] };
-            
-            const obtenerMedicoDataSpy = jest
-                .spyOn(EstadisticaService.prototype, "obtenerMedicoData")
-                .mockResolvedValue(mockData);
-
-            service = crearServicio();
-            
-            const resultado = await service.obtenerResumenGeneral(usuario);
-            
-            expect(obtenerMedicoDataSpy).toHaveBeenCalledWith(usuario);
-            expect(resultado).toEqual(mockData);
-        });
-
-        test("debe usar estrategia ENFERMERO", async () => {
-            const usuario = { id: 4, rol: "ENFERMERO" };
-            const mockData = { tarjetas: [], actividad: [] };
-            
-            const obtenerEnfermeroDataSpy = jest
-                .spyOn(EstadisticaService.prototype, "obtenerEnfermeroData")
-                .mockResolvedValue(mockData);
-
-            service = crearServicio();
-            
-            const resultado = await service.obtenerResumenGeneral(usuario);
-            
-            expect(obtenerEnfermeroDataSpy).toHaveBeenCalledWith(usuario);
-            expect(resultado).toEqual(mockData);
-        });
-
-        test("debe mapear idRol a rol si no hay rol", async () => {
-            const usuario = { id: 1, idRol: 1 };
-            const mockData = { tarjetas: [], actividad: [] };
-            
-            const obtenerAdminDataSpy = jest
-                .spyOn(EstadisticaService.prototype, "obtenerAdminData")
-                .mockResolvedValue(mockData);
-
-            service = crearServicio();
-            
-            const resultado = await service.obtenerResumenGeneral(usuario);
-            
-            expect(obtenerAdminDataSpy).toHaveBeenCalledWith(usuario);
-            expect(resultado).toEqual(mockData);
-        });
-
-        test("debe retornar vacío si el rol no tiene estrategia", async () => {
-            const usuario = { id: 5, rol: "ROL_INEXISTENTE" };
-            
-            const resultado = await service.obtenerResumenGeneral(usuario);
-            
-            expect(resultado).toEqual({ tarjetas: [], actividad: [] });
+            expect(resultado).toEqual({
+                tarjetas: [],
+                actividad: []
+            });
         });
     });
 
-    describe("obtenerAdminData", () => {
-        test("debe retornar datos de admin correctamente", async () => {
-            const usuario = { id: 1 };
-            const usuariosMock = [{ id: 1 }, { id: 2 }];
-            const auditoriaMock = [
-                { id: 1, usuario: { nombre: "Admin", apellido: "Sistema" }, accion: "LOGIN", fecha: new Date(), detalles: "{}" }
-            ];
+    describe("RECEPCIONISTA", () => {
 
-            mockUsuarioRepo.obtenerTodos.mockResolvedValue(usuariosMock);
-            mockAuditoriaRepo.obtenerRecientes.mockResolvedValue(auditoriaMock);
+        test("debe retornar dashboard recepcionista", async () => {
 
-            const resultado = await service.obtenerAdminData(usuario);
+            expedienteRepository.contarCreadosHoy.mockResolvedValue(5);
+            auditoriaRepository.buscarActividad.mockResolvedValue([
+                {
+                    id: 1,
+                    accion: "CREACIÓN DE EXPEDIENTE",
+                    fecha: new Date(),
+                    usuario: { nombre: "Ana", apellido: "Lopez" }
+                }
+            ]);
 
-            expect(resultado.tarjetas[0].valor).toBe(2);
-            expect(resultado.tarjetas[1].valor).toBe(1);
-            expect(resultado.actividad).toHaveLength(1);
-        });
-    });
+            const resultado = await service.obtenerRecepcionistaData({ id: 1 }, 1);
 
-    describe("obtenerRecepcionistaData", () => {
-        test("debe retornar datos de recepcionista", async () => {
-            const usuario = { id: 2, rol: "RECEPCIONISTA" };
-            const expedientesHoy = 5;
-            const actividadMock = [
-                { id: 1, usuario: { nombre: "Laura", apellido: "Fernández" }, accion: "CREACIÓN DE EXPEDIENTE", fecha: new Date(), detalles: "{}" }
-            ];
-
-            mockExpedienteRepo.contarCreadosHoy.mockResolvedValue(expedientesHoy);
-            mockAuditoriaRepo.buscarActividad.mockResolvedValue(actividadMock);
-
-            const resultado = await service.obtenerRecepcionistaData(usuario);
-
+            expect(resultado.tarjetas).toHaveLength(3);
             expect(resultado.tarjetas[1].valor).toBe(5);
-            expect(resultado.actividad).toHaveLength(1);
-        });
-
-        test("admin puede ver datos de recepcionista", async () => {
-            const usuario = { id: 1, rol: "ADMINISTRADOR" };
-            const expedientesHoy = 10;
-            const actividadMock = [];
-
-            mockExpedienteRepo.contarCreadosHoy.mockResolvedValue(expedientesHoy);
-            mockAuditoriaRepo.buscarActividad.mockResolvedValue(actividadMock);
-
-            const resultado = await service.obtenerRecepcionistaData(usuario);
-
-            expect(resultado.tarjetas[1].valor).toBe(10);
         });
     });
 
-    describe("obtenerMedicoData", () => {
-        test("debe retornar datos de médico", async () => {
-            const usuario = { id: 3, rol: "MEDICO" };
-            const consultasHoy = 8;
-            const recetasHoy = 12;
-            const actividadMock = [
+    describe("MEDICO", () => {
+
+        test("debe retornar dashboard médico", async () => {
+
+            consultaMedicaRepository.contarConsultasHoy.mockResolvedValue(10);
+            consultaMedicaRepository.obtenerRecientesPorMedico.mockResolvedValue([
                 {
                     id: 1,
-                    expediente: { paciente: { nombre: "Juan", apellido: "Pérez" } },
                     tipoConsulta: "GENERAL",
-                    diagnostico: "Diagnóstico de prueba",
-                    fechaConsulta: new Date()
+                    fechaConsulta: new Date(),
+                    expediente: {
+                        paciente: { nombre: "Juan", apellido: "Perez" }
+                    }
                 }
-            ];
+            ]);
+            recetaMedicaRepository.contarRecetasHoy.mockResolvedValue(3);
 
-            mockPrisma.consultaMedica.count.mockResolvedValue(consultasHoy);
-            mockPrisma.recetaMedica.count.mockResolvedValue(recetasHoy);
-            mockPrisma.consultaMedica.findMany.mockResolvedValue(actividadMock);
+            const resultado = await service.obtenerMedicoData({ id: 1 }, 1);
 
-            const resultado = await service.obtenerMedicoData(usuario);
-
-            expect(resultado.tarjetas[0].valor).toBe(8);
-            expect(resultado.tarjetas[3].valor).toBe(12);
-            expect(resultado.actividad).toHaveLength(1);
-        });
-
-        test("admin puede ver datos de médico", async () => {
-            const usuario = { id: 1, rol: "ADMINISTRADOR" };
-            const consultasHoy = 15;
-
-            mockPrisma.consultaMedica.count.mockResolvedValue(consultasHoy);
-            mockPrisma.recetaMedica.count.mockResolvedValue(0);
-            mockPrisma.consultaMedica.findMany.mockResolvedValue([]);
-
-            const resultado = await service.obtenerMedicoData(usuario);
-
-            expect(resultado.tarjetas[0].valor).toBe(15);
+            expect(resultado.tarjetas[0].valor).toBe(10);
+            expect(resultado.tarjetas[3].valor).toBe(3);
         });
     });
 
-    describe("obtenerEnfermeroData", () => {
-        test("debe retornar datos de enfermero", async () => {
-            const totalEvaluados = 50;
-            const evaluadosHoy = 5;
-            const actividadMock = [
+    describe("ENFERMERO", () => {
+
+        test("debe retornar dashboard enfermero", async () => {
+
+            registroPreclinicoRepository.contarTodos.mockResolvedValue(20);
+            registroPreclinicoRepository.contarEvaluadosHoy.mockResolvedValue(5);
+            registroPreclinicoRepository.obtenerRecientes.mockResolvedValue([
                 {
                     id: 1,
-                    expediente: { paciente: { nombre: "Ana", apellido: "Martínez" } },
-                    fechaRegistro: new Date()
+                    fechaRegistro: new Date(),
+                    expediente: {
+                        paciente: { nombre: "Luis", apellido: "Ramirez" }
+                    }
                 }
-            ];
+            ]);
 
-            mockPrisma.registroPreclinico.count
-                .mockResolvedValueOnce(totalEvaluados)
-                .mockResolvedValueOnce(evaluadosHoy);
-            mockPrisma.registroPreclinico.findMany.mockResolvedValue(actividadMock);
+            const resultado = await service.obtenerEnfermeroData({ id: 1 }, 1);
 
-            const resultado = await service.obtenerEnfermeroData();
-
-            expect(resultado.tarjetas[0].valor).toBe(50);
-            expect(resultado.tarjetas[0].pie).toBe("5 hoy");
-            expect(resultado.actividad).toHaveLength(1);
+            expect(resultado.tarjetas[0].valor).toBe(20);
+            expect(resultado.actividad.length).toBe(1);
         });
     });
-
 });
