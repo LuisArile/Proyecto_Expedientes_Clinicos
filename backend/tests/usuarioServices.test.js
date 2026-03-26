@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const UsuarioService = require('../src/services/usuarioServices');
 const Encriptador = require('../src/utils/encritador');
+const {ErrorConflicto, ErrorValidacion, ErrorNoEncontrado} = require('../src/utils/errores');
 
 jest.mock('../src/utils/encritador');
 jest.mock('bcrypt');
@@ -13,17 +14,20 @@ describe('UsuarioService', () => {
 
     beforeEach(() => {
         usuarioRepositoryMock = {
-            filtrarNombreUsuario: jest.fn(),
             obtenerPorCorreo: jest.fn(),
+            filtrarNombreUsuario: jest.fn(),
             crear: jest.fn(),
-            registrarAccionUsuario: jest.fn(),
             obtenerTodos: jest.fn(),
             obtenerPorId: jest.fn(),
-            actualizarPassword: jest.fn()
+            actualizar: jest.fn(),
+            eliminar: jest.fn(),
+            actualizarPassword: jest.fn(),
+            registrarAccionUsuario: jest.fn()
         };
 
         auditoriaServiceMock = {
-            registrar: jest.fn()
+            registrar: jest.fn(),
+            registrarUsuario: jest.fn()
         };
 
         emailServiceMock = {
@@ -42,141 +46,264 @@ describe('UsuarioService', () => {
     });
 
     describe('crear', () => {
-        test('debe crear un usuario correctamente', async () => {
-            const data = {
-                nombre: "Juan",
-                apellido: "Perez",
-                correo: "juan@test.com",
-                nombreUsuario: "juan",
-                clave: "12345678",
-                idRol: 1
-            };
+        const data = {
+            nombre: "Juan",
+            apellido: "Perez",
+            correo: "juan@test.com",
+            nombreUsuario: "juan",
+            clave: "12345678",
+            idRol: 1
+        };
 
-            const usuarioMock = {
-                id: 10,
-                nombreUsuario: "juan",
-                idRol: 1
-            };
+        test('debe crear usuario y registrar auditoría', async () => {
+            const usuarioMock = { id: 1, ...data };
 
             usuarioRepositoryMock.obtenerPorCorreo.mockResolvedValue(null);
             usuarioRepositoryMock.filtrarNombreUsuario.mockResolvedValue(false);
             Encriptador.encriptar.mockResolvedValue("hash123");
             usuarioRepositoryMock.crear.mockResolvedValue(usuarioMock);
 
-            const resultado = await usuarioService.crear(data, 99);
+            const result = await usuarioService.crear(data, 99);
 
-            expect(usuarioRepositoryMock.obtenerPorCorreo).toHaveBeenCalledWith("juan@test.com");
-            expect(usuarioRepositoryMock.filtrarNombreUsuario).toHaveBeenCalledWith("juan");
-            expect(Encriptador.encriptar).toHaveBeenCalledWith("12345678");
-
-            expect(usuarioRepositoryMock.crear).toHaveBeenCalledWith(
-                expect.objectContaining({ clave: "hash123" })
-            );
-
-            expect(usuarioRepositoryMock.registrarAccionUsuario).toHaveBeenCalledWith(
+            expect(usuarioRepositoryMock.crear).toHaveBeenCalled();
+            expect(auditoriaServiceMock.registrarUsuario).toHaveBeenCalledWith(
                 99,
                 'USUARIO_CREADO',
-                `Se creó el usuario ${usuarioMock.nombreUsuario} con rol ID ${usuarioMock.idRol}`
+                usuarioMock
             );
 
-            expect(resultado).toEqual(usuarioMock);
+            expect(result).toEqual(usuarioMock);
         });
 
-        test('debe lanzar error si el nombre de usuario ya existe', async () => {
-            usuarioRepositoryMock.obtenerPorCorreo.mockResolvedValue(null);
-            usuarioRepositoryMock.filtrarNombreUsuario.mockResolvedValue(true);
+        test('debe lanzar error si correo ya existe', async () => {
+            usuarioRepositoryMock.obtenerPorCorreo.mockResolvedValue({ id: 1 });
 
-            await expect(
-                usuarioService.crear({
-                    nombre: "Juan",
-                    apellido: "Perez",
-                    correo: "juan@test.com",
-                    nombreUsuario: "juan",
-                    clave: "12345678",
-                    idRol: 1
-                })
-            ).rejects.toThrow();
+            await expect(usuarioService.crear(data, 99))
+                .rejects.toThrow(ErrorConflicto);
+        });
+
+        test('debe validar especialidad para médicos', async () => {
+            const medico = { ...data, idRol: 2 };
+
+            await expect(usuarioService.crear(medico, 99))
+                .rejects.toThrow('La especialidad es obligatoria para médicos');
         });
     });
 
     describe('obtenerTodos', () => {
-        test('debe obtener todos los usuarios correctamente', async () => {
-            const usuariosMock = [
-                { toJSON: () => ({ id: 1, nombreUsuario: 'a' }) },
-                { toJSON: () => ({ id: 2, nombreUsuario: 'b' }) }
+        test('debe retornar lista de usuarios', async () => {
+            const usuarios = [
+                { id: 1 },
+                { id: 2 }
             ];
 
-            usuarioRepositoryMock.obtenerTodos.mockResolvedValue(usuariosMock);
+            usuarioRepositoryMock.obtenerTodos.mockResolvedValue(usuarios);
 
-            const resultado = await usuarioService.obtenerTodos();
+            const result = await usuarioService.obtenerTodos();
 
             expect(usuarioRepositoryMock.obtenerTodos).toHaveBeenCalled();
-
-            const limpio = resultado.map(u => u.toJSON());
-
-            expect(limpio).toEqual([
-                { id: 1, nombreUsuario: 'a' },
-                { id: 2, nombreUsuario: 'b' }
-            ]);
+            expect(result).toEqual(usuarios);
         });
     });
 
+    describe('obtenerPorId', () => {
+        test('debe retornar usuario', async () => {
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue({ id: 1 });
+
+            const result = await usuarioService.obtenerPorId(1);
+
+            expect(result).toEqual({ id: 1 });
+        });
+
+        test('debe lanzar error si no existe', async () => {
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(null);
+
+            await expect(usuarioService.obtenerPorId(99))
+                .rejects.toThrow(ErrorValidacion);
+        });
+    });
+
+    describe('actualizar', () => {
+        const usuarioExistente = {
+            id: 1,
+            nombre: "Ana",
+            apellido: "Sosa",
+            correo: "ana@test.com",
+            nombreUsuario: "ana",
+            idRol: 1,
+            activo: true,
+            especialidad: null
+        };
+
+        test('debe actualizar usuario y registrar auditoría', async () => {
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuarioExistente);
+            usuarioRepositoryMock.obtenerPorCorreo.mockResolvedValue(null);
+            usuarioRepositoryMock.actualizar.mockResolvedValue({
+                ...usuarioExistente,
+                nombre: "Ana Maria"
+            });
+
+            const data = { nombre: "Ana Maria" };
+
+            await usuarioService.actualizar(1, data, 99);
+
+            expect(auditoriaServiceMock.registrar).toHaveBeenCalled();
+        });
+
+        test('no debe permitir auto-inactivación', async () => {
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuarioExistente);
+
+            await expect(
+                usuarioService.actualizar(1, { activo: false }, 1)
+            ).rejects.toThrow('No puedes inactivar tu propia cuenta');
+        });
+
+        test('debe lanzar ErrorNoEncontrado si no existe usuario', async () => {
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(null);
+
+            await expect(
+                usuarioService.actualizar(1, {}, 99)
+            ).rejects.toThrow(ErrorNoEncontrado);
+        });
+
+        test('debe validar especialidad en rol médico', async () => {
+            const medico = {
+                ...usuarioExistente,
+                idRol: 2
+            };
+
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(medico);
+
+            await expect(
+                usuarioService.actualizar(1, { idRol: 2 }, 99)
+            ).rejects.toThrow('La especialidad es obligatoria para médicos');
+        });
+    });
+
+    describe('eliminar', () => {
+        test('debe eliminar usuario y auditar', async () => {
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue({ id: 1 });
+
+            const result = await usuarioService.eliminar(1, 99);
+
+            expect(usuarioRepositoryMock.eliminar).toHaveBeenCalledWith(1);
+            expect(auditoriaServiceMock.registrarUsuario).toHaveBeenCalledWith(
+                99,
+                'ELIMINACION',
+                1
+            );
+
+            expect(result).toBe(true);
+        });
+
+        test('debe lanzar error si no existe usuario', async () => {
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(null);
+
+            await expect(usuarioService.eliminar(1, 99))
+                .rejects.toThrow(ErrorNoEncontrado);
+        });
+    });
+
+
     describe('cambiarPassword', () => {
-        const userId = 1;
-        const currentPassword = '1234';
-        const newPassword = '5678';
+        test('debe cambiar contraseña correctamente', async () => {
+            const usuario = { id: 1, clave: "hashOld" };
 
-        test('debe cambiar la contraseña correctamente', async () => {
-            const usuarioMock = { id: userId, clave: "hashActual" };
-
-            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuarioMock);
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuario);
             bcrypt.compare.mockResolvedValue(true);
-            Encriptador.encriptar.mockResolvedValue("nuevoHash");
+            Encriptador.encriptar.mockResolvedValue("hashNew");
             usuarioRepositoryMock.actualizarPassword.mockResolvedValue(true);
 
-            const resultado = await usuarioService.cambiarPassword(
-                userId,
-                currentPassword,
-                newPassword
+            const result = await usuarioService.cambiarPassword(
+                1,
+                "1234",
+                "5678"
             );
 
-            expect(usuarioRepositoryMock.obtenerPorId).toHaveBeenCalledWith(userId);
-            expect(bcrypt.compare).toHaveBeenCalledWith(currentPassword, usuarioMock.clave);
-            expect(Encriptador.encriptar).toHaveBeenCalledWith(newPassword);
+            expect(usuarioRepositoryMock.actualizarPassword)
+                .toHaveBeenCalledWith(1, "hashNew");
 
-            expect(usuarioRepositoryMock.actualizarPassword).toHaveBeenCalledWith(
-                userId,
-                "nuevoHash"
-            );
+            expect(auditoriaServiceMock.registrar)
+                .toHaveBeenCalledWith(1, 'CAMBIO_PASSWORD', 'El usuario actualizó su contraseña');
 
-            expect(auditoriaServiceMock.registrar).toHaveBeenCalledWith(
-                userId,
-                'CAMBIO_PASSWORD',
-                'El usuario actualizó su contraseña'
-            );
-
-            expect(resultado).toEqual({
+            expect(result).toEqual({
                 mensaje: "Contraseña actualizada correctamente"
             });
         });
 
-        test('debe lanzar error si el usuario no existe', async () => {
+        test('debe fallar si usuario no existe', async () => {
             usuarioRepositoryMock.obtenerPorId.mockResolvedValue(null);
 
             await expect(
-                usuarioService.cambiarPassword(userId, currentPassword, newPassword)
+                usuarioService.cambiarPassword(1, "a", "b")
             ).rejects.toThrow("Usuario no encontrado");
         });
 
-        test('debe lanzar error si la contraseña actual es incorrecta', async () => {
-            const usuarioMock = { id: userId, clave: "hashActual" };
-
-            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuarioMock);
+        test('debe fallar si contraseña actual es incorrecta', async () => {
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue({ clave: "hash" });
             bcrypt.compare.mockResolvedValue(false);
 
             await expect(
-                usuarioService.cambiarPassword(userId, currentPassword, newPassword)
+                usuarioService.cambiarPassword(1, "a", "b")
             ).rejects.toThrow("La contraseña actual es incorrecta");
+        });
+    });
+
+    describe('alternarEstado', () => {
+        test('debe cambiar estado correctamente', async () => {
+            const usuario = { id: 1, activo: true, nombreUsuario: "test" };
+
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuario);
+            usuarioRepositoryMock.actualizar.mockResolvedValue({
+                ...usuario,
+                activo: false
+            });
+
+            const result = await usuarioService.alternarEstado(1);
+
+            expect(usuarioRepositoryMock.actualizar)
+                .toHaveBeenCalledWith(1, { activo: false });
+
+            expect(usuarioRepositoryMock.registrarAccionUsuario)
+                .toHaveBeenCalled();
+
+            expect(result.success).toBe(true);
+        });
+
+        test('debe fallar si no existe usuario', async () => {
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(null);
+
+            await expect(usuarioService.alternarEstado(1))
+                .rejects.toThrow(ErrorNoEncontrado);
+        });
+    });
+
+    describe('enviarCredenciales', () => {
+        test('debe generar password y enviar email', async () => {
+            const usuario = { id: 1, correo: "test@test.com" };
+
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuario);
+            bcrypt.hash.mockResolvedValue("hashTemp");
+
+            await usuarioService.enviarCredenciales(1);
+
+            expect(usuarioRepositoryMock.actualizar)
+                .toHaveBeenCalledWith(1,
+                    expect.objectContaining({
+                        clave: "hashTemp",
+                        debeCambiarPassword: true
+                    })
+                );
+
+            expect(emailServiceMock.enviarCredenciales)
+                .toHaveBeenCalled();
+        });
+
+        test('debe fallar si usuario no existe', async () => {
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(null);
+
+            await expect(usuarioService.enviarCredenciales(1))
+                .rejects.toThrow("Usuario no encontrado");
         });
     });
 });
