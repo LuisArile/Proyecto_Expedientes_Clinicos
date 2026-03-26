@@ -33,7 +33,7 @@ router.get("/paciente/:idPaciente", validarToken, (req, res,next) => expedienteC
 router.get("/:idExpediente", validarToken, (req, res,next) => expedienteController.obtenerPorId(req, res,next));
 
 // Actualizar expediente
-router.put("/:idExpediente", validarToken, (req, res,next) => expedienteController.actualizar(req, res,next));
+router.put("/:idExpediente", validarToken, autorizarRol(['RECEPCIONISTA', 'ADMINISTRADOR']), (req, res,next) => expedienteController.actualizar(req, res,next));
 
 // Eliminar expediente
 router.delete("/:idExpediente", validarToken, (req, res,next) => expedienteController.eliminar(req, res,next));
