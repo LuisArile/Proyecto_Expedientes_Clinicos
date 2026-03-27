@@ -11,9 +11,10 @@ const permisoRouters = require("./routes/permisoRoute")
 const registroPreclinico=require("./routes/registroPreclinicoRoute")
 const consultaMedicaRouters=require("./routes/consultaMedicaRoute")
 const busquedaRouters = require("./routes/busquedaRoute");
+const estadisticaRouters = require("./routes/estadisticaRoute")
+const auditoriaRouters = require("./routes/auditoriaRoute");
 
 const manejadorErrores = require("./middlewares/manejoErrores")
-const estadisticasRoute = require("./routes/estadisticasRoute")
 
 
 const app= express();
@@ -50,9 +51,7 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-app.use("/api/usuarios", usuarioRouters); //creacion de usuarios
-
-app.use("/api/obtenerUsuarios", usuarioRouters); //obtener todos los usuarios
+app.use("/api/usuarios", usuarioRouters); //gestion de usuarios
 
 app.use("/api", inicioSesionRouters); //inicio y cierre de sesion
 
@@ -65,10 +64,11 @@ app.use("/api/registroPreclinico", registroPreclinico); //gestion de registro de
 
 app.use("/api/consultaMedica", consultaMedicaRouters); //Consulta medicas
 
-
-app.use("/api/estadisticas", estadisticasRoute);
+app.use("/api/estadisticas", estadisticaRouters);
 
 app.use("/api/busqueda", busquedaRouters);
+
+app.use("/api/auditoria", auditoriaRouters);
 
 app.use(manejadorErrores);
 module.exports=app;

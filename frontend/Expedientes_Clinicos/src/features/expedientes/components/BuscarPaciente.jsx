@@ -9,11 +9,11 @@ import { PaginationControls } from "@/components/common/PaginationControls";
 import { useBuscarPacientes } from "../hooks/useBuscarPaciente";
 import { SearchFilterCard } from "./SearchFilterCard";
 
-import { useAuth } from "@/features/auth/useAuth";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica }) {
-
-    const { user } = useAuth();
+    
+    const { checkPermission } = useAuth();
 
     const {
         termino, setTermino,
@@ -27,14 +27,12 @@ export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica }) 
     } = useBuscarPacientes();
 
     const columns = useMemo( () => {
-        const rol = user?.rol?.toUpperCase();
-        const esPersonalAutorizado = rol === "MEDICO" || rol === "ADMIN";
         return [
             {
                 header: "Código de Expediente",
                 render: (p) => (
                     <span className="font-mono text-sm text-blue-600">
-                        {p.expedientes?.numeroExpediente || p.codigo || "SIN EXP"}
+                        {p.expedientes?.numeroExpediente}
                     </span>
                 ),
             },
@@ -50,7 +48,7 @@ export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica }) 
                 header: "Identidad",
                 render: (p) => (
                     <span className="text-gray-600">
-                        {p.dni || p.identidad || "N/A"}
+                        {p.dni}
                     </span>
                 ),
             },
@@ -60,18 +58,16 @@ export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica }) 
                 render: (p) => (
                     <div className="flex items-center justify-center gap-2 flex-wrap">
                         <Button
-                            variant="outline"
-                            size="sm"
+                            variant="outline" size="sm"
                             onClick={() => onVerExpediente(p)}
                             className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300"
                         >
                             <Eye className="size-4 mr-1" /> Ver expediente
                         </Button>
 
-                        {onConsultaMedica && esPersonalAutorizado && (
+                        {checkPermission("CONSULTA_MEDICA") && (
                             <Button
-                                size="sm"
-                                variant="outline"
+                                size="sm" variant="outline"
                                 onClick={() => onConsultaMedica(p)}
                                 className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-300"
                             >
@@ -82,7 +78,7 @@ export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica }) 
                 ),
             },
         ];
-    }, [onVerExpediente, onConsultaMedica, user]);
+    }, [checkPermission, onVerExpediente, onConsultaMedica]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">

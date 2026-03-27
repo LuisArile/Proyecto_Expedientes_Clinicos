@@ -47,6 +47,7 @@ model Usuario {
   nombre        String
   ultimoAcceso  DateTime?
   updatedAt     DateTime    @updatedAt
+  debeCambiarPassword Boolean @default(false)
   rol           Rol         @relation(fields: [idRol], references: [idRol])
   auditorias    Auditoria[]
   

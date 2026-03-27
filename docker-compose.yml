@@ -12,7 +12,7 @@ services:
     healthcheck:
       test: [
         "CMD-SHELL",
-        "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"
+        "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"
       ]
       interval: 10s
       timeout: 5s
@@ -24,6 +24,10 @@ services:
     container_name: backend-clinica
     ports:
       - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - /app/node_modules/.prisma
     env_file:
       - .env
     depends_on:
@@ -31,7 +35,10 @@ services:
         condition: service_healthy
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        - VITE_API_URL=http://localhost:3000
     container_name: frontend-clinica
     ports:
       - "80:80"

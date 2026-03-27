@@ -1,51 +1,64 @@
 const bcrypt = require('bcrypt');
 const prisma = require('../config/prisma');
-const UsuarioBase = require('../factoryMet/usuarioBaseFact');
 
 class UsuarioRepository {
 
     async crear(data) {
-        try {
+        const usuario = await prisma.usuario.create({
+            data: {
+                nombre: data.nombre,
+                apellido: data.apellido,
+                correo: data.correo,
+                nombreUsuario: data.nombreUsuario,
+                clave: data.clave,
+                idRol: Number(data.idRol),
+                especialidad: data.especialidad || null,                    
+            },
+            include: { rol: true }
+        });
 
-            const resultado = await prisma.usuario.create({
-                data: {
-                    nombre: data.nombre,
-                    apellido: data.apellido,
-                    correo: data.correo,
-                    nombreUsuario: data.nombreUsuario,
-                    clave: data.clave,
-                    idRol: Number(data.idRol),
-                    activo: true
-                },
-                include: { rol: true }
-            });
-
-            const usuarioConRol = {
-                ...resultado,
-                rolNombre: resultado.rol.nombre
-            };
-
-            return UsuarioBase.crearUsuario(usuarioConRol);
-
-        } catch (error) {
-            throw new Error(`Error al crear usuario: ${error.message}`);
-        }
+        return {usuario, rolNombre:usuario.rol?.nombre};
     }
 
     async obtenerTodos() {
-        try {
-            const resultados = await prisma.usuario.findMany({
-                include: { auditorias: true, rol: true }
-            });
+        const usuarios = await prisma.usuario.findMany({
+            include: { auditorias: true, rol: true }
+        });
 
-            return UsuarioBase.crearUsuarios(resultados.map(r => ({
-                ...r,
-                rolNombre: r.rol.nombre
-            })));
+        return usuarios.map(r => ({
+            ...r,
+            rolNombre: r.rol.nombre
+        }));        
+    }
+    
+    async actualizar(id,data) {
+    
+        const actualizarData = {};
+        
+        if (data.nombre !== undefined) actualizarData.nombre = data.nombre;
+        if (data.apellido !== undefined) actualizarData.apellido = data.apellido;
+        if (data.correo !== undefined) actualizarData.correo = data.correo;
+        if (data.nombreUsuario !== undefined) actualizarData.nombreUsuario = data.nombreUsuario;
+        if (data.clave !== undefined) actualizarData.clave = data.clave;
+        if (data.especialidad !== undefined) actualizarData.especialidad = data.especialidad;
+        if (data.activo !== undefined) actualizarData.activo = data.activo;
+        if (data.idRol !== undefined) actualizarData.idRol = Number(data.idRol);
+        if (data.debeCambiarPasword !== undefined) actualizarData.debeCambiarPasword = data.debeCambiarPassword;
 
-        } catch (error) {
-            throw new Error(`Error al obtener usuarios: ${error.message}`);
-        }
+        const usuario = await prisma.usuario.update({
+            where: {id:Number(id)},
+            data: actualizarData,
+            include: { rol: true }
+        });
+
+        return {usuario, rolNombre:usuario.rol?.nombre};        
+    }
+
+    async eliminar(id) {
+        await prisma.usuario.delete({
+            where: { id: Number(id) }
+        });
+        return true;
     }
 
     async filtrarNombreUsuario(nombreUsuario) {
@@ -62,19 +75,25 @@ class UsuarioRepository {
                     }
                 }
             });
-
             if (!data) return null;
 
-            const usuarioConRol = {
-                ...data,
+            return{ 
+                id: data.id,
+                nombre: data.nombre,
+                apellido: data.apellido,
+                correo: data.correo,
+                nombreUsuario: data.nombreUsuario,
+                clave: data.clave,
+                idRol: data.idRol,
+                activo: data.activo,
                 rolNombre: data.rol?.nombre || "SIN_ROL",
-                permisos: data.rol?.permisos?.map(p => p.permiso.nombre) || []
+                permisos: data.rol?.permisos?.map(p => p.permiso.nombre) || [],
+                ultimoAcceso: data.ultimoAcceso,
+                createdAt: data.createdAt,
+                updatedAt: data.updatedAt
             };
 
-            return UsuarioBase.crearUsuario(usuarioConRol);
-
         } catch (error) {
-            // Este es el error que ves en tu consola actualmente
             throw new Error(`Error al buscar usuario: ${error.message}`);
         }
     }
@@ -91,33 +110,25 @@ class UsuarioRepository {
         }
     }
 
-    async registrarAccionUsuario(usuarioId, accion, detalles = {}) {
-        try {
-            return await prisma.auditoria.create({
-                data: {
-                    usuarioId: usuarioId ? Number(usuarioId) : null,
-                    accion: accion,
-                    detalles: JSON.stringify(detalles),
-                    fecha: new Date()
-                }
-            });
-
-        } catch (error) {
-            console.error('Error al registrar auditoría:', error);
-        }
-    }
-
     async obtenerPorId(userId) {
-        try {
+        
             return await prisma.usuario.findUnique({
-                where: { id: Number(userId) }
+                where: { id: Number(userId) },
+                include: { rol: true }
             });
 
-        } catch (error) {
-            console.error("Error Prisma:", error);
-            throw error;
-        }
     } 
+
+    async registrarAccionUsuario(usuarioId, accion, detalles = {}) {
+        return await prisma.auditoria.create({
+            data: {
+                usuarioId: usuarioId ? Number(usuarioId) : null,
+                accion: accion,
+                detalles: typeof detalles === 'object' ? JSON.stringify(detalles) : detalles,
+                fecha: new Date()
+            }
+        });
+    }
     
     async actualizarPassword(userId, nuevaPassword) {
         try {
@@ -134,6 +145,11 @@ class UsuarioRepository {
             throw error;
         }
     }
-}
 
+    async obtenerPorCorreo(correo) {
+    return await prisma.usuario.findUnique({
+        where: { correo }
+    });
+}
+}
 module.exports = UsuarioRepository;

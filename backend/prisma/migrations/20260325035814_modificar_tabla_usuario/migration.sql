@@ -29,6 +29,11 @@ CREATE TABLE [dbo].[RecetaMedica] (
     CONSTRAINT [RecetaMedica_pkey] PRIMARY KEY CLUSTERED ([id])
 );
 
+-- AddForeignKey
+ALTER TABLE [dbo].[registroPreclinico] ADD CONSTRAINT [registroPreclinico_expedienteId_fkey] FOREIGN KEY ([expedienteId]) REFERENCES [dbo].[Expediente]([idExpediente]) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[registroPreclinico] ADD CONSTRAINT [registroPreclinico_enfermeroId_fkey] FOREIGN KEY ([enfermeroId]) REFERENCES [dbo].[Usuario]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE [dbo].[ConsultaMedica] ADD CONSTRAINT [ConsultaMedica_expedienteId_fkey] FOREIGN KEY ([expedienteId]) REFERENCES [dbo].[Expediente]([idExpediente]) ON DELETE NO ACTION ON UPDATE CASCADE;

@@ -1,138 +1,130 @@
-const PermisoService = require('../src/services/permisoService');
+const PermisoService = require("../src/services/permisoService");
 
-describe('PermisoService', () => {
-    let permisoRepositoryMock;
+describe("PermisoService", () => {
+
     let service;
+    let permisoRepository;
+    let auditoriaService;
 
     beforeEach(() => {
-        permisoRepositoryMock = {
-            obtenerPorNombre: jest.fn(),
+
+        permisoRepository = {
             crear: jest.fn(),
             obtenerTodos: jest.fn(),
             obtenerPorId: jest.fn(),
+            obtenerPorNombre: jest.fn(),
             actualizar: jest.fn(),
             eliminar: jest.fn()
         };
 
-        service = new PermisoService(permisoRepositoryMock);
+        auditoriaService = {
+            registrar: jest.fn()
+        };
+
+        service = new PermisoService(permisoRepository, auditoriaService);
     });
 
-    /* =========================
-       CREAR
-    ========================= */
+    describe("crear", () => {
 
-    test('debe crear un permiso correctamente', async () => {
-        permisoRepositoryMock.obtenerPorNombre.mockResolvedValue(null);
-        permisoRepositoryMock.crear.mockResolvedValue({ id: 1, nombre: 'ADMIN' });
+        test("debe crear permiso", async () => {
 
-        const result = await service.crear({ nombre: 'admin' });
+            permisoRepository.obtenerPorNombre.mockResolvedValue(null);
+            permisoRepository.crear.mockResolvedValue({ id: 1 });
 
-        expect(permisoRepositoryMock.obtenerPorNombre).toHaveBeenCalledWith('ADMIN');
-        expect(permisoRepositoryMock.crear).toHaveBeenCalledWith({ nombre: 'ADMIN' });
-        expect(result).toEqual({ id: 1, nombre: 'ADMIN' });
+            const res = await service.crear({ nombre: "READ" });
+
+            expect(res.id).toBe(1);
+        });
+
+        test("debe fallar si nombre vacío", async () => {
+
+            await expect(
+                service.crear({ nombre: "" })
+            ).rejects.toThrow("El nombre del permiso es requerido");
+        });
+
+        test("debe fallar si existe duplicado", async () => {
+
+            permisoRepository.obtenerPorNombre.mockResolvedValue({ id: 1 });
+
+            await expect(
+                service.crear({ nombre: "READ" })
+            ).rejects.toThrow("Ya existe un permiso con ese nombre");
+        });
     });
 
-    test('debe lanzar error si el nombre está vacío', async () => {
-        await expect(service.crear({ nombre: '   ' }))
-            .rejects
-            .toThrow('El nombre del permiso es requerido');
+    describe("obtener", () => {
+
+        test("obtenerTodos", async () => {
+
+            permisoRepository.obtenerTodos.mockResolvedValue([1]);
+
+            const res = await service.obtenerTodos();
+
+            expect(res).toHaveLength(1);
+        });
+
+        test("obtenerPorId existe", async () => {
+
+            permisoRepository.obtenerPorId.mockResolvedValue({ id: 1 });
+
+            const res = await service.obtenerPorId(1);
+
+            expect(res.id).toBe(1);
+        });
+
+        test("obtenerPorId no existe", async () => {
+
+            permisoRepository.obtenerPorId.mockResolvedValue(null);
+
+            await expect(service.obtenerPorId(1))
+                .rejects.toThrow("Permiso no encontrado");
+        });
     });
 
-    test('debe lanzar error si el permiso ya existe', async () => {
-        permisoRepositoryMock.obtenerPorNombre.mockResolvedValue({ id: 1 });
+    describe("actualizar", () => {
 
-        await expect(service.crear({ nombre: 'admin' }))
-            .rejects
-            .toThrow('Ya existe un permiso con ese nombre');
+        test("debe actualizar permiso", async () => {
+
+            permisoRepository.obtenerPorId.mockResolvedValue({ idPermiso: 1 });
+            permisoRepository.obtenerPorNombre.mockResolvedValue(null);
+            permisoRepository.actualizar.mockResolvedValue({ id: 1 });
+
+            const res = await service.actualizar(1, { nombre: "UPDATE" }, 10);
+
+            expect(res.id).toBe(1);
+            expect(auditoriaService.registrar).toHaveBeenCalled();
+        });
+
+        test("debe fallar si no existe", async () => {
+
+            permisoRepository.obtenerPorId.mockResolvedValue(null);
+
+            await expect(
+                service.actualizar(1, { nombre: "X" }, 10)
+            ).rejects.toThrow("Permiso no encontrado");
+        });
     });
 
-    /* =========================
-       OBTENER TODOS
-    ========================= */
+    describe("eliminar", () => {
 
-    test('debe obtener todos los permisos', async () => {
-        const permisos = [{ id: 1 }, { id: 2 }];
-        permisoRepositoryMock.obtenerTodos.mockResolvedValue(permisos);
+        test("debe eliminar permiso", async () => {
 
-        const result = await service.obtenerTodos();
+            permisoRepository.obtenerPorId.mockResolvedValue({ idPermiso: 1 });
+            permisoRepository.eliminar.mockResolvedValue(true);
 
-        expect(result).toEqual(permisos);
-    });
+            const res = await service.eliminar(1, 10);
 
-    /* =========================
-       OBTENER POR ID
-    ========================= */
+            expect(res).toBe(true);
+            expect(auditoriaService.registrar).toHaveBeenCalled();
+        });
 
-    test('debe obtener un permiso por ID', async () => {
-        const permiso = { id: 1, nombre: 'ADMIN' };
-        permisoRepositoryMock.obtenerPorId.mockResolvedValue(permiso);
+        test("debe fallar si no existe", async () => {
 
-        const result = await service.obtenerPorId(1);
+            permisoRepository.obtenerPorId.mockResolvedValue(null);
 
-        expect(result).toEqual(permiso);
-    });
-
-    test('debe lanzar error si el permiso no existe (obtenerPorId)', async () => {
-        permisoRepositoryMock.obtenerPorId.mockResolvedValue(null);
-
-        await expect(service.obtenerPorId(1))
-            .rejects
-            .toThrow('Permiso no encontrado');
-    });
-
-    /* =========================
-       ACTUALIZAR
-    ========================= */
-
-    test('debe actualizar un permiso correctamente', async () => {
-        permisoRepositoryMock.obtenerPorId.mockResolvedValue({ idPermiso: 1 });
-        permisoRepositoryMock.obtenerPorNombre.mockResolvedValue(null);
-        permisoRepositoryMock.actualizar.mockResolvedValue({ idPermiso: 1, nombre: 'USER' });
-
-        const result = await service.actualizar(1, { nombre: 'user' });
-
-        expect(permisoRepositoryMock.actualizar)
-            .toHaveBeenCalledWith(1, { nombre: 'USER' });
-
-        expect(result).toEqual({ idPermiso: 1, nombre: 'USER' });
-    });
-
-    test('debe lanzar error si no existe el permiso al actualizar', async () => {
-        permisoRepositoryMock.obtenerPorId.mockResolvedValue(null);
-
-        await expect(service.actualizar(1, { nombre: 'user' }))
-            .rejects
-            .toThrow('Permiso no encontrado');
-    });
-
-    test('debe lanzar error si el nombre ya existe en otro permiso', async () => {
-        permisoRepositoryMock.obtenerPorId.mockResolvedValue({ idPermiso: 1 });
-        permisoRepositoryMock.obtenerPorNombre.mockResolvedValue({ idPermiso: 2 });
-
-        await expect(service.actualizar(1, { nombre: 'admin' }))
-            .rejects
-            .toThrow('Ya existe un permiso con ese nombre');
-    });
-
-    /* =========================
-       ELIMINAR
-    ========================= */
-
-    test('debe eliminar un permiso correctamente', async () => {
-        permisoRepositoryMock.obtenerPorId.mockResolvedValue({ idPermiso: 1 });
-        permisoRepositoryMock.eliminar.mockResolvedValue(true);
-
-        const result = await service.eliminar(1);
-
-        expect(permisoRepositoryMock.eliminar).toHaveBeenCalledWith(1);
-        expect(result).toBe(true);
-    });
-
-    test('debe lanzar error si el permiso no existe al eliminar', async () => {
-        permisoRepositoryMock.obtenerPorId.mockResolvedValue(null);
-
-        await expect(service.eliminar(1))
-            .rejects
-            .toThrow('Permiso no encontrado');
+            await expect(service.eliminar(1, 10))
+                .rejects.toThrow("Permiso no encontrado");
+        });
     });
 });

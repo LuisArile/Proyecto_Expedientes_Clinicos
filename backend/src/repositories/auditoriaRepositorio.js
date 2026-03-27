@@ -29,7 +29,66 @@ class auditoriaRepository {
         }
     }
 
-    async obtenerRecientes(limite = 6) {
+    async obtenerTodos(limite = 100) {
+        return await this.prisma.auditoria.findMany({
+            take: limite,
+            orderBy: { fecha: 'desc' },
+            include: { 
+                usuario: { 
+                    select: { 
+                        nombre: true, 
+                        apellido: true, 
+                        nombreUsuario: true,
+                        rol: { select: { nombre: true } }
+                    } 
+                } 
+            }
+        });
+    }
+
+    async obtenerLogsDeHoy() {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        return await this.prisma.auditoria.findMany({
+            where: {
+                fecha: {
+                    gte: hoy
+                }
+            },
+            orderBy: { fecha: 'desc' },
+            include: { 
+                usuario: { 
+                    select: { 
+                        nombre: true, 
+                        apellido: true, 
+                        nombreUsuario: true 
+                    } 
+                } 
+            }
+        });
+    }
+
+    async obtenerEstadisticas() {
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+
+        const [total, hoyConteo, usuariosUnicos] = await Promise.all([
+            prisma.auditoria.count(),
+            prisma.auditoria.count({ where: { fecha: { gte: hoy } } }),
+            prisma.auditoria.groupBy({
+                by: ['usuarioId'],
+                where: { usuarioId: { not: null } }
+            })
+        ]);
+
+        return {
+            total,
+            hoy: hoyConteo,
+            usuariosActivos: usuariosUnicos.length
+        };
+    }
+
+    async obtenerRecientes(limite = 10) {
         return await this.prisma.auditoria.findMany({
             take: limite,
             orderBy: { fecha: 'desc' },
