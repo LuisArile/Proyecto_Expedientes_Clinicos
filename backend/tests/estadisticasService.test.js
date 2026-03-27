@@ -44,7 +44,8 @@ describe("EstadisticasService", () => {
         mockPacienteRepo = {};
 
         mockExpedienteRepo = {
-            contarCreadosHoy: jest.fn()
+            contarCreadosHoy: jest.fn(),
+            obtenerCreadosHoyConPaciente: jest.fn()
         };
 
         service = crearServicio();
@@ -168,11 +169,15 @@ describe("EstadisticasService", () => {
         test("debe retornar datos de recepcionista", async () => {
             const usuario = { id: 2, rol: "RECEPCIONISTA" };
             const expedientesHoy = 5;
+            const expedientesRecientes = [
+                { id: 1, numeroExpediente: "EXP-001", paciente: { nombre: "Laura", apellido: "Fernández" } }
+            ];
             const actividadMock = [
                 { id: 1, usuario: { nombre: "Laura", apellido: "Fernández" }, accion: "CREACIÓN DE EXPEDIENTE", fecha: new Date(), detalles: "{}" }
             ];
 
             mockExpedienteRepo.contarCreadosHoy.mockResolvedValue(expedientesHoy);
+            mockExpedienteRepo.obtenerCreadosHoyConPaciente.mockResolvedValue(expedientesRecientes);
             mockAuditoriaRepo.buscarActividad.mockResolvedValue(actividadMock);
 
             const resultado = await service.obtenerRecepcionistaData(usuario);
@@ -184,9 +189,11 @@ describe("EstadisticasService", () => {
         test("admin puede ver datos de recepcionista", async () => {
             const usuario = { id: 1, rol: "ADMINISTRADOR" };
             const expedientesHoy = 10;
+            const expedientesRecientes = [];
             const actividadMock = [];
 
             mockExpedienteRepo.contarCreadosHoy.mockResolvedValue(expedientesHoy);
+            mockExpedienteRepo.obtenerCreadosHoyConPaciente.mockResolvedValue(expedientesRecientes);
             mockAuditoriaRepo.buscarActividad.mockResolvedValue(actividadMock);
 
             const resultado = await service.obtenerRecepcionistaData(usuario);
