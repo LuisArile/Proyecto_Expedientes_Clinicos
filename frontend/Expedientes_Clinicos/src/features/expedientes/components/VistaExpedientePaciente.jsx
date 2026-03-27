@@ -52,7 +52,6 @@ export function VistaExpedientePaciente({ pacienteSeleccionado, onVolver, onActu
     const cargarExpediente = async () => {
       setCargando(true);
       setError("");
-      setConfirmacion("");
 
       try {
         let data;
@@ -77,6 +76,15 @@ export function VistaExpedientePaciente({ pacienteSeleccionado, onVolver, onActu
     cargarExpediente();
   }, [idExpediente, pacienteSeleccionado]);
 
+  useEffect(() => {
+    if (confirmacion) {
+      const timer = setTimeout(() => {
+        setConfirmacion("");
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [confirmacion]);
+
   const actualizarCampo = (campo, valor) => {
     setFormData((prev) => ({ ...prev, [campo]: valor }));
   };
@@ -96,7 +104,6 @@ export function VistaExpedientePaciente({ pacienteSeleccionado, onVolver, onActu
 
     setGuardando(true);
     setError("");
-    setConfirmacion("");
 
     try {
       const payload = {
@@ -118,10 +125,11 @@ export function VistaExpedientePaciente({ pacienteSeleccionado, onVolver, onActu
       setExpediente(dataActualizada);
       setFormData(mapearFormularioDesdeExpediente(dataActualizada));
       setModoEdicion(false);
-      setConfirmacion("Datos personales actualizados correctamente.");
+      setConfirmacion("Se registraron los cambios exitosamente, el expediente ha sido actualizado");
       onActualizado?.(dataActualizada);
     } catch (err) {
       setError(err.message || "No se pudo actualizar el expediente");
+      setConfirmacion("");
     } finally {
       setGuardando(false);
     }
