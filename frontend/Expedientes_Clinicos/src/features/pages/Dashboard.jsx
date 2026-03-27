@@ -1,10 +1,10 @@
 import React, { useState, useMemo, Suspense, useCallback, useEffect } from "react";
-import { DashboardLayout } from "../components/layout/dashboardLayout";
+import { DashboardLayout } from "@/components/layout/dashboardLayout";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
-import { LoaderModulo } from "../components/ui/loaderModulo";
-import { getView } from "../features/dashboard/utils/verRegistro";
+import { LoaderModulo } from "@/components/ui/loaderModulo";
+import { getView } from "@/features/dashboard/utils/verRegistro";
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -59,6 +59,8 @@ export function Dashboard() {
     onConsultaMedica: handleConsultaMedica,
     onNavigate: setCurrentView
   }), [selectedPaciente, volverInicio, handleConsultaMedica]);
+
+  console.log("PRUEBA");
 
   if (!user) return <LoaderModulo />;
 

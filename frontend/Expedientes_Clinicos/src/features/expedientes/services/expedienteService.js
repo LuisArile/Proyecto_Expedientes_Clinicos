@@ -1,4 +1,4 @@
-import { expedienteAPI } from "@/services/api";
+import { expedienteAPI } from "@/api";
 
 /**
  * Crear un nuevo expediente con datos del paciente
