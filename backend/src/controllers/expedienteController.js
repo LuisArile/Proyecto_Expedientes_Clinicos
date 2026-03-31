@@ -98,16 +98,47 @@ class expedienteController {
     
     actualizar = capturarAsync(async (req, res, next) => {
         const { idExpediente } = req.params;
-        const { estado, observaciones } = req.body;
+        const { 
+            // Datos del paciente
+            nombre, 
+            apellido, 
+            dni, 
+            correo, 
+            telefono, 
+            fechaNacimiento, 
+            sexo, 
+            direccion,
+            // Datos del expediente
+            estado, 
+            observaciones 
+        } = req.body;
 
         if (!idExpediente) {
             throw new ErrorValidacion('El ID del expediente es obligatorio');
         }
 
-        const resultado = await this.expedienteService.actualizar(idExpediente, {
-            estado,
-            observaciones
-        });
+        // Separar datos del paciente y del expediente
+        const dataPaciente = {};
+        if (nombre !== undefined) dataPaciente.nombre = nombre;
+        if (apellido !== undefined) dataPaciente.apellido = apellido;
+        if (dni !== undefined) dataPaciente.dni = dni;
+        if (correo !== undefined) dataPaciente.correo = correo;
+        if (telefono !== undefined) dataPaciente.telefono = telefono;
+        if (fechaNacimiento !== undefined) dataPaciente.fechaNacimiento = fechaNacimiento;
+        if (sexo !== undefined) dataPaciente.sexo = sexo;
+        if (direccion !== undefined) dataPaciente.direccion = direccion;
+
+        const dataExpediente = {};
+        if (estado !== undefined) dataExpediente.estado = estado;
+        if (observaciones !== undefined) dataExpediente.observaciones = observaciones;
+
+        const usuarioId = req.usuario?.id;
+        const resultado = await this.expedienteService.actualizarConPaciente(
+            idExpediente,
+            dataPaciente,
+            dataExpediente,
+            usuarioId
+        );
 
         res.json({
             success: true,
