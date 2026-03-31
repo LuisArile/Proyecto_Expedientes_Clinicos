@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@components/ui/button";
+import { Input } from "@components/ui/input";
 import { User, Lock, Eye, EyeOff } from "lucide-react";
-import { FormField } from "@/components/common/FormField";
-import { FormHeader } from "@/components/common/FormHeader";
+import { FormField } from "@components/common/FormField";
+import { FormHeader } from "@components/common/FormHeader";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 

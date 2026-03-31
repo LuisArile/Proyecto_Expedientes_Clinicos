@@ -1,13 +1,6 @@
 import React from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { cn } from "@/components/ui/utils";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@components/ui/table";
+import { cn } from "@components/ui/utils";
 
 export function DataTable({ columns, data, emptyMessage = "No se encontraron resultados." }) {
   return (

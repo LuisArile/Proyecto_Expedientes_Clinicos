@@ -33,7 +33,7 @@ vi.mock("../features/dashboard/hooks/useDashboardData", () => ({
 }));
 
 // Mock componentes UI
-vi.mock("@/components/ui/card", () => ({
+vi.mock("@components/ui/card", () => ({
   Card: ({ children, ...props }) => <div {...props}>{children}</div>,
   CardContent: ({ children, ...props }) => <div {...props}>{children}</div>,
   CardHeader: ({ children, ...props }) => <div {...props}>{children}</div>,
@@ -41,7 +41,7 @@ vi.mock("@/components/ui/card", () => ({
   CardDescription: ({ children, ...props }) => <div {...props}>{children}</div>
 }));
 
-vi.mock("@/components/ui/badge", () => ({
+vi.mock("@components/ui/badge", () => ({
   Badge: ({ children }) => <span>{children}</span>
 }));
 

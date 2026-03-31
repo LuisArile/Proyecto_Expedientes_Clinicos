@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { FormHeader } from "@/components/common/FormHeader";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@components/ui/input";
+import { Button } from "@components/ui/button";
+import { Textarea } from "@components/ui/textarea";
+import { PageHeader } from "@components/layout/PageHeader";
+import { FormHeader } from "@components/common/FormHeader";
+import { Card, CardContent, CardHeader } from "@components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 import { FileText, User, Calendar, Phone, Mail, MapPin, IdCard, Search, Loader2 } from "lucide-react";
 
 import { useExpedienteForm } from "../hooks/useExpedienteForm";
-import { FormField } from "@/components/common/FormField";
-import { FormSection } from "@/components/common/FormSection";
-import { StatusModal } from "@/components/common/StatusModal";
+import { FormField } from "@components/common/FormField";
+import { FormSection } from "@components/common/FormSection";
+import { StatusModal } from "@components/common/StatusModal";
 
 export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
 

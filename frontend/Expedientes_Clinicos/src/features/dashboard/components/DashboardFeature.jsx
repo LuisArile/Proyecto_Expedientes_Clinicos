@@ -1,11 +1,10 @@
-import { Clock, UserCheck, PillBottle, Activity, Users, BarChart3, Pill, TestTube, FileText, Stethoscope, Calendar, NotebookText 
-        } from "lucide-react";
+import { Clock, UserCheck, PillBottle, Activity, Users, BarChart3, Pill, TestTube, FileText, Stethoscope, Calendar, NotebookText } from "lucide-react";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useDashboardData } from "../hooks/useDashboardData";
 import { DASHBOARD_CONFIG } from "@/constants/dashboardStrategies";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
+import { Badge } from "@components/ui/badge";
 import { obtenerFechaActual } from "@/utils/dateFormatter";
 
 const ICON_MAP = {
