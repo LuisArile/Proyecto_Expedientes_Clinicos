@@ -2,18 +2,18 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Activity, Heart, Thermometer, Weight, Ruler, Search, Loader2 } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { FormField } from "@/components/common/FormField";
-import { FormSection } from "@/components/common/FormSection";
-import { StatusModal } from "@/components/common/StatusModal";
+import { Input } from "@components/ui/input";
+import { Button } from "@components/ui/button";
+import { Textarea } from "@components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/card";
+import { PageHeader } from "@components/layout/PageHeader";
+import { FormField } from "@components/common/FormField";
+import { FormSection } from "@components/common/FormSection";
+import { StatusModal } from "@components/common/StatusModal";
 import { SearchFilterCard } from "@/features/expedientes/components/SearchFilterCard";
 import { useBuscarPacientes } from "@/features/expedientes/hooks/useBuscarPaciente";
 import { useRegistroPreclinico } from "../hooks/useRegistroPreclinico";
-import { DataTable } from "@/components/common/DataTable";
+import { DataTable } from "@components/common/DataTable";
 
 export function FormularioRegistroPreclinico({ onVolver, onSuccess }) {
   const {

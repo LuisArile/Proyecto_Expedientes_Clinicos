@@ -1,7 +1,7 @@
 import React from 'react';
-import { Mail, Loader2, User, ShieldCheck } from "lucide-react";
-import { ModalDetalleBase } from '../../../components/common/ModalDetalleBase';
-import { DetailBox } from '../../../components/common/DetailBox';
+import { Mail, User } from "lucide-react";
+import { ModalDetalleBase } from '@components/common/ModalDetalleBase';
+import { DetailBox } from '@components/common/DetailBox';
 
 export function DialogoEnvioCredenciales({ isOpen, onClose, onConfirm, usuario, procesando }) {
   if (!usuario) return null;

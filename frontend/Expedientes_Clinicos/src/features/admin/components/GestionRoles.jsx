@@ -1,7 +1,7 @@
 import { Shield, Save, Plus, Check, Lock } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { Card, CardContent, CardHeader, CardTitle } from "@components/ui/card";
+import { Button } from "@components/ui/button";
+import { PageHeader } from "@components/layout/PageHeader";
 
 import React, { useState } from "react"; 
 import { useGestionRoles } from "../hooks/useGestionRoles";

@@ -1,4 +1,4 @@
-import { rolAPI, permisoAPI } from "@/api";
+import { rolAPI, permisoAPI } from "@/shared/services/api";
 
 export const rolesService = {
     async fetchAllData() {

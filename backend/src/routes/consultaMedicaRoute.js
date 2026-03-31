@@ -1,6 +1,8 @@
 const express = require('express');
 const validarToken = require('../middlewares/inicioSesionMiddleware');
 const autorizarRol = require('../middlewares/autorizarRol');
+const autorizarPermiso = require("../middlewares/autorizarPermiso");
+
 const prisma = require('../config/prisma');
 
 const ConsultaMedicaRepository = require('../repositories/consultaMedicaRepositorio');
@@ -35,12 +37,12 @@ router.use(validarToken);
 
 
 //Creacion de nueva consulta, solo medico autorizado
-router.post('/expediente/:expedienteId',autorizarRol(['MEDICO']),(req, res,next) => consultaMedicaController.registrar(req, res,next));
+router.post('/expediente/:expedienteId', autorizarPermiso('CONSULTA_MEDICA'), (req, res,next) => consultaMedicaController.registrar(req, res,next));
 
 //Medicos y enfemeros pueden ver consultas de un expediente
-router.get('/expediente/:expedienteId',autorizarRol(['MEDICO', 'ENFERMERO']),(req, res,next) => consultaMedicaController.obtenerPorExpediente(req, res,next));
+router.get('/expediente/:expedienteId', autorizarPermiso('VER_CONSULTAS'), (req, res,next) => consultaMedicaController.obtenerPorExpediente(req, res,next));
 
 //obtener un expediente en especifico, solo medico y enfermeros
-router.get('/:id',autorizarRol(['MEDICO', 'ENFERMERO']),(req, res,next) => consultaMedicaController.obtenerPorId(req, res,next));
+router.get('/:id', autorizarPermiso('VER_CONSULTAS'), (req, res,next) => consultaMedicaController.obtenerPorId(req, res,next));
 
 module.exports = router;

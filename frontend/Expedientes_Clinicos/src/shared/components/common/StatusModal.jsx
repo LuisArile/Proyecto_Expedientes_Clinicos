@@ -1,6 +1,6 @@
 import { CheckCircle2, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@components/ui/card";
 
 export function StatusModal({ isOpen, result, onClose }) {
     if (!isOpen) return null;

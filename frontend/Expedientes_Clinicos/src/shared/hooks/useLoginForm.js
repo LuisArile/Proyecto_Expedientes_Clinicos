@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext";
-import { validarLogin } from "@/components/validaciones/validarLogin";
+import { validarLogin } from "@components/validaciones/validarLogin";
 
 export function useLoginForm() {
   const { login } = useAuth();

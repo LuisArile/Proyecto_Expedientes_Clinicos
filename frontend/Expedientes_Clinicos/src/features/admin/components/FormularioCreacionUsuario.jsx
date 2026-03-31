@@ -2,16 +2,16 @@ import React, { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form'; 
 import { User, Mail, ShieldCheck, Stethoscope, Save, X, Loader2, UserCog, Briefcase, UserPlus } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@components/ui/input";
+import { Button } from "@components/ui/button";
+import { Card, CardContent, CardHeader } from "@components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 
-import { PageHeader } from "@/components/layout/PageHeader";
-import { FormHeader } from "@/components/common/FormHeader";
-import { FormField } from "@/components/common/FormField";
-import { FormSection } from "@/components/common/FormSection";
-import { StatusModal } from "@/components/common/StatusModal";
+import { PageHeader } from "@components/layout/PageHeader";
+import { FormHeader } from "@components/common/FormHeader";
+import { FormField } from "@components/common/FormField";
+import { FormSection } from "@components/common/FormSection";
+import { StatusModal } from "@components/common/StatusModal";
 
 import { useUsuarioForm } from "../hooks/useUsuarioForm";
 

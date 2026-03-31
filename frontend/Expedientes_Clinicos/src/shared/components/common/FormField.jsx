@@ -1,4 +1,4 @@
-import { Label } from "@/components/ui/label";
+import { Label } from "@components/ui/label";
 import { AlertCircle } from "lucide-react";
 
 export function FormField({ label, icon: Icon, error, required, children, className = "" }) {

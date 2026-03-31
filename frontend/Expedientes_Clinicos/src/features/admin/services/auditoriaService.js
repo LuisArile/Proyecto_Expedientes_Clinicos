@@ -1,4 +1,4 @@
-import { auditoriaAPI } from "@/api";
+import { auditoriaAPI } from "@/shared/services/api";
 
 export async function obtenerLogsAuditoria() {
   try {

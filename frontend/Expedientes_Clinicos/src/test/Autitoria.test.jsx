@@ -8,7 +8,7 @@ vi.mock("@/features/admin/hooks/useAuditoria", () => ({
     useAuditoria: vi.fn(),
 }));
 
-vi.mock("@/components/common/DataTable", () => ({
+vi.mock("@components/common/DataTable", () => ({
     DataTable: ({ columns, data, emptyMessage }) => (
         <table>
             <tbody>

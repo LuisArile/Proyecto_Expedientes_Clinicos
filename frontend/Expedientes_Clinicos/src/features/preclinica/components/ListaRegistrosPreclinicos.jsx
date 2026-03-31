@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Loader2, Users } from "lucide-react";
 
-import { Card } from "@/components/ui/card";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { DataTable } from "@/components/common/DataTable";
+import { Card } from "@components/ui/card";
+import { PageHeader } from "@components/layout/PageHeader";
+import { DataTable } from "@components/common/DataTable";
 import { obtenerTodosRegistros } from "../services/registroPreclinicoService";
 
 export function ListaRegistrosPreclinicos({ onVolver }) {
