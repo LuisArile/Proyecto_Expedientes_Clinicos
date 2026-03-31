@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import React, { useEffect } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Textarea } from "@components/ui/textarea";
@@ -7,19 +7,37 @@ import { PageHeader } from "@components/layout/PageHeader";
 import { FormHeader } from "@components/common/FormHeader";
 import { Card, CardContent, CardHeader } from "@components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
-import { FileText, User, Calendar, Phone, Mail, MapPin, IdCard, Search, Loader2 } from "lucide-react";
+import { FileText, User, Calendar, Phone, Mail, MapPin, IdCard, Search, Loader2, X } from "lucide-react";
 
 import { useExpedienteForm } from "../hooks/useExpedienteForm";
 import { FormField } from "@components/common/FormField";
 import { FormSection } from "@components/common/FormSection";
 import { StatusModal } from "@components/common/StatusModal";
+import { formatearFechaParaInput } from "@/utils/dateFormatter";
 
-export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
+export function FormularioExpediente({ onSuccess, onCancel, onVolver, modo = "crear", pacienteData = null }) {
 
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm();
-  const [generoSeleccionado, setGeneroSeleccionado] = useState("");
+  const { register, handleSubmit, formState: { errors }, setValue, control } = useForm();
+  const generoSeleccionado = useWatch({ control, name: "sexo", defaultValue: "" });
 
-  const { loading, idDuplicado, modal, setModal, validarId, enviarFormulario } = useExpedienteForm(onSuccess);
+  const { loading, idDuplicado, modal, setModal, validarId, enviarFormulario } = useExpedienteForm(modo, pacienteData);
+  
+  const esEdicion = modo === "editar";
+  
+  // Prellenar el formulario si es edición
+  useEffect(() => {
+    if (esEdicion && pacienteData?.paciente) {
+      const p = pacienteData.paciente;
+      setValue("nombre", p.nombre || "");
+      setValue("apellido", p.apellido || "");
+      setValue("numeroIdentidad", p.dni || "");
+      setValue("fechaNacimiento", formatearFechaParaInput(p.fechaNacimiento) || "");
+      setValue("correo", p.correo || "");
+      setValue("telefono", p.telefono || "");
+      setValue("direccion", p.direccion || "");
+      setValue("sexo", p.sexo || "");
+    }
+  }, [esEdicion, pacienteData, setValue]);
   
   const inputClass = (name) => `${errors[name] || (name === 'numeroIdentidad' && idDuplicado) ? "border-red-500" : "border-gray-300"} transition-all`;
 
@@ -27,11 +45,21 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
 
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
 
-      <PageHeader title="Crear Expediente" subtitle="Crear expedientes clinicos" Icon={Search} onVolver={onVolver} />
+      <PageHeader 
+        title={esEdicion ? "Editar Expediente" : "Crear Expediente"} 
+        subtitle={esEdicion ? "Modificar datos del expediente clínico" : "Crear expedientes clinicos"} 
+        Icon={Search} 
+        onVolver={onVolver} 
+      />
       
       <Card className="w-full max-w-3xl mx-auto shadow-lg border-blue-100 mt-4 overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-b border-blue-100 p-0">
-          <FormHeader  title="Crear Nuevo Expediente" subtitle="Registro oficial de paciente en el sistema clínico" icon={FileText} align="left"/>
+          <FormHeader  
+            title={esEdicion ? "Editar Datos del Expediente" : "Crear Nuevo Expediente"} 
+            subtitle={esEdicion ? "Actualización de datos del paciente y expediente clínico" : "Registro oficial de paciente en el sistema clínico"} 
+            icon={FileText} 
+            align="left"
+          />
         </CardHeader>
 
         <CardContent className="pt-6">
@@ -84,11 +112,7 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
               </FormField>
               {/* Género */}
               <FormField label="Sexo" required error={errors.sexo?.message}>
-                <Select onValueChange={(val) => {
-                    setGeneroSeleccionado(val);
-                    setValue("sexo", val);
-                  }}
-                >
+                <Select value={generoSeleccionado} onValueChange={(val) => setValue("sexo", val)}>
                   <SelectTrigger className={inputClass("sexo")}>
                     <SelectValue placeholder="Seleccionar..." />
                   </SelectTrigger>
@@ -127,9 +151,18 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver }) {
             {/* Botones */}
             <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t">
               <Button type="submit" disabled={loading || idDuplicado} className="flex-1 bg-blue-600 hover:bg-blue-700 h-11 text-base font-semibold transition-all shadow-md">
-                {loading ? <Loader2 className="animate-spin" /> : "Confirmar Registro"}
+                {loading ? <Loader2 className="animate-spin" /> : (esEdicion ? "Guardar Cambios" : "Confirmar Registro")}
               </Button>
-              <Button type="button" variant="ghost" onClick={onCancel} className="flex-1 h-11 text-base border-gray-300 hover:bg-gray-50">
+              <Button 
+                type="button" 
+                onClick={onCancel} 
+                className={`flex-1 h-11 text-base font-semibold transition-all shadow-md flex items-center justify-center gap-2 ${
+                  esEdicion 
+                    ? "bg-red-50 text-red-600 border-2 border-red-300 hover:bg-red-100 hover:border-red-400" 
+                    : "bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200 hover:border-gray-400"
+                }`}
+              >
+                <X size={18} />
                 Cancelar
               </Button>
             </div>
