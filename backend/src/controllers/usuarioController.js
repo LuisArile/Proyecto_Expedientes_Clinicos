@@ -16,8 +16,8 @@ class usuarioController {
         if(!idRol) throw new ErrorValidacion('El rol es obligatorio');
 
         if (req.usuario.idRol !== 1) {
-        throw new ErrorNoAutorizado('Solo los administradores pueden crear usuarios');
-    }
+           throw new ErrorNoAutorizado('Solo los administradores pueden crear usuarios');
+        }
         const usuario = await this.usuarioService.crear(req.body, req.usuario.id);
         
         res.status(201).json({
