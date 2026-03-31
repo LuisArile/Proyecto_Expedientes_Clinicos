@@ -6,7 +6,7 @@ import { FormularioExpediente } from "../../expedientes/components/FormularioExp
 import { BuscarPaciente } from "../../expedientes/components/BuscarPaciente";
 import { ConsultaMedica } from "../../consultas/components/ConsultaMedica";
 import { FormularioRegistroPreclinico } from "../../preclinica/components/FormularioRegistroPreclinico";
-import { GestionUsuarios } from "../../../pages/GestionUsuarios";
+import { GestionUsuarios } from "../../../features/pages/GestionUsuarios";
 import { FormularioCreacionUsuario } from "../../admin/components/FormularioCreacionUsuario";
 const Auditoria = lazy(() => import("../../admin/components/Auditoria").then(module => ({ default: module.Auditoria })));
 const GestionRoles = lazy(() => import("../../admin/components/GestionRoles").then(module => ({ default: module.GestionRoles })));

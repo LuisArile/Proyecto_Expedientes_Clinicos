@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, test, expect, vi } from "vitest";
-import { Login } from "../pages/Login";
+import { Login } from "@/features/pages/Login";
 import { MemoryRouter } from "react-router-dom";
 
 // Mock navigate

@@ -1,4 +1,4 @@
-import { consultaMedicaAPI } from "@/services/api";
+import { consultaMedicaAPI } from "@/api";
 
 export async function registrarConsultaMedica(idExpediente, datos) {
     try {

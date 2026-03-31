@@ -1,4 +1,4 @@
-import { buscarAPI } from "@/services/api";
+import { buscarAPI } from "@/api";
 
 /**
  * Buscar pacientes/expedientes por término de búsqueda

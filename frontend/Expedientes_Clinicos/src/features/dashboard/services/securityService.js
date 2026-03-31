@@ -1,4 +1,4 @@
-import { seguridadAPI } from "@/services/api";
+import { seguridadAPI } from "@/api";
 
 export const securityService = {
   cambiarPassword: async (userId, currentPassword, newPassword) => {

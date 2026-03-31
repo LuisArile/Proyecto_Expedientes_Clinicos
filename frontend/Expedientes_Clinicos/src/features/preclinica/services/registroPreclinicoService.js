@@ -1,4 +1,4 @@
-import { registroPreclinicoAPI } from "@/services/api";
+import { registroPreclinicoAPI } from "@/api";
 
 export async function registrarPreclinico(expedienteId, datos) {
   try {

@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { Dashboard } from "./pages/Dashboard";
-import { Login } from "./pages/Login";
+import { Dashboard } from "@/features/pages/Dashboard";
+import { Login } from "@/features/pages/Login";
 
 function PrivateRoute({ children}) {
   const { user } = useAuth();

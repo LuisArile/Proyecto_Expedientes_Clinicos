@@ -1,4 +1,4 @@
-import { estadisticasAPI } from "@/services/api";
+import { estadisticasAPI } from "@/api";
 
 const dashboardService = {
     /**

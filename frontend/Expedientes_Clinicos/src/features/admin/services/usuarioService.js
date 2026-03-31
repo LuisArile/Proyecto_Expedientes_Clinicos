@@ -1,4 +1,4 @@
-import { usuarioAPI } from '@/services/api';
+import { usuarioAPI } from '@/api';
 
 export const usuarioService = {
     getAll: async () => {
