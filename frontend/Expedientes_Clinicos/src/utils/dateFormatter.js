@@ -22,13 +22,9 @@ export function obtenerFechaActual() {
  * @param {string|Date} fecha - Fecha en cualquier formato válido de JavaScript
  * @returns {string} Fecha formateada como YYYY-MM-DD o string vacío si es inválida
  * @example
- * formatearFechaParaInput("2000-05-15"); // "2000-05-15"
- * formatearFechaParaInput("2000-05-15T00:00:00.000Z"); // "2000-05-15"
- * formatearFechaParaInput(new Date(2000, 4, 15)); // "2000-05-15"
- * formatearFechaParaInput(""); // ""
- * formatearFechaParaInput("fecha inválida"); // ""
+ * formatearFecha("2026-02-28T00:00:00Z"); // "2026-02-28"
  */
-export function formatearFechaParaInput(fecha) {
+export function formatearFecha(fecha) {
   if (!fecha) return "";
   
   const date = new Date(fecha);
