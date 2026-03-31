@@ -26,6 +26,8 @@ export function Dashboard() {
     }
   });
   
+  const [expedienteEnEdicion, setExpedienteEnEdicion] = useState(null);
+
   // const [selectedPaciente, setSelectedPaciente] = useState(() => {
   //   const saved = localStorage.getItem("sgec_selected_paciente");
   //   try { return saved ? JSON.parse(saved) : null; } catch { return null; }
@@ -39,7 +41,8 @@ export function Dashboard() {
     const protectedViews = [
       "consulta-medica",
       "ver-expediente",
-      "gestion-pacientes"
+      "gestion-pacientes",
+      "editar-expediente"
     ];
     
     if (protectedViews.includes(currentView) && !selectedPaciente) {
@@ -65,22 +68,37 @@ export function Dashboard() {
     setCurrentView("inicio");
   }, []);
 
+  const volverAlExpediente = useCallback(() => {
+    setCurrentView("gestion-pacientes");
+  }, []);
+
   const handleConsultaMedica = useCallback((p) => {
     setSelectedPaciente(p);
     setCurrentView("consulta-medica");
   }, []);
+
+  const handleEditarExpediente = useCallback((expedienteData) => {
+    setExpedienteEnEdicion(expedienteData);
+    setCurrentView("editar-expediente");
+  }, []);
+
   console.log("Estado actual del Dashboard:", { currentView, selectedPaciente });
   const viewConfig = getView(effectiveView);
   const Component = viewConfig.component;
   
   const commonProps = useMemo(() => ({
     onVolver: volverInicio,
-    onSuccess: volverInicio,
+    onSuccess: volverAlExpediente,
+    onCancel: currentView === "editar-expediente" ? volverAlExpediente : volverInicio,
     paciente: selectedPaciente,
     onVerExpediente: (p) => { setSelectedPaciente(p); setCurrentView("gestion-pacientes"); },
+    onEditarExpediente: handleEditarExpediente,
     onConsultaMedica: handleConsultaMedica,
-    onNavigate: setCurrentView
-  }), [selectedPaciente, volverInicio, handleConsultaMedica]);
+    onNavigate: setCurrentView,
+    // Props específicas para modo edición
+    modo: currentView === "editar-expediente" ? "editar" : "crear",
+    pacienteData: currentView === "editar-expediente" ? expedienteEnEdicion : null
+  }), [selectedPaciente, volverInicio, volverAlExpediente, handleConsultaMedica, handleEditarExpediente, currentView, expedienteEnEdicion]);
 
   console.log("PRUEBA");
 
