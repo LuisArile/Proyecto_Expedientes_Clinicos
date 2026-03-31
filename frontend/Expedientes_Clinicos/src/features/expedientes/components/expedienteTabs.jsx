@@ -54,7 +54,7 @@ export function ExpedienteTabs({ tabActiva, setTabActiva, data }) {
           <TabsContent value="datos"><DatosPaciente paciente={data.paciente} /></TabsContent>
         )}
 
-        {checkPermission("PRECLINICA") && (
+        {checkPermission("VER_PRECLINICAS") && (
           <TabsContent value="preclinica"><Preclinica data={data.registrosPreclinicos} /></TabsContent>
         )}
 
