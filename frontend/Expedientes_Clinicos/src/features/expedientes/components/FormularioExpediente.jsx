@@ -13,7 +13,7 @@ import { useExpedienteForm } from "../hooks/useExpedienteForm";
 import { FormField } from "@components/common/FormField";
 import { FormSection } from "@components/common/FormSection";
 import { StatusModal } from "@components/common/StatusModal";
-import { formatearFechaParaInput } from "@/utils/dateFormatter";
+import { formatearFecha} from "@/utils/dateFormatter";
 
 export function FormularioExpediente({ onSuccess, onCancel, onVolver, modo = "crear", pacienteData = null }) {
 
@@ -31,7 +31,7 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver, modo = "cr
       setValue("nombre", p.nombre || "");
       setValue("apellido", p.apellido || "");
       setValue("numeroIdentidad", p.dni || "");
-      setValue("fechaNacimiento", formatearFechaParaInput(p.fechaNacimiento) || "");
+      setValue("fechaNacimiento", formatearFecha(p.fechaNacimiento) || "");
       setValue("correo", p.correo || "");
       setValue("telefono", p.telefono || "");
       setValue("direccion", p.direccion || "");
