@@ -3,21 +3,9 @@ import { CardContent } from "@components/ui/card";
 import { Alert, AlertDescription } from "@components/ui/alert";
 import { Badge } from "@components/ui/badge";
 import { TabsContent } from "@components/ui/tabs";
+import { formatearFechaHora } from "@/utils/dateFormatter";
 
 export function Diagnosticos({ data = [] }) {
-
-  const formatFecha = (fechaRaw) => {
-    if (!fechaRaw) return "Fecha no disponible";
-    const fecha = new Date(fechaRaw);
-    return new Intl.DateTimeFormat("es-HN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    }).format(fecha).replace(",", "");
-  };
 
   return (
     <CardContent className="pt-6">
@@ -48,7 +36,7 @@ export function Diagnosticos({ data = [] }) {
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <p className="font-semibold text-gray-900">{diagInfo.descripcion}</p>
-                      <p className="text-sm text-gray-600 mt-1">{formatFecha(consulta.fechaConsulta)}</p>
+                      <p className="text-sm text-gray-600 mt-1">{formatearFechaHora(consulta.fechaConsulta)}</p>
                     </div>
                     <Badge variant="outline" 
                       className={

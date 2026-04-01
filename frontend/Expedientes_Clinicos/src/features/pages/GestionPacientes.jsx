@@ -9,7 +9,6 @@ import { ExpedienteTabs } from "@/features/expedientes/components/expedienteTabs
 export function VerExpediente({ paciente, onVolver, onEditarExpediente }) {
     const { checkPermission } = useAuth();
     
-    
     const idParaCarga = paciente?.expedientes?.idExpediente || paciente?.idExpediente
 
     const { data, loading } = useExpediente(idParaCarga);
@@ -32,9 +31,10 @@ export function VerExpediente({ paciente, onVolver, onEditarExpediente }) {
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
             <ExpedienteHeader
                 paciente={data.paciente}
+                expediente={data.expediente}
                 onVolver={onVolver}
                 onEditar={handleEditar}
-                puedeEditar={puedeEditar} // Opción para editar expediente
+                puedeEditar={puedeEditar}
             />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

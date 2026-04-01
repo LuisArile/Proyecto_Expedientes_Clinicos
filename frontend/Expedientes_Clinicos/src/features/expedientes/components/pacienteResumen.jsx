@@ -1,5 +1,6 @@
 import { Card, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
-import { User, IdCard, Calendar } from "lucide-react";
+import { User, IdCard, Calendar, Mars, Venus } from "lucide-react";
+import { formatearFecha } from "@/utils/dateFormatter";
 
 export function PacienteResumen({ paciente }) {
     return (
@@ -15,14 +16,19 @@ export function PacienteResumen({ paciente }) {
                             <CardDescription className="mt-1 flex items-center gap-4 text-base">
                                 <span className="flex items-center gap-1">
                                     <IdCard className="h-4 w-4" />
-                                    {paciente.identidad}
+                                    {paciente.dni}
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <Calendar className="h-4 w-4" />
-                                    {paciente.fechaNacimiento}
+                                    {formatearFecha(paciente.fechaNacimiento)}
                                 </span>
-                                <span className="capitalize">
-                                    {paciente.genero}
+                                <span className="flex items-center gap-1">
+                                    {paciente.sexo === 'masculino' ? (
+                                        <Mars className="h-4 w-4" />
+                                    ) : paciente.sexo === 'femenino' ? (
+                                        <Venus className="h-4 w-4" />
+                                    ): null }
+                                    {paciente.sexo}
                                 </span>
                             </CardDescription>
                         </div>

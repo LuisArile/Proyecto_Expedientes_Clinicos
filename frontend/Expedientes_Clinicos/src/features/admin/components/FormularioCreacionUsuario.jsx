@@ -42,8 +42,8 @@ export function FormularioCreacionUsuario({ onVolver, onSuccess }) {
       <PageHeader title={isEdit ? "Editar Personal" : "Registro de Personal"} subtitle="Gestión de credenciales y roles de acceso" Icon={UserCog} onVolver={onVolver}/>
 
       <main className="max-w-3xl mx-auto p-4 sm:p-6">
-        <Card className="shadow-xl border-none overflow-hidden bg-white/80 backdrop-blur-md">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-700 p-0 border-b border-blue-100">
+        <Card className="w-full max-w-3xl mx-auto shadow-lg border-blue-100 mt-4 overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-b border-blue-100 p-0">
             <FormHeader 
               title={isEdit ? "Modificar Usuario" : "Nuevo Integrante"}
               subtitle="La contraseña temporal se enviará automáticamente por correo"
@@ -52,7 +52,7 @@ export function FormularioCreacionUsuario({ onVolver, onSuccess }) {
             />
           </CardHeader>
 
-          <CardContent className="p-8">
+          <CardContent className="pt-6">
             <form onSubmit={handleSubmit(enviarFormulario)} className="space-y-8">
 
               <FormSection title="Datos Personales">

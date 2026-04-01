@@ -1,25 +1,13 @@
 import { Activity, Stethoscope, User } from "lucide-react";
 import { CardContent } from "@components/ui/card";
 import { TabsContent } from "@components/ui/tabs";
+import { formatearFechaHora } from "@/utils/dateFormatter";
 
 export function Historial({ data }) {
   const eventos = [
     ...(data?.consultasMedicas || []), 
     ...(data?.registrosPreclinicos || [])
   ];
-
-  const formatFecha = (fechaStr) => {
-    if (!fechaStr) return "N/A";
-    const date = new Date(fechaStr);
-    return new Intl.DateTimeFormat('es-HN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    }).format(date).replace(',', '');
-  };
 
   return (
     <CardContent className="pt-6">
@@ -47,7 +35,7 @@ export function Historial({ data }) {
                 ? `${evento.medico?.nombre} ${evento.medico?.apellido}`
                 : `${evento.enfermero?.nombre} ${evento.enfermero?.apellido}`;
               
-              const fechaFormateada = formatFecha(evento.fechaConsulta || evento.fechaRegistro);
+              const fechaFormateada = formatearFechaHora(evento.fechaConsulta || evento.fechaRegistro);
 
               let diagnosticoTexto = "";
               if (esConsulta && evento.diagnostico) {

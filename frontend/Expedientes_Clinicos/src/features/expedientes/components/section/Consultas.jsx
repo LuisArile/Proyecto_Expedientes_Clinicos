@@ -3,21 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@comp
 import { Alert, AlertDescription } from "@components/ui/alert";
 import { TabsContent } from "@components/ui/tabs";
 import { Badge } from "@components/ui/badge";
+import { formatearFechaHora } from "@/utils/dateFormatter";
 
 export function Consultas({ data = [] }) {
-  
-  const formatearFecha = (fechaRaw) => {
-    if (!fechaRaw) return "Fecha no disponible";
-    const fecha = new Date(fechaRaw);
-    return new Intl.DateTimeFormat('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    }).format(fecha).replace(',', '');
-  };
 
   return (
     <CardContent className="pt-6">
@@ -50,7 +38,7 @@ export function Consultas({ data = [] }) {
                       <div>
                         <CardTitle className="text-purple-900 text-base">CONS-{consulta.id}</CardTitle>
                         <CardDescription className="mt-1">
-                          {formatearFecha(consulta.fechaConsulta)} 
+                          {formatearFechaHora(consulta.fechaConsulta)} 
                           <span className="block text-xs text-gray-500">
                             Dr: {consulta.medico?.nombre} {consulta.medico?.apellido}
                           </span>

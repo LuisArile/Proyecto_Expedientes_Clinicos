@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { User, Activity, Stethoscope, Pill, TestTube, Paperclip, FileText, History } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@components/ui/tabs";
 import { Card, CardHeader } from "@components/ui/card";
@@ -30,6 +32,12 @@ export function ExpedienteTabs({ tabActiva, setTabActiva, data }) {
 
   const tabsVisibles = tabsConfig.filter(tab => checkPermission(tab.permission));
 
+  useEffect(() => {
+    if (tabsVisibles.length > 0 && !tabsVisibles.find(t => t.id === tabActiva)) {
+      setTabActiva(tabsVisibles[0].id);
+    }
+  }, [tabsVisibles, tabActiva, setTabActiva]);
+
   return (
     <Card className="bg-white shadow-sm border-slate-200">
       <Tabs value={tabActiva} onValueChange={setTabActiva}>
@@ -50,37 +58,18 @@ export function ExpedienteTabs({ tabActiva, setTabActiva, data }) {
           </TabsList>
         </CardHeader>
 
-        {checkPermission("VER_DATOS_BASICOS") && (
-          <TabsContent value="datos"><DatosPaciente paciente={data.paciente} /></TabsContent>
-        )}
-
-        {checkPermission("VER_PRECLINICAS") && (
-          <TabsContent value="preclinica"><Preclinica data={data.registrosPreclinicos} /></TabsContent>
-        )}
-
-        {checkPermission("VER_CONSULTAS") && (
-          <TabsContent value="consultas"><Consultas data={data.consultasMedicas} /></TabsContent>
-        )}
-
-        {checkPermission("VER_RECETAS") && (
-          <TabsContent value="recetas"><Recetas data={data.consultasMedicas} /></TabsContent>
-        )}
-
-        {checkPermission("VER_EXAMENES") && (
-          <TabsContent value="examenes"><Examenes data={data.consultasMedicas} /></TabsContent>        
-        )}
-
-        {checkPermission("VER_DOCUMENTOS") && (
-          <TabsContent value="documentos"><Documentos data={data.documentos} /></TabsContent>
-        )}
-
-        {checkPermission("VER_DIAGNOSTICOS") && (
-          <TabsContent value="diagnosticos"><Diagnosticos data={data.consultasMedicas} /></TabsContent>
-        )}
-
-        {checkPermission("VER_HISTORIAL_CLINICO") && (
-          <TabsContent value="historial"><Historial data={data} /></TabsContent>
-        )}
+        {tabsVisibles.map(tab => (
+          <TabsContent key={tab.id} value={tab.id}>
+            {tab.id === "datos" && <DatosPaciente paciente={data.paciente} />}
+            {tab.id === "preclinica" && <Preclinica data={data.registrosPreclinicos} />}
+            {tab.id === "consultas" && <Consultas data={data.consultasMedicas} />}
+            {tab.id === "recetas" && <Recetas data={data.consultasMedicas} />}
+            {tab.id === "examenes" && <Examenes data={data.consultasMedicas} />}
+            {tab.id === "documentos" && <Documentos data={data.documentos} />}
+            {tab.id === "diagnosticos" && <Diagnosticos data={data.consultasMedicas} />}
+            {tab.id === "historial" && <Historial data={data} />}
+          </TabsContent>
+        ))}
       </Tabs>
     </Card>
   );

@@ -3,9 +3,9 @@ import { Button } from "@components/ui/button";
 import { FileText, Edit } from "lucide-react";
 import { PageHeader } from "@components/layout/PageHeader";
 
-export function ExpedienteHeader({ paciente, onVolver, onEditar, puedeEditar }) {
-  const estaActivo = paciente.estado === true;
-  const codigoExpediente = paciente.expedientes?.idExpediente || [];
+export function ExpedienteHeader({ expediente, onVolver, onEditar, puedeEditar }) {
+  const estaActivo = Boolean(expediente?.estado);
+  const codigoExpediente = expediente?.numeroExpediente || "";
 
   return (
     <PageHeader

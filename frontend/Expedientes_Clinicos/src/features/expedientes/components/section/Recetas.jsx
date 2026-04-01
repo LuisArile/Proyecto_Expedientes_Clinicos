@@ -2,6 +2,7 @@ import { AlertCircle, Pill,} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
 import { Alert, AlertDescription } from "@components/ui/alert";
 import { TabsContent } from "@components/ui/tabs";
+import { formatearFechaHora } from "@/utils/dateFormatter";
 
 export function Recetas({ data = [] }) {
   const listaConsultas = Array.isArray(data) ? data : [];
@@ -32,7 +33,7 @@ export function Recetas({ data = [] }) {
                         Consulta #{consulta.id}
                       </CardTitle>
                       <CardDescription className="mt-1">
-                        {new Date(consulta.fechaConsulta).toLocaleDateString()} - 
+                        {formatearFechaHora(consulta.fechaConsulta)} - 
                         Prescrita por: {consulta.medico?.nombre} {consulta.medico?.apellido}
                       </CardDescription>
                     </div>

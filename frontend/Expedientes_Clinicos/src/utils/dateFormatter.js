@@ -35,3 +35,26 @@ export function formatearFecha(fecha) {
   // Retornar en formato YYYY-MM-DD (requerido por input type="date")
   return date.toISOString().split('T')[0];
 }
+
+/**
+ * Formatea fecha con hora en español (es-HN)
+ * @param {string|Date} fechaRaw
+ * @returns {string}
+ * @example
+ * formatearFechaHora("2026-02-28T14:30:00Z")
+ * // "28/02/2026 2:30 p. m."
+ */
+export function formatearFechaHora(fechaRaw) {
+  const fecha = fechaRaw ? new Date(fechaRaw) : null;
+
+  if (!fecha || isNaN(fecha)) return "Fecha no disponible";
+
+  return new Intl.DateTimeFormat("es-HN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }).format(fecha).replace(",", "");
+}

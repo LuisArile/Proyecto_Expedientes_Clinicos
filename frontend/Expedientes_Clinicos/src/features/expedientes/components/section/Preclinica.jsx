@@ -2,20 +2,9 @@ import { Activity, Heart, Thermometer, AlertCircle, Scale, Ruler, } from "lucide
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
 import { Alert, AlertDescription } from "@components/ui/alert";
 import { TabsContent } from "@components/ui/tabs";
+import { formatearFechaHora } from "@/utils/dateFormatter";
 
 export function Preclinica({ data }) {
-  const formatearFecha = (fechaRaw) => {
-    if (!fechaRaw) return "Fecha no disponible";
-    const fecha = new Date(fechaRaw);
-    return new Intl.DateTimeFormat('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    }).format(fecha).replace(',', '');
-  };
 
   return (
     <CardContent className="pt-6">
@@ -36,7 +25,7 @@ export function Preclinica({ data }) {
                       <div>
                         <CardTitle className="text-green-900 text-base">PRECL-{registro.id}</CardTitle>
                         <CardDescription className="mt-1">
-                          {formatearFecha(registro.fechaRegistro)} - Por: {registro.enfermero?.nombre} {registro.enfermero?.apellido}
+                          {formatearFechaHora(registro.fechaRegistro)} - Por: {registro.enfermero?.nombre} {registro.enfermero?.apellido}
                         </CardDescription>
                       </div>
                     </div>

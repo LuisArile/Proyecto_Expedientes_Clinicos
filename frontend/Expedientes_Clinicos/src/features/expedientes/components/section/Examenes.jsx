@@ -2,6 +2,7 @@ import { TestTube} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
 import { Alert, AlertDescription } from "@components/ui/alert";
 import { TabsContent } from "@components/ui/tabs";
+import { formatearFechaHora } from "@/utils/dateFormatter";
 
 export function Examenes({ data = [] }) {
     const consultasConExamenes = data.filter(c => {
@@ -32,7 +33,7 @@ export function Examenes({ data = [] }) {
                                             Exámenes - {consulta.id}
                                         </CardTitle>
                                         <CardDescription>
-                                            {new Date(consulta.fechaConsulta).toLocaleDateString()} - Dr. {consulta.medico?.nombre}
+                                            {formatearFechaHora(consulta.fechaConsulta)} - Dr. {consulta.medico?.nombre}
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="pt-4 space-y-3">

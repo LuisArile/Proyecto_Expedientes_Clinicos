@@ -1,18 +1,9 @@
 import { User, IdCard, Calendar, Shield, Phone, Mail, MapPin } from "lucide-react";
 import { CardContent } from "@components/ui/card";
 import { TabsContent } from "@components/ui/tabs";
+import { formatearFecha } from "@/utils/dateFormatter";
 
 export function DatosPaciente({ paciente }) {
-
-  const formatearFecha = (fechaRaw) => {
-    if (!fechaRaw) return "Fecha no disponible";
-    const fecha = new Date(fechaRaw);
-    return new Intl.DateTimeFormat('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    }).format(fecha).replace(',', '');
-  };
 
   return (
     <CardContent className="pt-6">

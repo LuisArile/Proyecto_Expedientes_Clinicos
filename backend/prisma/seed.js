@@ -63,11 +63,27 @@ async function main() {
     },
     { 
       rol: 'RECEPCIONISTA', 
-      permisos: ['CREAR_EXPEDIENTE', 'VER_EXPEDIENTE', 'EDITAR_EXPEDIENTE', 'BUSCAR_PACIENTE', 'GESTION_PACIENTES', 'VER_DATOS_BASICOS', 'VER_HISTORIAL_CLINICO',] 
+      permisos: [
+        'CREAR_EXPEDIENTE',
+        'VER_EXPEDIENTE',
+        'EDITAR_EXPEDIENTE',
+        'BUSCAR_PACIENTE',
+        'GESTION_PACIENTES',
+        'VER_DATOS_BASICOS',
+        'VER_HISTORIAL_CLINICO',
+        'VER_CONSULTAS',
+        'VER_PRECLINICAS',
+      ] 
     },
     { 
       rol: 'ENFERMERO', 
-      permisos: ['BUSCAR_PACIENTE', 'VER_EXPEDIENTE', 'PRECLINICA', 'VER_PRECLINICAS', 'VER_DATOS_BASICOS'] 
+      permisos: [
+        'BUSCAR_PACIENTE',
+        'VER_EXPEDIENTE',
+        'PRECLINICA',
+        'VER_PRECLINICAS',
+        'VER_DATOS_BASICOS'
+      ] 
     },
     { 
       rol: 'MEDICO', 

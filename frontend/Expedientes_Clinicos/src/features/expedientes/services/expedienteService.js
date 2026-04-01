@@ -82,25 +82,22 @@ export async function eliminarExpediente(idExpediente) {
   }
 }
 
-export async function obtenerExpedienteCompleto(idExpediente) {
+export async function obtenerExpedienteCompleto(idExpediente, permisos = {}) {
   try {
-    const [
-      expedienteRes,
-      preclinicosRes,
-      consultasRes
-    ] = await Promise.all([
+    const [ expedienteRes, preclinicosRes, consultasRes ] = await Promise.all([
+      
       expedienteAPI.obtenerPorId(idExpediente).catch(err => {
         console.error("Error crítico: No se pudo obtener el expediente", err);
         return { error: true, data: null };
       }),
-      registroPreclinicoAPI.obtenerPorExpediente(idExpediente).catch(err => {
-        console.warn("No se pudo obtener preclínica (posible falta de permisos)", err);
-        return { success: false, data: [] };
-      }),
-      consultaMedicaAPI.obtenerPorExpediente(idExpediente).catch(err => {
-        console.warn("Consultas bloqueadas o no encontradas", err);
-        return { success: false, data: [] };
-      }),
+
+      permisos.verPreclinica 
+        ? registroPreclinicoAPI.obtenerPorExpediente(idExpediente).catch(() => ({ data: [] }))
+        : Promise.resolve({ data: [] }),
+      
+      permisos.verConsultas 
+        ? consultaMedicaAPI.obtenerPorExpediente(idExpediente).catch(() => ({ data: [] }))
+        : Promise.resolve({ data: [] }),
     ]);
 
     if (expedienteRes.error || !expedienteRes.data) {
@@ -109,8 +106,9 @@ export async function obtenerExpedienteCompleto(idExpediente) {
 
     return {
       paciente: expedienteRes.data?.paciente || {},
+      expediente: expedienteRes.data || {},
       registrosPreclinicos: preclinicosRes.data || [],
-      consultasMedicas: (consultasRes.data || []).map(c => ({ ...c })),
+      consultasMedicas: consultasRes.data || [],
       documentos: expedienteRes.data?.documentos || []
     };
   } catch (error) {

@@ -3,6 +3,7 @@ import { Card, CardContent } from "@components/ui/card";
 import { Alert, AlertDescription } from "@components/ui/alert";
 import { Button } from "@components/ui/button"
 import { TabsContent } from "@components/ui/tabs";
+import { formatearFecha } from "@/utils/dateFormatter";
 
 export function Documentos({ data }) {
     return (
@@ -29,7 +30,7 @@ export function Documentos({ data }) {
                           <div className="flex-item">
                             <p className="font-semibold text-gray-900 mb-1">{doc.nombre}</p>
                             <p className="text-sm text-gray-600 mb-2">{doc.tipo} - {doc.tamaño}</p>
-                            <p className="text-xs text-gray-500"> Subido: {doc.fecha} - Por: {doc.subidoPor} </p>
+                            <p className="text-xs text-gray-500"> Subido: {formatearFecha(doc.fecha)} - Por: {doc.subidoPor} </p>
                           </div>
                           <div className="flex gap-2 mt-3">
                             <Button size="sm" variant="outline" className="text-blue-600">Ver</Button>
