@@ -8,7 +8,8 @@ const AuditoriaService = require("../services/auditoriaService");
 const ExpedienteService = require("../services/expedienteService");
 const ExpedienteController = require("../controllers/expedienteController");
 const validarToken = require("../middlewares/inicioSesionMiddleware");
-const autorizarRol=require("../middlewares/autorizarRol");
+const autorizarRol = require("../middlewares/autorizarRol");
+const autorizarPermiso = require("../middlewares/autorizarPermiso");
 
 
 const router = express.Router();
@@ -21,7 +22,7 @@ const expedienteService = new ExpedienteService(expedienteRepository, pacienteRe
 const expedienteController = new ExpedienteController(expedienteService);
 
 // Crear expediente junto con datos del paciente (único endpoint de creación)
-router.post("/", validarToken,autorizarRol(['ENFERMERO','RECEPCIONISTA'])  , (req, res,next) => expedienteController.crearConPaciente(req, res, next));
+router.post("/", validarToken, autorizarRol(['ADMINISTRADOR', 'RECEPCIONISTA']), autorizarPermiso('CREAR_EXPEDIENTE'), (req, res, next) => expedienteController.crearConPaciente(req, res, next));
 
 // Obtener todos los expedientes
 router.get("/", validarToken, (req, res,next) => expedienteController.obtenerTodos(req, res,next));

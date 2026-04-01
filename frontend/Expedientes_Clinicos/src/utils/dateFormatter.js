@@ -16,3 +16,22 @@ export function obtenerFechaActual() {
   
   return `${diaSemana}, ${dia} de ${mes} ${anio}`;
 }
+
+/**
+ * Convierte una fecha a formato YYYY-MM-DD para input type="date"
+ * @param {string|Date} fecha - Fecha en cualquier formato válido de JavaScript
+ * @returns {string} Fecha formateada como YYYY-MM-DD o string vacío si es inválida
+ * @example
+ * formatearFecha("2026-02-28T00:00:00Z"); // "2026-02-28"
+ */
+export function formatearFecha(fecha) {
+  if (!fecha) return "";
+  
+  const date = new Date(fecha);
+  
+  // Validar que sea una fecha válida
+  if (isNaN(date.getTime())) return "";
+  
+  // Retornar en formato YYYY-MM-DD (requerido por input type="date")
+  return date.toISOString().split('T')[0];
+}

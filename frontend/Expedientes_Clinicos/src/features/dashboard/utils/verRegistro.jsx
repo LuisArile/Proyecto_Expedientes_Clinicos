@@ -16,6 +16,7 @@ const ListaRegistrosPreclinicos = lazy(() => import("@/features/preclinica/compo
 export const VIEW_COMPONENTS = {
     "inicio": { component: DashboardFeature },
     "crear-expediente": { component: FormularioExpediente },
+    "editar-expediente": { component: FormularioExpediente },
     "buscar-paciente": { component: BuscarPaciente },
     "gestion-roles": { component: GestionRoles },
     "changepassword": { component: Changepassword },

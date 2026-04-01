@@ -2,9 +2,6 @@ BEGIN TRY
 
 BEGIN TRAN;
 
--- AlterTable
-ALTER TABLE [dbo].[Usuario] ADD [debeCambiarPassword] BIT NOT NULL CONSTRAINT [Usuario_debeCambiarPassword_df] DEFAULT 0;
-
 -- CreateTable
 CREATE TABLE [dbo].[ConsultaMedica] (
     [id] INT NOT NULL IDENTITY(1,1),
@@ -31,6 +28,12 @@ CREATE TABLE [dbo].[RecetaMedica] (
     [createdAt] DATETIME2 NOT NULL CONSTRAINT [RecetaMedica_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT [RecetaMedica_pkey] PRIMARY KEY CLUSTERED ([id])
 );
+
+-- AddForeignKey
+ALTER TABLE [dbo].[registroPreclinico] ADD CONSTRAINT [registroPreclinico_expedienteId_fkey] FOREIGN KEY ([expedienteId]) REFERENCES [dbo].[Expediente]([idExpediente]) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[registroPreclinico] ADD CONSTRAINT [registroPreclinico_enfermeroId_fkey] FOREIGN KEY ([enfermeroId]) REFERENCES [dbo].[Usuario]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE [dbo].[ConsultaMedica] ADD CONSTRAINT [ConsultaMedica_expedienteId_fkey] FOREIGN KEY ([expedienteId]) REFERENCES [dbo].[Expediente]([idExpediente]) ON DELETE NO ACTION ON UPDATE CASCADE;

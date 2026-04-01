@@ -86,11 +86,13 @@ class pacienteRepository {
      * Actualiza los datos de un paciente existente.
      * @param {number} idPaciente - ID único del paciente.
      * @param {Partial<PacienteData>} data - Objeto con los campos parciales a actualizar.
+     * @param {Object} [tx] - Cliente de transacción (opcional).
      * @returns {Promise<Object>} El registro del paciente actualizado.
      */
-    async actualizar(idPaciente, data) {
+    async actualizar(idPaciente, data, tx = null) {
+        const client = tx || prisma;
         try {
-            return await prisma.paciente.update({
+            return await client.paciente.update({
                 where: { idPaciente: Number(idPaciente) },
                 data: {
                     dni: data.dni || undefined,

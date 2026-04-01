@@ -6,7 +6,7 @@ import { useExpediente } from "@/features/expedientes/hooks/useExpediente";
 import { ExpedienteHeader } from "@/features/expedientes/components/expedienteHeader";
 import { PacienteResumen } from "@/features/expedientes/components/pacienteResumen";
 import { ExpedienteTabs } from "@/features/expedientes/components/expedienteTabs";
-export function VerExpediente({ paciente, onVolver, onEditar }) {
+export function VerExpediente({ paciente, onVolver, onEditarExpediente }) {
     const { checkPermission } = useAuth();
     
     
@@ -22,12 +22,18 @@ export function VerExpediente({ paciente, onVolver, onEditar }) {
 
     if (!data) return <div>Error cargando expediente</div>;
 
+    const handleEditar = () => {
+      if (onEditarExpediente) {
+        onEditarExpediente({ ...data, idExpediente: idParaCarga });
+      }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
             <ExpedienteHeader
                 paciente={data.paciente}
                 onVolver={onVolver}
-                onEditar={onEditar}
+                onEditar={handleEditar}
                 puedeEditar={puedeEditar} // Opción para editar expediente
             />
 
