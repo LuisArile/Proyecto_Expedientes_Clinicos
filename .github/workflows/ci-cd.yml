@@ -88,6 +88,8 @@ jobs:
       - name: Build frontend image
         run: |
           docker build \
+            --target prod \
+            --build-arg VITE_API_URL=http://backend:3000 \
             -t clinicacontainerregistry.azurecr.io/frontend-clinica:${{ env.TAG }} \
             ./frontend
 
