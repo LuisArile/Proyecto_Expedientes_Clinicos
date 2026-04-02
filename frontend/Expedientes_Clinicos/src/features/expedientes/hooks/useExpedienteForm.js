@@ -32,7 +32,7 @@ export function useExpedienteForm(modo = "crear", datosIniciales = null) {
     }
   };
 
-  const enviarFormulario = async (data, generoSeleccionado) => {
+  const enviarFormulario = async (data) => {
     const idActual = esEdicion ? datosIniciales?.paciente?.dni : null;
     const existe = await validarId(data.numeroIdentidad, idActual);
     
@@ -49,7 +49,7 @@ export function useExpedienteForm(modo = "crear", datosIniciales = null) {
         dni: data.numeroIdentidad,
         correo: data.correo || null,
         fechaNacimiento: data.fechaNacimiento,
-        sexo: generoSeleccionado,
+        sexo: data.sexo,
         direccion: data.direccion,
         telefono: data.telefono,
       };
