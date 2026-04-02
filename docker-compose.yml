@@ -38,7 +38,7 @@ services:
     build:
       context: ./frontend
       args:
-        - VITE_API_URL=http://localhost:3000
+        VITE_API_URL: http://backend:3000
     container_name: frontend-clinica
     ports:
       - "80:80"
