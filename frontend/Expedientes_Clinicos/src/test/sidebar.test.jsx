@@ -31,7 +31,7 @@ vi.mock("@/constants/allMenuItems", () => ({
   ],
 }));
 
-import { Sidebar } from "@/components/layout/sidebar";
+import { Sidebar } from "@components/layout/sidebar";
 
 describe("Sidebar", () => {
   const mockNavigate = vi.fn();

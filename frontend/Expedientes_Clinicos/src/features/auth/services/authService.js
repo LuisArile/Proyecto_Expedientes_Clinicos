@@ -1,4 +1,4 @@
-import { authAPI } from "@/api";
+import { authAPI } from "@/shared/services/api";
 
 export const authService = {
     async login(nombreUsuario, clave) {
