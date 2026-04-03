@@ -1,25 +1,26 @@
-import { Clock, UserCheck, PillBottle, Activity, Users, BarChart3, Pill, TestTube, FileText, Stethoscope, Calendar, NotebookText } from "lucide-react";
+import { Clock, UserCheck, PillBottle, Activity, Users, BarChart3, Pill, TestTube, FileText, Stethoscope, Calendar, NotebookText, Component } from "lucide-react";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useDashboardData } from "../hooks/useDashboardData";
 import { DASHBOARD_CONFIG } from "@/constants/dashboardStrategies";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
 import { Badge } from "@components/ui/badge";
+import { Button } from "@components/ui/Button";
 import { obtenerFechaActual } from "@/utils/dateFormatter";
+import { StatCard } from "@components/common/StatCard"
 
 const ICON_MAP = {
-  Users: Users,
-  BarChart3: BarChart3,
-  Pill: Pill,
-  TestTube: TestTube,
-  UserCheck: UserCheck,
-  Activity: Activity,
-  Calendar: Calendar,
-  PillBottle: PillBottle,
-  NotebookText: NotebookText,
-  Stethoscope: Stethoscope,
-  FileText: FileText,
-
+    Users: Users,
+    BarChart3: BarChart3,
+    Pill: Pill,
+    TestTube: TestTube,
+    UserCheck: UserCheck,
+    Activity: Activity,
+    Calendar: Calendar,
+    PillBottle: PillBottle,
+    NotebookText: NotebookText,
+    Stethoscope: Stethoscope,
+    FileText: FileText,
 };
 
 export function DashboardFeature({ onNavigate }) {
@@ -62,15 +63,16 @@ export function DashboardFeature({ onNavigate }) {
                     const navigateTo = configVisual?.navigateTo;
 
                 return (
-                    <StatsCard 
+                    <StatCard 
                         key={stat.id}
-                        titulo={configVisual?.titulo || stat.titulo}
-                        valor={stat.valor}
+                        title={configVisual?.titulo || stat.titulo}
+                        value={stat.valor}
                         icon={configVisual?.icon || "Activity"}
+                        iconColor={configVisual?.textColor || "text-gray-600"}
                         border={configVisual?.border || "border-gray-100"}
-                        textColor={configVisual?.textColor || "text-gray-600"}
-                        pie={stat.pie}
+                        footer={stat.pie}
                         onClick={navigateTo && onNavigate ? () => onNavigate(navigateTo) : undefined}
+                        variant="large"
                     />
                 );
                 })}
@@ -109,6 +111,49 @@ export function DashboardFeature({ onNavigate }) {
                 </CardContent>
             </Card>
 
+            {/* Módulos de Trazabilidad */}
+            {config.trazabilidad && (
+                <Card className="border-none shadow-sm bg-gray-50/50">
+                    <CardHeader>
+                        <CardTitle className="text-xl font-bold text-gray-800">{config.trazabilidad.title}</CardTitle>
+                        <CardDescription>{config.trazabilidad.subtitle}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {config.trazabilidad.items?.map((item) => (
+                                <Card 
+                                    key={item.id}
+                                    onClick={() => onNavigate(item.navigateTo)}
+                                    className={`hover:shadow-lg transition-all cursor-pointer border-2 ${item.border} ${item.hoverBorder} bg-gradient-to-br ${item.bg}`}
+                                >
+                                    <CardHeader>
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-3 ${item.color} rounded-lg`}>
+                                                <item.icon className={`h-6 w-6 ${item.color} text-white`} />
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-blue-900 text-sm">{item.title}</CardTitle>
+                                                <CardDescription className="text-xs">{item.sub}</CardDescription>
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Button
+                                            onClick={() => onNavigate(item.action)}
+                                            className={`w-full ${item.color} hover:opacity-90 text-white`}
+                                            size="sm"
+                                        >
+                                            <item.icon className="mr-2 h-4 w-4" />
+                                            Ver {item.title}
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
             {/* Sección de Actividad Reciente */}
             <Card className="shadow-md border-none overflow-hidden">
                 <CardHeader>
@@ -145,27 +190,6 @@ export function DashboardFeature({ onNavigate }) {
                 </CardContent>
             </Card>
         </div>
-    );
-    }
-
-    function StatsCard({ titulo, valor, icon, border, textColor, pie, onClick }) {
-        const IconComponent = ICON_MAP[icon] || Activity;
-        return (
-        <Card 
-            className={`hover:shadow-md transition-shadow border-l-4 ${border} ${onClick ? 'cursor-pointer' : ''}`}
-            onClick={onClick}
-        >
-            <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-xs font-bold uppercase text-gray-500 tracking-wider">
-                    {titulo}
-                </CardTitle>
-                <IconComponent className={`h-5 w-5 ${textColor}`} />
-            </CardHeader>
-            <CardContent>
-                <div className={`text-3xl font-bold ${textColor}`}>{valor}</div>
-                <p className="text-xs text-gray-500 mt-1 font-medium">{pie}</p>
-            </CardContent>
-        </Card>
     );
     }
 

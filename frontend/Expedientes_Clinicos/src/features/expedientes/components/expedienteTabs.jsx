@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { User, Activity, Stethoscope, Pill, TestTube, Paperclip, FileText, History } from "lucide-react";
+import { User, Route, Activity, Stethoscope, Pill, TestTube, Paperclip, FileText, History } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@components/ui/tabs";
 import { Card, CardHeader } from "@components/ui/card";
 
@@ -12,7 +12,7 @@ import { Documentos } from "@/features/expedientes/components/section/Documentos
 import { Diagnosticos } from "@/features/expedientes/components/section/Diagnosticos";
 import { Historial } from "@/features/expedientes/components/section/Historial";
 import { Examenes } from "@/features/expedientes/components/section/Examenes";
-
+import { TimelineAtencion } from "@/features/expedientes/components/section/TimelineAtención";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function ExpedienteTabs({ tabActiva, setTabActiva, data }) {
@@ -21,6 +21,7 @@ export function ExpedienteTabs({ tabActiva, setTabActiva, data }) {
 
   const tabsConfig = [
     { id: "datos", label: "Datos", icon: User, permission: "VER_DATOS_BASICOS" },
+    { id: "trazabilidad", label: "Trazabilidad", icon: Route, permission: "VER_HISTORIAL_CLINICO" },
     { id: "preclinica", label: "Preclínica", icon: Activity, permission: "VER_PRECLINICAS" },
     { id: "consultas", label: "Consultas", icon: Stethoscope, permission: "VER_CONSULTAS" },
     { id: "recetas", label: "Recetas", icon: Pill, permission: "VER_RECETAS" },
@@ -42,7 +43,7 @@ export function ExpedienteTabs({ tabActiva, setTabActiva, data }) {
     <Card className="bg-white shadow-sm border-slate-200">
       <Tabs value={tabActiva} onValueChange={setTabActiva}>
         <CardHeader className="border-b border-gray-200 pb-0">
-          <TabsList className={`grid w-full gap-1 bg-gray-100 rounded-full grid-cols-8 lg:grid-cols-${tabsVisibles.length}`}>
+          <TabsList className={`grid w-full gap-1 bg-gray-100 rounded-full grid-cols-9 lg:grid-cols-${tabsVisibles.length}`}>
             {tabsVisibles.map((tab) => (
               <TabsTrigger 
                 key={tab.id} 
@@ -61,6 +62,7 @@ export function ExpedienteTabs({ tabActiva, setTabActiva, data }) {
         {tabsVisibles.map(tab => (
           <TabsContent key={tab.id} value={tab.id}>
             {tab.id === "datos" && <DatosPaciente paciente={data.paciente} />}
+            {tab.id === "trazabilidad" && <TimelineAtencion></TimelineAtencion>}
             {tab.id === "preclinica" && <Preclinica data={data.registrosPreclinicos} />}
             {tab.id === "consultas" && <Consultas data={data.consultasMedicas} />}
             {tab.id === "recetas" && <Recetas data={data.consultasMedicas} />}

@@ -1,15 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { useUsuarios } from '@/features/admin/hooks/useUsuarios';
-import { Card, CardContent, CardHeader } from "@components/ui/card";
+import { Card, CardTitle, CardDescription, CardContent, CardHeader } from "@components/ui/card";
 import { Button } from "@components/ui/button";
-import { Input } from "@components/ui/input";
 import { Badge } from "@components/ui/badge";
-import { Users, UserPlus, Loader2, CheckCircle2, Power, Mail, Edit } from "lucide-react";
+import { Users, UserPlus, Loader2, CheckCircle2, Power, Mail, Edit, Search } from "lucide-react";
 import { DialogoEnvioCredenciales } from '@/features/admin/components/DialogoEnvioCredenciales';
 
 import { DataTable } from "@components/common/DataTable";
 import { PageHeader } from "@components/layout/PageHeader";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { StatCard } from "@components/common/StatCard"
+import { FilterInput } from "@components/common/FilterSearch"
 
 export function GestionUsuarios({ onNavigate, onVolver }) {
     const { user: currentUser } = useAuth();
@@ -126,20 +127,18 @@ export function GestionUsuarios({ onNavigate, onVolver }) {
             <main className="min-h-screen bg-slate-50/50 p-6 space-y-6">
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <StatCard title="Otros Usuarios" value={usuariosExcluyendoActual.length} icon={<Users className="text-blue-600" />} />
-                    <StatCard title="Activos" value={usuariosExcluyendoActual.filter(u => u.activo).length} icon={<CheckCircle2 className="text-green-600" />} color="text-green-600" />
-                    <StatCard title="Inactivos" value={usuariosExcluyendoActual.filter(u => !u.activo).length} icon={<Power className="text-red-600" />} color="text-red-600" />
+                    <StatCard title="Otros Usuarios" value={usuariosExcluyendoActual.length} icon={Users} iconColor="text-blue-600"/>
+                    <StatCard title="Activos" value={usuariosExcluyendoActual.filter(u => u.activo).length} icon={CheckCircle2} iconColor="text-green-600" />
+                    <StatCard title="Inactivos" value={usuariosExcluyendoActual.filter(u => !u.activo).length} icon={Power} iconColor="text-red-600" />
                 </div>
 
                 <Card className="bg-white shadow-sm border-slate-200">
                     <CardHeader className="pb-2">
-                        <div className="flex justify-between items-center">
-                            <Input
-                                placeholder="Buscar por nombre, usuario o correo..."
-                                value={busqueda}
-                                onChange={(e) => setBusqueda(e.target.value)}
-                                className="pl-10"
-                            />
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle>Listado de Usuarios</CardTitle>
+                                <CardDescription>Gestione los usuarios del sistema</CardDescription>
+                            </div>
                             <Button 
                                 onClick={() => {
                                     sessionStorage.removeItem("edit_user_id");
@@ -152,6 +151,12 @@ export function GestionUsuarios({ onNavigate, onVolver }) {
                         </div>
                     </CardHeader>
                     <CardContent>
+                        <div className="mb-4">
+                            <div className="relative">    
+                                <FilterInput icon={Search} value={busqueda} onChange={setBusqueda} placeholder="Buscar por nombre, usuario o correo..." />
+                            </div>
+                        </div>
+
                         <DataTable 
                             columns={columns} 
                             data={usuariosExcluyendoActual}
@@ -171,19 +176,5 @@ export function GestionUsuarios({ onNavigate, onVolver }) {
                 />
             </main>
         </div>
-    );
-}
-
-function StatCard({ title, value, icon, color = "text-gray-900" }) {
-    return (
-        <Card className="border-none shadow-sm bg-white">
-            <CardContent className="pt-4 flex items-center justify-between">
-                <div>
-                    <p className="text-xs font-medium text-gray-500 uppercase">{title}</p>
-                    <p className={`text-2xl font-bold ${color}`}>{value}</p>
-                </div>
-                <div className="h-10 w-10 bg-gray-50 rounded-full flex items-center justify-center">{icon}</div>
-            </CardContent>
-        </Card>
     );
 }

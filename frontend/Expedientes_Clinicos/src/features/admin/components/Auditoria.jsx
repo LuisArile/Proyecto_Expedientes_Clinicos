@@ -1,20 +1,21 @@
 import React, { useState } from "react";
-import { Shield, Clock, Search, Filter, FileText, User, Calendar, Activity, CheckCircle2, AlertCircle } from "lucide-react";
+import { Shield, Clock, Search, Filter, FileText, User, Calendar, Activity, AlertCircle } from "lucide-react";
 
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
 import { Badge } from "@components/ui/badge";
 import { Button } from "@components/ui/button";
 import { ScrollArea } from "@components/ui/scroll-area";
-import { ModalDetalleBase } from "@components/common/ModalDetalleBase";
+import { DialogoDetalleAuditoria } from "./DialogoDetalleAuditoria";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 
 import { ROLE_STRATEGIES } from "@/constants/roles";
 import { DataTable } from "@components/common/DataTable";
 import { PageHeader } from "@components/layout/PageHeader";
-import { DetailBox } from "@components/common/DetailBox";
 import { useAuditoria } from "../hooks/useAuditoria";
+
+import { StatCard } from "@components/common/StatCard"
+import { FilterInput, FilterSelect } from "@components/common/FilterSearch"
 
 export function Auditoria({ onVolver }) {
   const {
@@ -101,9 +102,9 @@ export function Auditoria({ onVolver }) {
       <main className="min-h-screen bg-slate-50/50 p-6 space-y-6">
         {/* Grid de Estadísticas*/}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <StatCard title="Total Eventos" value={totalEventos} Icon={Activity} iconColor="text-blue-600"/>
-          <StatCard title="Eventos de Hoy" value={eventosHoy} Icon={Calendar} iconColor="text-green-600"/>
-          <StatCard title="Usuarios Activos" value={usuariosUnicos.length} Icon={User} iconColor="text-purple-600"/>
+          <StatCard title="Total Eventos" value={totalEventos} icon={Activity} iconColor="text-blue-600"/>
+          <StatCard title="Eventos de Hoy" value={eventosHoy} icon={Calendar} iconColor="text-green-600"/>
+          <StatCard title="Usuarios Activos" value={usuariosUnicos.length} icon={User} iconColor="text-purple-600"/>
           <StatCard title="Filtrados" value={eventos.length} Icon={Filter} iconColor="text-orange-600"/>
         </div>
 
@@ -171,85 +172,12 @@ export function Auditoria({ onVolver }) {
         </Card>
 
         {/* Modal de Detalles */}
-        <ModalDetalleBase
-          isOpen={modalDetallesAbierto}
-          onClose={() => setModalDetallesAbierto(false)}
-          title="Detalle del Evento"
-          subtitle={`Referencia: ${eventoSeleccionado?.id}`}
-          icon={FileText}
-          colorScheme={{
-            iconBg: "bg-blue-50",
-            iconText: "text-blue-600",
-            border: "border-slate-100",
-            accent: "text-slate-400"
-          }}
-        >
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <DetailBox label="Usuario" value={eventoSeleccionado?.usuario} icon={User} />
-              <DetailBox label="Módulo" value={eventoSeleccionado?.modulo} icon={Activity}/>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between px-1">
-                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Metadatos del Registro</Label>
-                <span className="text-[10px] text-slate-300 font-mono italic">application/json</span>
-              </div>
-              <pre className="bg-slate-50 text-slate-700 p-5 rounded-xl text-xs font-mono max-h-[280px] overflow-auto border border-slate-200 shadow-inner leading-relaxed">
-                {eventoSeleccionado?.detalles}
-              </pre>
-            </div>
-          </div>
-        </ModalDetalleBase>
+        <DialogoDetalleAuditoria 
+            isOpen={modalDetallesAbierto}
+            onClose={() => setModalDetallesAbierto(false)}
+            evento={eventoSeleccionado}
+        />
       </main>
-    </div>
-  );
-}
-
-// Componentes Auxiliares
-function StatCard({ title, value, Icon, iconColor, bgColor= "bg-white" }) {
-  return (
-    <Card className={`${bgColor} shadow-sm border-slate-200`}>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-gray-600">{title}</p>
-            <p className="text-2xl font-bold text-slate-900">{value}</p>
-          </div>
-          <div className={`p-2 rounded-lg bg-slate-50 ${iconColor}`}>
-            <Icon className="h-6 w-6" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function FilterInput({ label, icon: Icon, value, onChange, placeholder }) {
-  return (
-    <div className="space-y-2">
-      <Label className="text-sm text-gray-700">{label}</Label>
-      <div className="relative">
-        <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <Input placeholder={placeholder} className="pl-10 bg-slate-50" value={value} onChange={(e) => onChange(e.target.value)} />
-      </div>
-    </div>
-  );
-}
-
-function FilterSelect({ label, value, onValueChange, options }) {
-  return (
-    <div className="space-y-2">
-      <Label className="text-sm text-gray-700">{label}</Label>
-      <Select value={value} onValueChange={onValueChange}>
-        <SelectTrigger>
-          <SelectValue placeholder="Todos" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="todos">Todos</SelectItem>
-          {options.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
-        </SelectContent>
-      </Select>
     </div>
   );
 }

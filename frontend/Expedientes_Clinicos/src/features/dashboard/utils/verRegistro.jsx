@@ -12,6 +12,11 @@ import { VerExpediente } from "@/features/pages/GestionPacientes";
 const Auditoria = lazy(() => import("@/features/admin/components/Auditoria").then(module => ({ default: module.Auditoria })));
 const GestionRoles = lazy(() => import("@/features/admin/components/GestionRoles").then(module => ({ default: module.GestionRoles })));
 const ListaRegistrosPreclinicos = lazy(() => import("@/features/preclinica/components/ListaRegistrosPreclinicos").then(module => ({ default: module.ListaRegistrosPreclinicos })));
+import { TableroTrazabilidad } from "@/features/trazabilidad/components/TableroTrazabilidad";
+import { AgendaCitas } from "@/features/trazabilidad/components/AgendaCitas";
+import { ColaPreclinica } from "@/features/trazabilidad/components/ColaPreclinica";
+import { ColaConsulta } from "@/features/trazabilidad/components/ColaConsultaMedica";
+import { FormularioCita } from "@/features/trazabilidad/components/FormularioCita";
 
 export const VIEW_COMPONENTS = {
     "inicio": { component: DashboardFeature },
@@ -28,7 +33,15 @@ export const VIEW_COMPONENTS = {
     "formulario-usuario": { component: FormularioCreacionUsuario },
     // "ver-expediente": { component: VerExpediente },
     "gestion-pacientes": { component: VerExpediente },
-    "error": { component: ModuloEnConstruccion }
+    "error": { component: ModuloEnConstruccion },
+
+    //Modulos de Triaje
+    "tablero": { component: TableroTrazabilidad },
+    "agenda-citas": { component: AgendaCitas },
+        "formulario-agendar-cita": { component: FormularioCita, modo: "agendar" },
+        "formulario-registro-hoy": { component: FormularioCita, modo: "hoy" },
+    "cola-preclinica": { component: ColaPreclinica },
+    "cola-consulta": { component: ColaConsulta },
 };
 
 export const getView = (viewId) => VIEW_COMPONENTS[viewId] || VIEW_COMPONENTS["error"];

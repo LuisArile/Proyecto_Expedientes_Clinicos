@@ -1,4 +1,4 @@
-import { Shield, Stethoscope, Activity, Users, Clock, BarChart3, Pill, TestTube, Calendar } from "lucide-react";
+import { Shield, Stethoscope, Activity, Users, Clock, BarChart3, Pill, TestTube, Calendar, Kanban, ListChecks } from "lucide-react";
 
 export const DASHBOARD_CONFIG = {
   ADMINISTRADOR: {
@@ -29,7 +29,58 @@ export const DASHBOARD_CONFIG = {
       { id: 'auditoria', title: "Auditoría", sub: "Eventos del sistema", icon: BarChart3, color: "text-purple-600", path: "/auditoria" },
       { id: 'medicamentos', title: "Medicamentos", sub: "Catálogo", icon: Pill, color: "text-green-600", path: "/medicamentos" },
       { id: 'examenes', title: "Exámenes", sub: "Tipos de examen", icon: TestTube, color: "text-teal-600", path: "/examenes" },
-    ]
+    ],
+    
+    trazabilidad: {
+      title: "Sistema de Trazabilidad",
+      subtitle: "Supervisión del flujo asistencial",
+      items: [
+        {
+          id: "tablero",
+          title: "Tablero",
+          sub: "Vista Kanban",
+          icon: Kanban,
+          color: "bg-orange-600",
+          border: "border-orange-200",
+          hoverBorder: "hover:border-orange-400",
+          bg: "from-white to-orange-50",
+          navigateTo: "tablero"
+        },
+        {
+          id: "agenda",
+          title: "Agenda",
+          sub: "Programar citas",
+          icon: Calendar,
+          color: "bg-blue-600",
+          border: "border-blue-200",
+          hoverBorder: "hover:border-blue-400",
+          bg: "from-white to-blue-50",
+          navigateTo: "agenda-citas"
+        },
+        {
+          id: "preclinica",
+          title: "Preclínica",
+          sub: "Cola de espera",
+          icon: ListChecks,
+          color: "bg-green-600",
+          border: "border-green-200",
+          hoverBorder: "hover:border-green-400",
+          bg: "from-white to-green-50",
+          navigateTo: "cola-preclinica"
+        },
+        {
+          id: "consulta",
+          title: "Consulta",
+          sub: "Cola de espera",
+          icon: ListChecks,
+          color: "bg-purple-600",
+          border: "border-purple-200",
+          hoverBorder: "hover:border-purple-400",
+          bg: "from-white to-purple-50",
+          navigateTo: "cola-consulta"
+        }
+      ]
+    }
   },
 
   MEDICO: {

@@ -96,7 +96,9 @@ export function Dashboard() {
     onConsultaMedica: handleConsultaMedica,
     onNavigate: setCurrentView,
     // Props específicas para modo edición
-    modo: currentView === "editar-expediente" ? "editar" : "crear",
+    modo: currentView === "formulario-registro-hoy" ? "hoy" : "agendar",
+    ...currentView === "editar-expediente" ? "editar" : "crear",
+    
     pacienteData: currentView === "editar-expediente" ? expedienteEnEdicion : null
   }), [selectedPaciente, volverInicio, volverAlExpediente, handleConsultaMedica, handleEditarExpediente, currentView, expedienteEnEdicion]);
 
