@@ -3,6 +3,13 @@ import { User, IdCard, Calendar, Mars, Venus } from "lucide-react";
 import { formatearFecha } from "@/utils/dateFormatter";
 
 export function PacienteResumen({ paciente }) {
+    const sexo = paciente.sexo?.toLowerCase();
+
+    const IconoSexo = {
+        masculino: Mars,
+        femenino: Venus
+    }[sexo];
+    
     return (
         <Card className="mb-6 border-blue-200 shadow-lg">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-b border-blue-100">
@@ -23,11 +30,7 @@ export function PacienteResumen({ paciente }) {
                                     {formatearFecha(paciente.fechaNacimiento)}
                                 </span>
                                 <span className="flex items-center gap-1">
-                                    {paciente.sexo === 'masculino' ? (
-                                        <Mars className="h-4 w-4" />
-                                    ) : paciente.sexo === 'femenino' ? (
-                                        <Venus className="h-4 w-4" />
-                                    ): null }
+                                    {IconoSexo && <IconoSexo className="h-4 w-4" />}
                                     {paciente.sexo}
                                 </span>
                             </CardDescription>
