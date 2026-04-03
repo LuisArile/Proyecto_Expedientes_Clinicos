@@ -19,6 +19,8 @@ async function main() {
 
   const permisosADefinir = [
     'CREAR_EXPEDIENTE',
+    'VER_EXPEDIENTE',
+    'EDITAR_EXPEDIENTE',
     'GESTION_ROLES',
     'BUSCAR_PACIENTE',
     'GESTION_USUARIOS',
@@ -29,8 +31,18 @@ async function main() {
     'PRECLINICA',
     'CONSULTA_MEDICA',
     'SOLICITUD_EXAMEN',
-    'ADJUNTAR_DOCUMENTOS'
+    'ADJUNTAR_DOCUMENTOS',
+    // --- PERMISOS DE VISUALIZACIÓN ---
+    'VER_DATOS_BASICOS',
+    'VER_HISTORIAL_CLINICO',
+    'VER_PRECLINICAS',
+    'VER_CONSULTAS',
+    'VER_RECETAS',
+    'VER_EXAMENES',
+    'VER_DOCUMENTOS',
+    'VER_DIAGNOSTICOS'
   ];
+
   const permisosDB = {};
 
   for (const nombrePermiso of permisosADefinir) {
@@ -51,15 +63,34 @@ async function main() {
     },
     { 
       rol: 'RECEPCIONISTA', 
-      permisos: ['CREAR_EXPEDIENTE', 'BUSCAR_PACIENTE', 'GESTION_PACIENTES'] 
+      permisos: [
+        'CREAR_EXPEDIENTE',
+        'VER_EXPEDIENTE',
+        'EDITAR_EXPEDIENTE',
+        'BUSCAR_PACIENTE',
+        'GESTION_PACIENTES',
+        'VER_DATOS_BASICOS',
+        'VER_HISTORIAL_CLINICO',
+        'VER_CONSULTAS',
+        'VER_PRECLINICAS',
+      ] 
     },
     { 
       rol: 'ENFERMERO', 
-      permisos: ['BUSCAR_PACIENTE', 'PRECLINICA'] 
+      permisos: [
+        'BUSCAR_PACIENTE',
+        'VER_EXPEDIENTE',
+        'PRECLINICA',
+        'VER_PRECLINICAS',
+        'VER_DATOS_BASICOS'
+      ] 
     },
     { 
       rol: 'MEDICO', 
-      permisos: ['BUSCAR_PACIENTE', 'CONSULTA_MEDICA', 'SOLICITUD_EXAMEN', 'ADJUNTAR_DOCUMENTOS'] 
+      permisos: [
+        'BUSCAR_PACIENTE', 'VER_EXPEDIENTE', 'CONSULTA_MEDICA', 'SOLICITUD_EXAMEN', 'ADJUNTAR_DOCUMENTOS',
+        'VER_DATOS_BASICOS', 'VER_HISTORIAL_CLINICO', 'VER_PRECLINICAS', 'VER_CONSULTAS', 'VER_RECETAS', 'VER_EXAMENES', 'VER_DOCUMENTOS', 'VER_DIAGNOSTICOS'
+      ] 
     }
   ];
 

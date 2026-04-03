@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { useUsuarios } from '@/features/admin/hooks/useUsuarios';
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@components/ui/card";
+import { Button } from "@components/ui/button";
+import { Input } from "@components/ui/input";
+import { Badge } from "@components/ui/badge";
 import { Users, UserPlus, Loader2, CheckCircle2, Power, Mail, Edit } from "lucide-react";
 import { DialogoEnvioCredenciales } from '@/features/admin/components/DialogoEnvioCredenciales';
 
-import { DataTable } from "@/components/common/DataTable";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { DataTable } from "@components/common/DataTable";
+import { PageHeader } from "@components/layout/PageHeader";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function GestionUsuarios({ onNavigate, onVolver }) {

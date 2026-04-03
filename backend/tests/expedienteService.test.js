@@ -27,6 +27,7 @@ describe("ExpedienteService", () => {
             obtenerPorDni: jest.fn(),
             obtenerPorId: jest.fn(),
             crear: jest.fn(),
+            actualizar: jest.fn(),
         };
 
         auditoriaService = {
@@ -122,16 +123,30 @@ describe("ExpedienteService", () => {
         });
     });
 
-    describe("actualizar", () => {
-        test("debe actualizar expediente", async () => {
-            expedienteRepo.obtenerPorId.mockResolvedValue({ idExpediente: 1 });
+    describe("actualizarConPaciente", () => {
+        test("debe actualizar expediente y paciente", async () => {
+            expedienteRepo.obtenerPorId.mockResolvedValue({ 
+                idExpediente: 1, 
+                idPaciente: 1,
+                numeroExpediente: "EXP-2026-00001",
+                paciente: { dni: "123" }
+            });
+            pacienteRepo.actualizar.mockResolvedValue({ nombre: "Juan Actualizado" });
             expedienteRepo.actualizar.mockResolvedValue({ estado: "Activo" });
 
-            const resultado = await service.actualizar(1, { estado: "Activo" });
+            prisma.$transaction.mockImplementation(async (callback) => {
+                const tx = {};
+                return callback(tx);
+            });
 
+            const resultado = await service.actualizarConPaciente(1, { nombre: "Juan Actualizado" }, { estado: "Activo" }, 1);
+
+            expect(pacienteRepo.actualizar)
+                .toHaveBeenCalledWith(1, { nombre: "Juan Actualizado" }, expect.any(Object));
             expect(expedienteRepo.actualizar)
-                .toHaveBeenCalledWith(1, { estado: "Activo" });
-            expect(resultado.estado).toBe("Activo");
+                .toHaveBeenCalledWith(1, { estado: "Activo" }, expect.any(Object));
+            expect(resultado.paciente).toBeDefined();
+            expect(resultado.expediente).toBeDefined();
         });
     });
 

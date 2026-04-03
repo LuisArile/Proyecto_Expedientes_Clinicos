@@ -1,11 +1,11 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useAuth } from "../../features/auth/hooks/useAuth";
+import { Button } from "@components/ui/button";
+import { Badge } from "@components/ui/badge";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ALL_MENU_ITEMS } from "@/constants/allMenuItems";
 import { Hospital, LogOut, KeyRound } from "lucide-react";
 
-import { useRoleConfig } from "../../features/auth/hooks/useRoleConfig";
+import { useRoleConfig } from "@/features/auth/hooks/useRoleConfig";
 
 export function Sidebar({ currentView, onNavigate  }) {
   const { user, logout, checkPermission } = useAuth();

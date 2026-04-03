@@ -1,4 +1,4 @@
-import { expedienteAPI } from "@/api";
+import { expedienteAPI, registroPreclinicoAPI, consultaMedicaAPI } from "@/shared/services/api";
 
 /**
  * Crear un nuevo expediente con datos del paciente
@@ -78,6 +78,41 @@ export async function eliminarExpediente(idExpediente) {
     return response;
   } catch (error) {
     console.error("Error al eliminar expediente:", error);
+    throw error;
+  }
+}
+
+export async function obtenerExpedienteCompleto(idExpediente, permisos = {}) {
+  try {
+    const [ expedienteRes, preclinicosRes, consultasRes ] = await Promise.all([
+      
+      expedienteAPI.obtenerPorId(idExpediente).catch(err => {
+        console.error("Error crítico: No se pudo obtener el expediente", err);
+        return { error: true, data: null };
+      }),
+
+      permisos.verPreclinica 
+        ? registroPreclinicoAPI.obtenerPorExpediente(idExpediente).catch(() => ({ data: [] }))
+        : Promise.resolve({ data: [] }),
+      
+      permisos.verConsultas 
+        ? consultaMedicaAPI.obtenerPorExpediente(idExpediente).catch(() => ({ data: [] }))
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    if (expedienteRes.error || !expedienteRes.data) {
+      throw new Error("Acceso denegado al expediente principal o el expediente no existe.");
+    }
+
+    return {
+      paciente: expedienteRes.data?.paciente || {},
+      expediente: expedienteRes.data || {},
+      registrosPreclinicos: preclinicosRes.data || [],
+      consultasMedicas: consultasRes.data || [],
+      documentos: expedienteRes.data?.documentos || []
+    };
+  } catch (error) {
+    console.error("Error fatal obteniendo expediente completo:", error);
     throw error;
   }
 }

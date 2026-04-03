@@ -6,17 +6,17 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useConsultaMedica } from "../hooks/useConsultaMedica";
 import { Stethoscope, FileText, Save, Clock, Pill, Plus, Trash2, Loader2 } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardHeader } from "@/components/ui/card";
-import { FormField } from "@/components/common/FormField";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { FormSection } from "@/components/common/FormSection";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@components/ui/input";
+import { Button } from "@components/ui/button";
+import { Textarea } from "@components/ui/textarea";
+import { Card, CardHeader } from "@components/ui/card";
+import { FormField } from "@components/common/FormField";
+import { PageHeader } from "@components/layout/PageHeader";
+import { FormSection } from "@components/common/FormSection";
+import { Alert, AlertDescription } from "@components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 
-import { StatusModal } from "@/components/common/StatusModal";
+import { StatusModal } from "@components/common/StatusModal";
 
 export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
   const { user } = useAuth();

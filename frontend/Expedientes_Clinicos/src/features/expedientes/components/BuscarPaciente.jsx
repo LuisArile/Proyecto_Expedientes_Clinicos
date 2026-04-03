@@ -1,11 +1,11 @@
 import React, { useMemo } from "react";
 import { Search, Eye, FileText, Loader2, Stethoscope } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { DataTable } from "@/components/common/DataTable";
-import { PaginationControls } from "@/components/common/PaginationControls";
+import { Button } from "@components/ui/button";
+import { Card, CardContent } from "@components/ui/card";
+import { PageHeader } from "@components/layout/PageHeader";
+import { DataTable } from "@components/common/DataTable";
+import { PaginationControls } from "@components/common/PaginationControls";
 import { useBuscarPacientes } from "../hooks/useBuscarPaciente";
 import { SearchFilterCard } from "./SearchFilterCard";
 

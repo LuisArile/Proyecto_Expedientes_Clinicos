@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { usuarioService } from '../services/usuarioService';
-import { rolAPI } from '@/api';
+import { rolAPI } from '@/shared/services/api';
 
 export function useUsuarioForm(id) {
     const [roles, setRoles] = useState([]);

@@ -2,15 +2,15 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, User, Eye, EyeOff, Search, ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@components/ui/input";
+import { Button } from "@components/ui/button";
+import { Card, CardContent, CardHeader } from "@components/ui/card";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { FormField } from "@/components/common/FormField";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { FormField } from "@components/common/FormField";
+import { PageHeader } from "@components/layout/PageHeader";
 import { useChangePassword } from "../hooks/useChangePassword";
-import { FormHeader } from "@/components/common/FormHeader";
+import { FormHeader } from "@components/common/FormHeader";
 
 export function Changepassword( { onVolver } ) {
   const { user } = useAuth();

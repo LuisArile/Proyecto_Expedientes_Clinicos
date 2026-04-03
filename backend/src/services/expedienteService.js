@@ -120,17 +120,65 @@ class expedienteService {
     }
 
     /**
-     * Actualiza la información de un expediente.
+     * Actualiza la información de un expediente y sus datos del paciente.
      * @param {number} idExpediente 
-     * @param {Object} data 
+     * @param {Object} dataPaciente - Datos del paciente a actualizar
+     * @param {Object} dataExpediente - Datos del expediente a actualizar
+     * @param {number} usuarioId - ID del usuario que realiza la actualización
      */
-    async actualizar(idExpediente, data) {
+    async actualizarConPaciente(idExpediente, dataPaciente, dataExpediente, usuarioId) {
         try {
             const expediente = await this.expedienteRepository.obtenerPorId(idExpediente);
             if (!expediente) {
                 throw new Error(`El expediente con ID ${idExpediente} no existe`);
             }
-            return await this.expedienteRepository.actualizar(idExpediente, data);
+
+            // Usar transacción para actualizar paciente y expediente
+            return await prisma.$transaction(async (tx) => {
+                const resultado = {
+                    paciente: null,
+                    expediente: null
+                };
+
+                // Actualizar paciente si hay datos
+                if (dataPaciente && Object.keys(dataPaciente).length > 0) {
+                    resultado.paciente = await this.pacienteRepository.actualizar(
+                        expediente.idPaciente,
+                        dataPaciente,
+                        tx
+                    );
+                }
+
+                // Actualizar expediente si hay datos
+                if (dataExpediente && Object.keys(dataExpediente).length > 0) {
+                    resultado.expediente = await this.expedienteRepository.actualizar(
+                        idExpediente,
+                        dataExpediente,
+                        tx
+                    );
+                } else {
+                    resultado.expediente = expediente;
+                }
+
+                // Registrar en auditoría
+                if (usuarioId && this.auditoriaService) {
+                    const cambios = [];
+                    if (dataPaciente && Object.keys(dataPaciente).length > 0) {
+                        cambios.push("datos del paciente");
+                    }
+                    if (dataExpediente && Object.keys(dataExpediente).length > 0) {
+                        cambios.push("información del expediente");
+                    }
+
+                    await this.auditoriaService.registrarExpediente(usuarioId, "ACTUALIZACIÓN", {
+                        idExpediente: idExpediente,
+                        dniPaciente: expediente.paciente.dni,
+                        detalles: `Actualización de ${cambios.join(" y ")} - Expediente ${expediente.numeroExpediente}`
+                    }, tx);
+                }
+
+                return resultado;
+            });
         } catch (error) {
             throw new Error(error.message);
         }

@@ -37,7 +37,7 @@ vi.mock("../features/dashboard/hooks/useDashboardData", () => ({
 }));
 
 // Mock componentes UI (para evitar dependencias visuales)
-vi.mock("@/components/ui/card", () => ({
+vi.mock("@components/ui/card", () => ({
   Card: ({ children, ...props }) => <div {...props}>{children}</div>,
   CardContent: ({ children, ...props }) => <div {...props}>{children}</div>,
   CardHeader: ({ children, ...props }) => <div {...props}>{children}</div>,
