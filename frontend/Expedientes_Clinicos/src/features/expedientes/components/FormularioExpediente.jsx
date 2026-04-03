@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Textarea } from "@components/ui/textarea";
@@ -17,27 +17,44 @@ import { formatearFecha} from "@/utils/dateFormatter";
 
 export function FormularioExpediente({ onSuccess, onCancel, onVolver, modo = "crear", pacienteData = null }) {
 
-  const { register, handleSubmit, formState: { errors }, setValue, control } = useForm();
-  const generoSeleccionado = useWatch({ control, name: "sexo", defaultValue: "" });
+  const esEdicion = modo === "editar";
+  
+  // Preparar defaultValues basados en pacienteData
+  const defaultValues = esEdicion && pacienteData?.paciente 
+    ? {
+        nombre: pacienteData.paciente.nombre || "",
+        apellido: pacienteData.paciente.apellido || "",
+        numeroIdentidad: pacienteData.paciente.dni || "",
+        fechaNacimiento: formatearFecha(pacienteData.paciente.fechaNacimiento) || "",
+        correo: pacienteData.paciente.correo || "",
+        telefono: pacienteData.paciente.telefono || "",
+        direccion: pacienteData.paciente.direccion || "",
+        sexo: pacienteData.paciente.sexo || "",
+      }
+    : {};
+
+  const { register, handleSubmit, formState: { errors }, control, reset } = useForm({ defaultValues });
 
   const { loading, idDuplicado, modal, setModal, validarId, enviarFormulario } = useExpedienteForm(modo, pacienteData);
   
-  const esEdicion = modo === "editar";
-  
-  // Prellenar el formulario si es edición
+  // Prellenar el formulario si es edición 
   useEffect(() => {
     if (esEdicion && pacienteData?.paciente) {
       const p = pacienteData.paciente;
-      setValue("nombre", p.nombre || "");
-      setValue("apellido", p.apellido || "");
-      setValue("numeroIdentidad", p.dni || "");
-      setValue("fechaNacimiento", formatearFecha(p.fechaNacimiento) || "");
-      setValue("correo", p.correo || "");
-      setValue("telefono", p.telefono || "");
-      setValue("direccion", p.direccion || "");
-      setValue("sexo", p.sexo || "");
+      
+      // Usar reset para sincronizar correctamente
+      reset({
+        nombre: p.nombre || "",
+        apellido: p.apellido || "",
+        numeroIdentidad: p.dni || "",
+        fechaNacimiento: formatearFecha(p.fechaNacimiento) || "",
+        correo: p.correo || "",
+        telefono: p.telefono || "",
+        direccion: p.direccion || "",
+        sexo: p.sexo || "",
+      });
     }
-  }, [esEdicion, pacienteData, setValue]);
+  }, [esEdicion, pacienteData, reset]);
   
   const inputClass = (name) => `${errors[name] || (name === 'numeroIdentidad' && idDuplicado) ? "border-red-500" : "border-gray-300"} transition-all`;
 
@@ -63,7 +80,9 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver, modo = "cr
         </CardHeader>
 
         <CardContent className="pt-6">
-          <form onSubmit={handleSubmit((data) => enviarFormulario(data, generoSeleccionado))} className="space-y-8">
+          <form onSubmit={handleSubmit((data) => {
+            enviarFormulario(data);
+          })} className="space-y-8">
             {/* Sección de Información Básica */}
             <FormSection title="Información Básica">
               {/* Nombres */}
@@ -112,16 +131,24 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver, modo = "cr
               </FormField>
               {/* Género */}
               <FormField label="Sexo" required error={errors.sexo?.message}>
-                <Select value={generoSeleccionado} onValueChange={(val) => setValue("sexo", val)}>
-                  <SelectTrigger className={inputClass("sexo")}>
-                    <SelectValue placeholder="Seleccionar..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="masculino">Hombre</SelectItem>
-                    <SelectItem value="femenino">Mujer</SelectItem>
-                  </SelectContent>
-                </Select>
-                <input type="hidden" {...register("sexo", { required: "Seleccione sexo" })} />
+                <Controller
+                  name="sexo"
+                  control={control}
+                  rules={{ required: "Seleccione sexo" }}
+                  render={({ field: { value, onChange } }) => (
+                    <Select value={value || ""} onValueChange={onChange}>
+                      <SelectTrigger className={inputClass("sexo")}>
+                        <span className={value ? "text-gray-900 font-medium" : "text-gray-400"}>
+                          {value === "masculino" ? "Hombre" : value === "femenino" ? "Mujer" : "Seleccionar..."}
+                        </span>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="masculino">Hombre</SelectItem>
+                        <SelectItem value="femenino">Mujer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </FormField>
               {/* Correo Electrónico */}
               <FormField label="Correo Electrónico" icon={Mail} error={errors.correo?.message}>
