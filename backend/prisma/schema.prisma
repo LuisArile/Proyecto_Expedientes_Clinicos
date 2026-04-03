@@ -151,3 +151,39 @@ model RecetaMedica {
 
   @@map("RecetaMedica")
 }
+
+model Cita {
+  idCita        Int      @id @default(autoincrement())
+  pacienteId    Int
+  fechaCita     DateTime
+  horaCita      String   @db.NVarChar(10)
+  motivo        String   @db.NVarChar(255)
+  prioridad     String   @default("NORMAL") @db.NVarChar(20)  // NORMAL, URGENTE, EMERGENCIA
+  tipo          String   @default("PROGRAMADA") @db.NVarChar(20) // PROGRAMADA, REGISTRO_DIA
+  estado        String   @default("PROGRAMADO") @db.NVarChar(20)
+  recepcionistaId Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  paciente      Paciente @relation(fields: [pacienteId], references: [idPaciente])
+  recepcionista Usuario  @relation(fields: [recepcionistaId], references: [id])
+  seguimiento   Seguimiento[]
+
+  @@map("Cita")
+}
+
+model Seguimiento {
+  idSeguimiento Int      @id @default(autoincrement())
+  citaId         Int
+  estadoAnterior String   @db.NVarChar(30)
+  estadoNuevo    String   @db.NVarChar(30)
+  usuarioId      Int
+  accion         String   @db.NVarChar(100)
+  observaciones  String?  @db.NVarChar(255)
+  fecha          DateTime @default(now())
+
+  cita    Cita    @relation(fields: [citaId], references: [idCita])
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@map("Seguimiento")
+}
