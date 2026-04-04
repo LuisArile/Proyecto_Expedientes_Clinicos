@@ -19,7 +19,7 @@ export function FormularioCreacionUsuario({ onVolver, onSuccess }) {
   const id = sessionStorage.getItem("edit_user_id");
   const isEdit = Boolean(id);
 
-  const { roles, loading, modal, setModal, enviarFormulario, datosIniciales } = useUsuarioForm(id);
+  const { roles, loading, modal, setModal, enviarFormulario, datosIniciales, setLoading } = useUsuarioForm(id);
   const { register, handleSubmit, setValue, reset, control, formState: { errors } } = useForm();
   
   const selectedRol = useWatch({ control, name: "idRol" });
@@ -167,6 +167,7 @@ export function FormularioCreacionUsuario({ onVolver, onSuccess }) {
           onClose={() => {
             setModal(prev => ({ ...prev, open: false }));
             if (modal.result.success) {
+              setLoading(false);
               sessionStorage.removeItem("edit_user_id");
               onSuccess();
             }
