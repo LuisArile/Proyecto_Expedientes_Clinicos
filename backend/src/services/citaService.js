@@ -1,3 +1,4 @@
+
 const { ErrorValidacion, ErrorNoEncontrado, ErrorNoAutorizado } = require('../utils/errores');
 
 class CitaService {
@@ -6,18 +7,25 @@ class CitaService {
         this.auditoriaService = auditoriaService;
     }
 
-    async agendarCita(data, recepcionistaId) {
-        if (!data.pacienteId) throw new ErrorValidacion('el paciente es obligatorio');
-        if (!data.fechaCita) throw new ErrorValidacion('la fecha de cita es obligatoria');
-        if (!data.horaCita) throw new ErrorValidacion('la hora de cita es obligatoria');
-        if (!data.motivo) throw new ErrorValidacion('el motivo de cita es obligatorio');
 
-        const cita = await this.citaRepository.crear({
-            ...data,
+    async agendarCita(data, recepcionistaId) {
+        if (!data.pacienteId) throw new ErrorValidacion('El paciente es obligatorio');
+        if (!data.fechaCita) throw new ErrorValidacion('La fecha de cita es obligatoria');
+        if (!data.horaCita) throw new ErrorValidacion('La hora de cita es obligatoria');
+        if (!data.motivo) throw new ErrorValidacion('El motivo de cita es obligatorio');
+
+        const citaData = {
+            pacienteId: data.pacienteId,
+            fechaCita: data.fechaCita,
+            horaCita: data.horaCita,
+            motivo: data.motivo,
+            prioridad: data.prioridad || 'NORMAL',
             tipo: 'PROGRAMADA',
             estado: 'PROGRAMADO',
-            recepcionistaId
-        });
+            recepcionistaId: recepcionistaId
+        };
+
+        const cita = await this.citaRepository.crear(citaData);
 
         await this.auditoriaService.registrar(
             recepcionistaId,
@@ -28,18 +36,31 @@ class CitaService {
         return cita;
     }
 
-    async registrarPacienteHoy(data, recepcionistaId) {
-        if (!data.pacienteId) throw new ErrorValidacion('Paciente es obligatorio');
-        if (!data.motivo) throw new ErrorValidacion('Motivo de atención es obligatorio');
 
-        const cita = await this.citaRepository.crear({
-            ...data,
-            fechaCita: new Date(),
-            horaCita: new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' }),
+    //Lo hace recepcionista
+    async registrarPacienteHoy(data, recepcionistaId) {
+        if (!data.pacienteId) throw new ErrorValidacion('El paciente es obligatorio');
+        if (!data.motivo) throw new ErrorValidacion('El motivo de atención es obligatorio');
+
+        const ahora = new Date();
+        const horaFormateada = ahora.toLocaleTimeString('es-HN', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+        });
+
+        const citaData = {
+            pacienteId: data.pacienteId,
+            fechaCita: ahora,
+            horaCita: horaFormateada,
+            motivo: data.motivo,
+            prioridad: data.prioridad || 'NORMAL',
             tipo: 'REGISTRO_DIA',
             estado: 'REGISTRADO_HOY',
-            recepcionistaId
-        });
+            recepcionistaId: recepcionistaId
+        };
+
+        const cita = await this.citaRepository.crear(citaData);
 
         await this.auditoriaService.registrar(
             recepcionistaId,
@@ -51,6 +72,11 @@ class CitaService {
     }
 
     async enviarAEsperaPreclinica(idCita, usuarioId) {
+
+        if (!idCita || isNaN(Number(idCita))) {
+            throw new ErrorValidacion('El ID de la cita es inválido');
+        }
+
         const cita = await this.citaRepository.actualizarEstado(
             idCita,
             'ESPERA_PRECLINICA',
@@ -58,10 +84,21 @@ class CitaService {
             'Enviado a espera de preclínica'
         );
 
+        if (!cita) {
+            throw new ErrorNoEncontrado(`Cita con ID ${idCita} no encontrada`);
+        }
+        
         return cita;
     }
 
+
+    // ENFERMERO
+
     async iniciarPreclinica(idCita, usuarioId) {
+        if (!idCita || isNaN(Number(idCita))) {
+            throw new ErrorValidacion('El ID de la cita es inválido');
+        }
+
         const cita = await this.citaRepository.actualizarEstado(
             idCita,
             'EN_PRECLINICA',
@@ -69,10 +106,18 @@ class CitaService {
             'Inicio de preclínica'
         );
 
+        if (!cita) {
+            throw new ErrorNoEncontrado(`Cita con ID ${idCita} no encontrada`);
+        }
         return cita;
     }
 
     async finalizarPreclinica(idCita, usuarioId) {
+
+        if (!idCita || isNaN(Number(idCita))) {
+            throw new ErrorValidacion('El ID de la cita es inválido');
+        }
+
         const cita = await this.citaRepository.actualizarEstado(
             idCita,
             'ESPERA_CONSULTA',
@@ -80,10 +125,21 @@ class CitaService {
             'Preclínica finalizada, enviado a consulta'
         );
 
+        if (!cita) {
+            throw new ErrorNoEncontrado(`Cita con ID ${idCita} no encontrada`);
+        }
+
         return cita;
     }
 
+    // MEDICO
+
     async iniciarConsulta(idCita, usuarioId) {
+
+        if (!idCita || isNaN(Number(idCita))) {
+            throw new ErrorValidacion('El ID de la cita es inválido');
+        }
+
         const cita = await this.citaRepository.actualizarEstado(
             idCita,
             'EN_CONSULTA',
@@ -91,10 +147,18 @@ class CitaService {
             'Inicio de consulta médica'
         );
 
+        if (!cita) {
+            throw new ErrorNoEncontrado(`Cita con ID ${idCita} no encontrada`);
+        }
         return cita;
     }
 
     async finalizarConsulta(idCita, usuarioId) {
+
+        if (!idCita || isNaN(Number(idCita))) {
+            throw new ErrorValidacion('El ID de la cita es inválido');
+        }
+
         const cita = await this.citaRepository.actualizarEstado(
             idCita,
             'FINALIZADO',
@@ -102,30 +166,39 @@ class CitaService {
             'Consulta finalizada'
         );
 
+        if (!cita) {
+            throw new ErrorNoEncontrado(`Cita con ID ${idCita} no encontrada`);
+        }
+
         return cita;
     }
 
+    
+
+// TABLERO Y SEGUIMIENTO
     async obtenerTablero(fecha = null) {
         return await this.citaRepository.obtenerTablero(fecha);
     }
 
-    async obtenerTrazabilidad(idCita) {
-        const trazabilidad = await this.citaRepository.obtenerTrazabilidad(idCita);
-        if (!trazabilidad.length) {
-            throw new ErrorNoEncontrado('No hay trazabilidad para esta cita');
+    async obtenerSeguimiento(idCita) {
+
+        if (!idCita || isNaN(Number(idCita))) {
+            throw new ErrorValidacion('El ID de la cita es inválido');
         }
-        return trazabilidad;
+
+        const seguimiento = await this.citaRepository.obtenerSeguimiento(idCita);
+        if (!seguimiento.length) {
+            throw new ErrorNoEncontrado('No hay seguimiento para esta cita');
+        }
+        return seguimiento;
     }
 
-    async obtenerCitasPorEstado(estado, rol) {
-        const estadosPermitidos = {
-            RECEPCIONISTA: ['PROGRAMADO', 'REGISTRADO_HOY', 'ESPERA_PRECLINICA', 'FINALIZADO'],
-            ENFERMERO: ['ESPERA_PRECLINICA', 'EN_PRECLINICA'],
-            DOCTOR: ['ESPERA_CONSULTA', 'EN_CONSULTA']
-        };
+    async obtenerCitasPorEstado(estado) {
 
-        if (!estadosPermitidos[rol]?.includes(estado)) {
-            throw new ErrorNoAutorizado('No tiene permisos para ver estos pacientes');
+        const estadosValidos = ['PROGRAMADO', 'REGISTRADO_HOY', 'ESPERA_PRECLINICA', 'EN_PRECLINICA', 'ESPERA_CONSULTA', 'EN_CONSULTA', 'FINALIZADO'];
+
+        if (!estadosValidos.includes(estado)) {
+            throw new ErrorValidacion(`Estado inválido: ${estado}`);
         }
 
         return await this.citaRepository.obtenerPorEstado(estado);

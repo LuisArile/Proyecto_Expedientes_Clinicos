@@ -13,6 +13,7 @@ const consultaMedicaRouters=require("./routes/consultaMedicaRoute")
 const busquedaRouters = require("./routes/busquedaRoute");
 const estadisticaRouters = require("./routes/estadisticaRoute")
 const auditoriaRouters = require("./routes/auditoriaRoute");
+const citaRouters=require("./routes/citaRoute");
 
 const manejadorErrores = require("./middlewares/manejoErrores")
 
@@ -69,6 +70,8 @@ app.use("/api/estadisticas", estadisticaRouters);
 app.use("/api/busqueda", busquedaRouters);
 
 app.use("/api/auditoria", auditoriaRouters);
+
+app.use("/api/citas", citaRouters); // Gestion de seguimiento a citas y trazabilidad
 
 app.use(manejadorErrores);
 module.exports=app;

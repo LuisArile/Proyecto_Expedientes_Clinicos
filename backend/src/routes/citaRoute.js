@@ -30,10 +30,12 @@ router.put('/:idCita/iniciar-preclinica', autorizarRol(['ENFERMERO', 'ADMINISTRA
 router.put('/:idCita/finalizar-preclinica', autorizarRol(['ENFERMERO', 'ADMINISTRADOR']), citaController.finalizarPreclinica);
 
 //MEDICO
-router.put('/:idCita/iniciar-consulta', autorizarRol(['DOCTOR', 'ADMINISTRADOR']), citaController.iniciarConsulta);
-router.put('/:idCita/finalizar-consulta', autorizarRol(['DOCTOR', 'ADMINISTRADOR']), citaController.finalizarConsulta);
+router.put('/:idCita/iniciar-consulta', autorizarRol(['MEDICO', 'ADMINISTRADOR']), citaController.iniciarConsulta);
+router.put('/:idCita/finalizar-consulta', autorizarRol(['MEDICO', 'ADMINISTRADOR']), citaController.finalizarConsulta);
 
 // TABLERO -TRAZABILIDAD
-router.get('/tablero', autorizarRol(['RECEPCIONISTA', 'ENFERMERO', 'DOCTOR', 'ADMINISTRADOR']), citaController.obtenerTablero);
-router.get('/trazabilidad/:idCita', autorizarRol(['RECEPCIONISTA', 'ENFERMERO', 'DOCTOR', 'ADMINISTRADOR']), citaController.obtenerTrazabilidad);
-router.get('/estado/:estado', autorizarRol(['RECEPCIONISTA', 'ENFERMERO', 'DOCTOR', 'ADMINISTRADOR']), citaController.obtenerCitasPorEstado);
+router.get('/tablero', autorizarRol(['RECEPCIONISTA', 'ENFERMERO', 'MEDICO', 'ADMINISTRADOR']), citaController.obtenerTablero);
+router.get('/seguimiento/:idCita', autorizarRol(['RECEPCIONISTA', 'ENFERMERO', 'MEDICO', 'ADMINISTRADOR']), citaController.obtenerSeguimiento);
+router.get('/estado/:estado', autorizarRol(['RECEPCIONISTA', 'ENFERMERO', 'MEDICO', 'ADMINISTRADOR']), citaController.obtenerCitasPorEstado);
+
+module.exports = router;

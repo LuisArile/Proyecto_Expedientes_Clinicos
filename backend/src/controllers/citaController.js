@@ -83,10 +83,10 @@ class CitaController {
         res.json({ success: true, data: tablero });
     });
 
-    obtenerTrazabilidad = capturarAsync(async (req, res) => {
+    obtenerSeguimiento= capturarAsync(async (req, res) => {
         const { idCita } = req.params;
-        const trazabilidad = await this.citaService.obtenerTrazabilidad(Number(idCita));
-        res.json({ success: true, data: trazabilidad });
+        const seguimiento = await this.citaService.obtenerSeguimiento(Number(idCita));
+        res.json({ success: true, data: seguimiento });
     });
 
     obtenerCitasPorEstado = capturarAsync(async (req, res) => {

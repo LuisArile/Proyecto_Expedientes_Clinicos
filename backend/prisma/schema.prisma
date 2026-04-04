@@ -54,6 +54,9 @@ model Usuario {
   registrosPreclinicos registroPreclinico[]
   consultasMedicas   ConsultaMedica[]
 
+  citasCreadas    Cita[]      @relation("citasCreadas")
+  seguimientos    Seguimiento[]
+
   @@map("Usuario")
 }
 
@@ -77,6 +80,8 @@ model Paciente {
   direccion       String?     @db.NVarChar(100)
   sexo            String?     @db.NVarChar(50)
   expedientes     Expediente?
+
+  citas           Cita[]
 
   @@map("Paciente")
 }
@@ -156,17 +161,17 @@ model Cita {
   idCita        Int      @id @default(autoincrement())
   pacienteId    Int
   fechaCita     DateTime
-  horaCita      String   @db.NVarChar(10)
+  horaCita      String   @db.NVarChar(20)
   motivo        String   @db.NVarChar(255)
   prioridad     String   @default("NORMAL") @db.NVarChar(20)  // NORMAL, URGENTE, EMERGENCIA
   tipo          String   @default("PROGRAMADA") @db.NVarChar(20) // PROGRAMADA, REGISTRO_DIA
-  estado        String   @default("PROGRAMADO") @db.NVarChar(20)
+  estado        String   @default("PROGRAMADO") @db.NVarChar(30)
   recepcionistaId Int
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   paciente      Paciente @relation(fields: [pacienteId], references: [idPaciente])
-  recepcionista Usuario  @relation(fields: [recepcionistaId], references: [id])
+  recepcionista Usuario  @relation("citasCreadas", fields: [recepcionistaId], references: [id])
   seguimiento   Seguimiento[]
 
   @@map("Cita")
@@ -182,8 +187,8 @@ model Seguimiento {
   observaciones  String?  @db.NVarChar(255)
   fecha          DateTime @default(now())
 
-  cita    Cita    @relation(fields: [citaId], references: [idCita])
-  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  cita    Cita    @relation(fields: [citaId], references: [idCita], onUpdate: NoAction, onDelete: NoAction)
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onUpdate: NoAction, onDelete: NoAction)
 
   @@map("Seguimiento")
 }
