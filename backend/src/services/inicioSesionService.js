@@ -41,6 +41,7 @@ class InicioSesionService {
             idRol: usuario.idRol,
             rol: usuario.rolNombre,
             permisos: usuario.permisos,
+            debeCambiarPassword: usuario.debeCambiarPassword,
             token
         };
     }
