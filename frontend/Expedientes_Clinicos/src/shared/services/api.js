@@ -37,7 +37,8 @@ export const apiCall = async (endpoint, options = {}) => {
 
     if (!response.ok) {
       console.error("Error detallado del servidor:", data);
-      throw new Error(data.error || "Error en la solicitud");
+      const errorMsg = data.error?.mensaje || data.error || "Error en la solicitud";
+      throw new Error(errorMsg);
     }
     return data;
   } catch (error) {
