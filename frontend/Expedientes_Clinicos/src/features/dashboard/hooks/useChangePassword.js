@@ -25,13 +25,6 @@ export function useChangePassword() {
       await securityService.cambiarPassword(user.id, currentPassword, newPassword);
       setSuccess("Contraseña actualizada correctamente");
       
-      // Actualizar el flag en sessionStorage
-      sessionStorage.setItem("debeCambiarPassword", "false");
-      
-      // Actualizar el objeto usuario en sessionStorage
-      const usuarioActualizado = { ...user, debeCambiarPassword: false };
-      sessionStorage.setItem("user", JSON.stringify(usuarioActualizado));
-      
       return true;
     } catch (err) {
       setError(err.message || "Error al cambiar la contraseña");
