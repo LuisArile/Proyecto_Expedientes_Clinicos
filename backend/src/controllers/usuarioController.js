@@ -131,7 +131,13 @@ class usuarioController {
 
     enviarCredenciales = capturarAsync(async (req, res, next) => {
         const { id } = req.params;
-        const resultado = await this.usuarioService.enviarCredenciales(id);
+        const administradorId = req.usuario?.id;
+
+        if (!administradorId) {
+            throw new ErrorNoAutorizado('No se encontró información del administrador');
+        }
+
+        const resultado = await this.usuarioService.enviarCredenciales(id, administradorId);
         res.json(resultado);
     });
 
