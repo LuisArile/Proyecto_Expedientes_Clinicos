@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import { Search, Eye, FileText, Loader2, Stethoscope } from "lucide-react";
 
 import { Button } from "@components/ui/button";
@@ -11,7 +11,7 @@ import { SearchFilterCard } from "./SearchFilterCard";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
-export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica }) {
+export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica, onNavigate, modo }) {
     
     const { checkPermission } = useAuth();
 
@@ -25,6 +25,16 @@ export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica }) 
         busquedaRealizada,
         ejecutarBusqueda
     } = useBuscarPacientes();
+
+    const handleSeleccionarPaciente = useCallback((p) => {
+        if (modo === "agendar") {
+            onConsultaMedica?.(p);
+            onNavigate("formulario-agendar-cita");
+        } else if (modo === "hoy") {
+            onConsultaMedica?.(p);
+            onNavigate("formulario-registro-hoy");
+        }
+    }, [modo, onConsultaMedica, onNavigate]);
 
     const columns = useMemo( () => {
         return [
@@ -74,11 +84,20 @@ export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica }) 
                                 <Stethoscope className="size-4 mr-1" /> Consulta
                             </Button>
                         )}
+                        {modo && (
+                            <Button
+                                size="sm"
+                                onClick={() => handleSeleccionarPaciente(p)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                            >
+                                Seleccionar
+                            </Button>
+                        )}
                     </div>
                 ),
             },
         ];
-    }, [checkPermission, onVerExpediente, onConsultaMedica]);
+    }, [checkPermission, onVerExpediente, onConsultaMedica, handleSeleccionarPaciente, modo]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
