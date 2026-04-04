@@ -61,7 +61,8 @@ describe('UsuarioService', () => {
             usuarioRepositoryMock.obtenerPorCorreo.mockResolvedValue(null);
             usuarioRepositoryMock.filtrarNombreUsuario.mockResolvedValue(false);
             Encriptador.encriptar.mockResolvedValue("hash123");
-            usuarioRepositoryMock.crear.mockResolvedValue(usuarioMock);
+            usuarioRepositoryMock.crear.mockResolvedValue({ usuario: usuarioMock });
+            emailServiceMock.enviarCredenciales.mockResolvedValue(true);
 
             const result = await usuarioService.crear(data, 99);
 
@@ -69,7 +70,7 @@ describe('UsuarioService', () => {
             expect(auditoriaServiceMock.registrarUsuario).toHaveBeenCalledWith(
                 99,
                 'USUARIO_CREADO',
-                usuarioMock
+                usuarioMock.id
             );
 
             expect(result).toEqual(usuarioMock);
@@ -220,8 +221,8 @@ describe('UsuarioService', () => {
                 "5678"
             );
 
-            expect(usuarioRepositoryMock.actualizarPassword)
-                .toHaveBeenCalledWith(1, "hashNew");
+            expect(usuarioRepositoryMock.actualizar)
+                .toHaveBeenCalledWith(1, { clave: "hashNew", debeCambiarPassword: false });
 
             expect(auditoriaServiceMock.registrar)
                 .toHaveBeenCalledWith(1, 'CAMBIO_PASSWORD', 'El usuario actualizó su contraseña');
