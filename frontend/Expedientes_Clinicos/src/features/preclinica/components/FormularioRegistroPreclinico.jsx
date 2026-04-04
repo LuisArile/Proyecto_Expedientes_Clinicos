@@ -15,15 +15,22 @@ import { useBuscarPacientes } from "@/features/expedientes/hooks/useBuscarPacien
 import { useRegistroPreclinico } from "../hooks/useRegistroPreclinico";
 import { DataTable } from "@components/common/DataTable";
 
-export function FormularioRegistroPreclinico({ onVolver, onSuccess }) {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm();
+export function FormularioRegistroPreclinico({ onVolver, onSuccess, paciente }) {
+  
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
-  const [expedienteSeleccionado, setExpedienteSeleccionado] = useState(null);
+  const [expedienteSeleccionado, setExpedienteSeleccionado] = useState(paciente || null);
+
+  React.useEffect(() => {
+      if (paciente && paciente.expedientes) {
+          setExpedienteSeleccionado({
+              idExpediente: paciente.expedientes.idExpediente,
+              numeroExpediente: paciente.expedientes.numeroExpediente,
+              nombrePaciente: `${paciente.nombre} ${paciente.apellido}`,
+              dni: paciente.dni,
+          });
+      }
+  }, [paciente]);
 
   const {
     termino, setTermino,
@@ -104,7 +111,7 @@ export function FormularioRegistroPreclinico({ onVolver, onSuccess }) {
       />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Paso 1: Buscar y seleccionar paciente */}
+        {/* Buscar y seleccionar paciente */}
         {!expedienteSeleccionado && (
           <div className="space-y-6">
             <SearchFilterCard
@@ -139,7 +146,7 @@ export function FormularioRegistroPreclinico({ onVolver, onSuccess }) {
           </div>
         )}
 
-        {/* Paso 2: Formulario de signos vitales */}
+        {/* Formulario de signos vitales */}
         {expedienteSeleccionado && (
           <Card className="shadow-lg border-blue-100">
             <CardHeader className="bg-gradient-to-r from-green-50 to-white border-b border-green-100">

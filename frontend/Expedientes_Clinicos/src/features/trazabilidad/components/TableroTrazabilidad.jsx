@@ -2,15 +2,11 @@ import { useState } from "react";
 import { Card, CardContent } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { Badge } from "@components/ui/badge";
-import { Input } from "@components/ui/input";
 import { Calendar, Clock, User, AlertCircle, Activity, Search, Filter, RefreshCw, Bell, CheckCircle2, } from "lucide-react";
 import { ScrollArea } from "@components/ui/scroll-area";
 import { PageHeader } from "@components/layout/PageHeader";
 import { StatCard } from "@components/common/StatCard";
-import { FilterInput, FilterSelect } from "@components/common/FilterSearch"
-
-
-// import { useAuth } from "../context/auth-context";
+import { FilterInput } from "@components/common/FilterSearch"
 
 // Datos simulados
 const pacientesSimulados = [
@@ -90,7 +86,6 @@ const pacientesSimulados = [
 ];
 
 export function TableroTrazabilidad(onVolver) {
-    // const { user } = useAuth();
     const [pacientes] = useState(pacientesSimulados);
     const [busqueda, setBusqueda] = useState("");
 
