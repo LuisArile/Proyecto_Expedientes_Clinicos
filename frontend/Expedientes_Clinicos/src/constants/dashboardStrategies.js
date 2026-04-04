@@ -44,7 +44,7 @@ export const DASHBOARD_CONFIG = {
           border: "border-orange-200",
           hoverBorder: "hover:border-orange-400",
           bg: "from-white to-orange-50",
-          navigateTo: "tablero"
+          navigateTo: "tablero-trazabilidad"
         },
         {
           id: "agenda",

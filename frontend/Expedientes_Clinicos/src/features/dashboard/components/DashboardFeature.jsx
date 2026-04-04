@@ -1,4 +1,4 @@
-import { Clock, UserCheck, PillBottle, Activity, Users, BarChart3, Pill, TestTube, FileText, Stethoscope, Calendar, NotebookText, Component } from "lucide-react";
+import { Clock, UserCheck, PillBottle, Activity, Users, BarChart3, Pill, TestTube, FileText, Stethoscope, Calendar, NotebookText } from "lucide-react";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useDashboardData } from "../hooks/useDashboardData";

@@ -27,6 +27,7 @@ export const VIEW_COMPONENTS = {
     "changepassword": { component: Changepassword },
     "auditoria": { component: Auditoria },
     "preclinica": { component: FormularioRegistroPreclinico },
+    "consulta": { component: ConsultaMedica },
     "pacientes-evaluados": { component: ListaRegistrosPreclinicos },
     "consulta-medica": { component: ConsultaMedica },
     "gestion-usuarios": { component: GestionUsuarios},
@@ -36,12 +37,14 @@ export const VIEW_COMPONENTS = {
     "error": { component: ModuloEnConstruccion },
 
     //Modulos de Triaje
-    "tablero": { component: TableroTrazabilidad },
+    "tablero-trazabilidad": { component: TableroTrazabilidad },
     "agenda-citas": { component: AgendaCitas },
         "formulario-agendar-cita": { component: FormularioCita, modo: "agendar" },
         "formulario-registro-hoy": { component: FormularioCita, modo: "hoy" },
     "cola-preclinica": { component: ColaPreclinica },
     "cola-consulta": { component: ColaConsulta },
+    "buscar-paciente-agendar": { component: BuscarPaciente, modo: "agendar" },
+    "buscar-paciente-hoy": { component: BuscarPaciente, modo: "hoy" },
 };
 
 export const getView = (viewId) => VIEW_COMPONENTS[viewId] || VIEW_COMPONENTS["error"];
