@@ -48,15 +48,22 @@ class usuarioService{
         data.clave= await Encriptador.encriptar(data.clave);
 
         //creamos usuario
-        const usuario= await this.usuarioRepository.crear(data);
+        const result = await this.usuarioRepository.crear(data);
+        const usuario = result.usuario;
 
-        if(usuario&&usuario.id){
+        if(usuario && usuario.id){
             await this.auditoriaService.registrarUsuario(
             usuarioCreadorId,
             'USUARIO_CREADO',
-            usuario
+            usuario.id
         );
-    }
+
+            // Enviar credenciales automáticamente después de crear el usuario
+            try {
+                await this.enviarCredenciales(usuario.id, usuarioCreadorId);
+            } catch (error) {
+            }
+        }
             return usuario;
     }
 
