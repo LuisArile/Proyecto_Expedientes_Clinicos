@@ -1,3 +1,4 @@
+const { skip } = require('@prisma/client/runtime/library');
 const prisma = require('../config/prisma');
 
 class consultaMedicaService {
@@ -71,6 +72,23 @@ class consultaMedicaService {
                 // Crear recetas si hay
                 if (datos.recetas?.length > 0) {
                     await this.recetaRepository.crearMultiples(consulta.id, datos.recetas, tx);
+                }
+
+                // EXÁMENES 
+                if (datos.examenes?.length > 0) {
+
+                    const examenesData = datos.examenes
+                        .filter(e => e.examenId)
+                        .map(e => ({
+                            consultaId: consulta.id,
+                            examenId: e.examenId,
+                            prioridad: (e.prioridad || "MEDIA").toUpperCase()
+                        }));
+
+                    await tx.consultaExamen.createMany({
+                        data: examenesData,
+                        skipDuplicates: true
+                    });
                 }
 
                 // Registrar en Auditoría 

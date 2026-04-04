@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import { registrarConsultaMedica } from "../services/consultaService";
+import { registrarConsultaMedica, obtenerExamenesActivos } from "../services/consultaService";
 import { toast } from "sonner";
 
 export const useConsultaMedica = (pacienteId, formMethods) => {
 
     const [guardando, setGuardando] = useState(false);
     const [modal, setModal] = useState({ open: false, result: { success: false, message: "" } });
+
+    const [examenesDisponibles, setExamenesDisponibles] = useState([]);
 
     const { reset, watch } = formMethods;
     const formValues = watch();
@@ -14,6 +16,22 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
     const isRestoring = useRef(false);
     const hasLoaded = useRef(false);
 
+    //  CARGAR EXÁMENES
+    useEffect(() => {
+        const cargarExamenes = async () => {
+            try {
+                const data = await obtenerExamenesActivos();
+                setExamenesDisponibles(data);
+            } catch (error) {
+                console.error("Error cargando exámenes", error);
+                toast.error("No se pudieron cargar los exámenes");
+            }
+        };
+
+        cargarExamenes();
+    }, []);
+
+    //  RESTORE LOCAL STORAGE
     useEffect(() => {
         if (!STORAGE_KEY || hasLoaded.current) return;
 
@@ -34,11 +52,13 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
         }
     }, [STORAGE_KEY, reset]);
 
+    //  AUTOSAVE
     useEffect(() => {
         if (!STORAGE_KEY || isRestoring.current) return;
 
         const tieneContenido = formValues?.diagnostico?.trim() || 
-                               (formValues?.medicamentos && formValues.medicamentos.length > 0);
+                               (formValues?.medicamentos && formValues.medicamentos.length > 0) ||
+                               (formValues?.examenes && formValues.examenes.length > 0); 
                       
         if (!tieneContenido) return;
 
@@ -50,7 +70,8 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
 
         return () => clearTimeout(timeoutId);
     }, [formValues, STORAGE_KEY]);
-    
+   
+    //  GUARDAR CONSULTA
     const guardarConsulta = async (expedienteId, data) => {
         setGuardando(true);
         try {
@@ -90,5 +111,11 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
         }
     };
 
-    return { guardarConsulta, guardando, modal, setModal };
+    return { 
+        guardarConsulta, 
+        guardando, 
+        modal, 
+        setModal,
+        examenesDisponibles 
+    };
 };

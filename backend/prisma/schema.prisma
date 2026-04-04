@@ -127,6 +127,7 @@ model ConsultaMedica {
   expediente    Expediente     @relation(fields: [expedienteId], references: [idExpediente])
   medico        Usuario        @relation(fields: [medicoId], references: [id])
   recetas       RecetaMedica[]
+  examenes      ConsultaExamen[]
 
   @@map("ConsultaMedica")
 }
@@ -142,4 +143,31 @@ model RecetaMedica {
   consulta     ConsultaMedica @relation(fields: [consultaId], references: [id])
 
   @@map("RecetaMedica")
+}
+
+model Examen {
+  id              Int               @id @default(autoincrement())
+  nombre          String            @db.NVarChar(100)
+  especialidad    String            @db.NVarChar(100)
+  estado          Boolean           @default(true)
+  fechaCreacion   DateTime          @default(now())
+
+  consultas       ConsultaExamen[]
+
+  @@map("Examen")
+}
+
+model ConsultaExamen {
+  id            Int             @id @default(autoincrement())
+  consultaId    Int
+  examenId      Int
+
+  consulta      ConsultaMedica  @relation(fields: [consultaId], references: [id])
+  examen        Examen          @relation(fields: [examenId], references: [id])
+
+  createdAt     DateTime        @default(now())
+  prioridad     String          @default("MEDIA")
+
+  @@unique([consultaId, examenId]) // evita duplicados
+  @@map("ConsultaExamen")
 }
