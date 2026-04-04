@@ -86,6 +86,7 @@ class UsuarioRepository {
                 clave: data.clave,
                 idRol: data.idRol,
                 activo: data.activo,
+                debeCambiarPassword: data.debeCambiarPassword,
                 rolNombre: data.rol?.nombre || "SIN_ROL",
                 permisos: data.rol?.permisos?.map(p => p.permiso.nombre) || [],
                 ultimoAcceso: data.ultimoAcceso,
