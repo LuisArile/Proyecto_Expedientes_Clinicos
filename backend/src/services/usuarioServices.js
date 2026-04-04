@@ -178,8 +178,11 @@ class usuarioService{
         // Generar hash de la nueva contraseña
         const hashedPassword = await Encriptador.encriptar(newPassword);
 
-        // Actualizar contraseña en la base de datos
-        const resultado = await this.usuarioRepository.actualizarPassword(userId, hashedPassword);
+        // Actualizar contraseña y limpiar flag en la base de datos 
+        await this.usuarioRepository.actualizar(userId, {
+            clave: hashedPassword,
+            debeCambiarPassword: false
+        });
         
         await this.auditoriaService.registrar(userId, 'CAMBIO_PASSWORD', 'El usuario actualizó su contraseña');
 
@@ -212,21 +215,30 @@ class usuarioService{
         };
     }
 
-    async enviarCredenciales(id) {
-        const usuario = await this.usuarioRepository.obtenerPorId(id);
+    async enviarCredenciales(UsuarioId, administradorId) {
+        const usuario = await this.usuarioRepository.obtenerPorId(UsuarioId);
         if (!usuario) throw new Error("Usuario no encontrado");
 
         // Generar clave aleatoria
         const tempPassword = Math.random().toString(36).slice(-10);
         const hashed = await bcrypt.hash(tempPassword, 10);
 
-        await this.usuarioRepository.actualizar(id, { 
+        await this.usuarioRepository.actualizar(UsuarioId, { 
             clave: hashed, 
             debeCambiarPassword: true 
         });
 
         // Enviar correo (Nodemailer)
         await this.emailService.enviarCredenciales(usuario, tempPassword);
+
+        // Registrar en auditoría
+        const detalles = `Credenciales enviadas al usuario ${usuario.nombreUsuario} (${usuario.correo}).`;
+        
+        await this.auditoriaService.registrar(
+            administradorId,
+            'ENVIO_CREDENCIALES',
+            detalles
+        );
 
         return { message: "Credenciales enviadas con éxito" };
     }
