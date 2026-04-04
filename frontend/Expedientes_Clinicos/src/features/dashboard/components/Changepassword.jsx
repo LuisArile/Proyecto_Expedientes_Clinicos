@@ -13,7 +13,7 @@ import { useChangePassword } from "../hooks/useChangePassword";
 import { FormHeader } from "@components/common/FormHeader";
 
 export function Changepassword( { onVolver } ) {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const navigate = useNavigate();
   const { changePassword, loading, error, success, setError, setSuccess } = useChangePassword();
 
@@ -33,6 +33,7 @@ export function Changepassword( { onVolver } ) {
 
     const isOk = await changePassword(currentPassword, newPassword, confirmPassword);
       if (isOk) {
+        updateUser({ debeCambiarPassword: false });
         setTimeout(() => {
           if (onVolver) onVolver();
           else navigate("/dashboard");
