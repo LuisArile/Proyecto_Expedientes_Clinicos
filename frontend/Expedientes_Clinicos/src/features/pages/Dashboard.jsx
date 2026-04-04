@@ -38,6 +38,11 @@ export function Dashboard() {
   });
 
   const effectiveView = useMemo(() => {
+    // Si debe cambiar contraseña, muestra ese formulario 
+    if (user?.debeCambiarPassword) {
+      return "changepassword";
+    }
+
     const protectedViews = [
       "consulta-medica",
       "ver-expediente",
@@ -49,7 +54,7 @@ export function Dashboard() {
       return "buscar-paciente";
     }
     return currentView;
-  }, [currentView, selectedPaciente]);
+  }, [currentView, selectedPaciente, user?.debeCambiarPassword]);
 
   useEffect(() => {
     localStorage.setItem("sgec_view", currentView);
