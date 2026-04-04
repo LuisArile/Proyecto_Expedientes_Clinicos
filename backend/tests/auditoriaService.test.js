@@ -137,4 +137,70 @@ describe("AuditoriaService", () => {
             expect(result.eventos[0].modulo).toBe("General");
         });
     });
+
+    describe("Otros métodos de auditoría", () => {
+
+        test("registrarUsuario debe construir correctamente acción y detalles", async () => {
+            await service.registrarUsuario(1, "Creacion", 20);
+
+            expect(mockRepository.crear).toHaveBeenCalledWith(
+                {
+                    usuarioId: 1,
+                    accion: "Creacion DE USUARIO",
+                    detalles: "creacion DE USUARIO 20"
+                },
+                null
+            );
+        });
+
+        test("registrarEntidad debe construir correctamente acción y detalles dinámicos", async () => {
+            await service.registrarEntidad(1, "Paciente", "Actualizacion", 15);
+
+            expect(mockRepository.crear).toHaveBeenCalledWith(
+                {
+                    usuarioId: 1,
+                    accion: "Actualizacion de Paciente",
+                    detalles: "actualizacion de paciente 15"
+                },
+                null
+            );
+        });
+
+        test("registrarAccionMedica debe incluir tx cuando se envía", async () => {
+            await service.registrarAccionMedica(1, "CONSULTA", 30, "tx-999");
+
+            expect(mockRepository.crear).toHaveBeenCalledWith(
+                {
+                    usuarioId: 1,
+                    accion: "CONSULTA",
+                    detalles: "Registro de consulta para expediente 30"
+                },
+                "tx-999"
+            );
+        });
+
+        test("registrarAccionMedica debe usar null como tx por defecto", async () => {
+            await service.registrarAccionMedica(1, "RECETA", 40);
+
+            expect(mockRepository.crear).toHaveBeenCalledWith(
+                {
+                    usuarioId: 1,
+                    accion: "RECETA",
+                    detalles: "Registro de receta para expediente 40"
+                },
+                null
+            );
+        });
+
+        test("obtenerResumen debe delegar al repositorio", async () => {
+            const mockStats = { total: 100, usuarios: 10 };
+            mockRepository.obtenerEstadisticas.mockResolvedValue(mockStats);
+
+            const result = await service.obtenerResumen();
+
+            expect(mockRepository.obtenerEstadisticas).toHaveBeenCalled();
+            expect(result).toEqual(mockStats);
+        });
+
+    });
 });
