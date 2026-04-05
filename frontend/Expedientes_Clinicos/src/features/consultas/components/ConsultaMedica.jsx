@@ -22,6 +22,16 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
 
   const [errorValidacion, setErrorValidacion] = React.useState("");
 
+  React.useEffect(() => {
+    if (!errorValidacion) return;
+
+    const timer = setTimeout(() => {
+      setErrorValidacion("");
+    }, 10000); 
+
+    return () => clearTimeout(timer);
+  }, [errorValidacion]);
+
   const methods = useForm({
     defaultValues: { 
       diagnostico: "", 
@@ -44,21 +54,10 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
   const examenesWatch = useWatch({ control, name: "examenes" });
   const tipoDiag = useWatch({ control, name: "tipoDiagnostico" });
 
-  const { 
-    guardarConsulta, 
-    guardando, 
-    modal, 
-    setModal,
-    examenesDisponibles
-  } = useConsultaMedica(
-    paciente?.dni || null, 
-    methods, 
-    onSuccess
-  );
+  const { guardarConsulta, guardando, modal, setModal, examenesDisponibles } =
+    useConsultaMedica(paciente?.dni || null, methods, onSuccess);
 
   const alEnviar = async (data) => {
-    console.log("DATA:", data);
-
     setErrorValidacion("");
 
     const idExpediente = paciente?.expedientes?.idExpediente;
@@ -76,6 +75,19 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
       const examenValido = data.examenes.some(e => e.examenId);
       if (!examenValido) {
         setErrorValidacion("Debe seleccionar al menos un examen válido");
+        return;
+      }
+    }
+
+    if (data.tipoDiagnostico === "DEFINITIVO") {
+      if (!data.medicamentos || data.medicamentos.length === 0) {
+        setErrorValidacion("Debe agregar al menos un medicamento para diagnóstico definitivo");
+        return;
+      }
+
+      const medicamentoValido = data.medicamentos.some(m => m.nombre);
+      if (!medicamentoValido) {
+        setErrorValidacion("Debe ingresar al menos un medicamento válido");
         return;
       }
     }
@@ -194,7 +206,7 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
                       variant="outline"
                       size="sm"
                       onClick={() => appendExamen({ examenId: "" })}
-                      className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                      className="text-purple-600 border-purple-200 hover:bg-purple-50 cursor-pointer"
                     >
                       <Plus className="mr-1 h-4 w-4" /> Agregar Examen
                     </Button>
@@ -266,9 +278,88 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
                 </div>
               </FormSection>
 
-              {/* ✅ ALERTA DE VALIDACIÓN */}
+              {/* MEDICAMENTOS (RESTAURADO COMPLETO) */}
+              {tipoDiag === "DEFINITIVO" && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end border-b border-purple-100 pb-2">
+                    <h3 className="text-sm font-semibold text-purple-800 uppercase tracking-wider flex items-center gap-2">
+                      <Pill className="size-4" /> Plan de Tratamiento
+                    </h3>
+
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => append({ nombre: "", dosis: "", frecuencia: "", duracion: "" })}
+                      className="text-purple-600 border-purple-200 hover:bg-purple-50 cursor-pointer"
+                    >
+                      <Plus className="mr-1 h-4 w-4" /> Agregar Medicamento
+                    </Button>
+                  </div>
+
+                  {fields.length === 0 ? (
+                    <p className="text-center py-8 text-gray-400 italic text-sm border-2 border-dashed border-gray-100 rounded-xl">
+                      No hay medicamentos registrados.
+                    </p>
+                  ) : (
+                    <div className="grid gap-3">
+                      {fields.map((field, index) => (
+                        <div
+                          key={field.id}
+                          className="grid w-full grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 bg-gray-50/50 p-4 rounded-xl border border-gray-100"
+                        >
+
+                          {/* MEDICAMENTO */}
+                          <FormField label="Medicamento">
+                            <Input {...register(`medicamentos.${index}.nombre`)} 
+                              className="border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200"
+                            />
+                          </FormField>
+
+                          {/* DOSIS */}
+                          <FormField label="Dosis">
+                            <Input {...register(`medicamentos.${index}.dosis`)} 
+                              className="border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200"
+                            />
+                          </FormField>
+
+                          {/* FRECUENCIA */}
+                          <FormField label="Frecuencia">
+                            <Input {...register(`medicamentos.${index}.frecuencia`)} 
+                              className="border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200"
+                            />
+                          </FormField>
+
+                          {/* DURACIÓN */}
+                          <FormField label="Duración">
+                            <Input {...register(`medicamentos.${index}.duracion`)} 
+                              className="border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200"
+                            />
+                          </FormField>
+
+                          {/* DELETE */}
+                          <div className="flex items-center justify-center">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => remove(index)}
+                              className="text-red-400 hover:text-red-600"
+                            >
+                              <Trash2 className="size-5" />
+                            </Button>
+                          </div>
+
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ALERTA DE VALIDACIÓN */}
               {errorValidacion && (
-                <Alert className="border-red-200 bg-red-50">
+                <Alert className="border-red-200 bg-red-50 ">
                   <AlertDescription className="text-red-700">
                     {errorValidacion}
                   </AlertDescription>
@@ -282,7 +373,12 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
                   Finalizar y Registrar
                 </Button>
 
-                <Button type="button" variant="ghost" onClick={onVolver} className="h-12 px-8 text-gray-500 hover:text-red-600">
+                <Button type="button" 
+                        variant="ghost" 
+                        onClick={() => {  
+                          onVolver()
+                        }} 
+                        className="h-12 px-8 text-gray-500 hover:text-red-600">
                   Descartar cambios
                 </Button>
               </div>

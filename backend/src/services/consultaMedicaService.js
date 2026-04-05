@@ -51,9 +51,14 @@ class consultaMedicaService {
             const errDiag = this.validarDiagnostico(datos.diagnostico);
             if (errDiag.length > 0) throw new Error(errDiag.join(', '));
 
+            // FILTRAR RECETAS VÁLIDAS (para evitar guardar recetas vacías o incompletas)
+            const recetasValidas = (datos.recetas || []).filter(r => 
+                r.medicamento?.trim() && r.dosis?.trim()
+            );
+
             // Si es definitivo se requiere recetas
             if (datos.diagnostico.tipo === 'DEFINITIVO') {
-                const errRec = this.validarRecetas(datos.recetas);
+                const errRec = this.validarRecetas(recetasValidas);
                 if (errRec.length > 0) throw new Error(errRec.join(', '));
             }
 
@@ -69,9 +74,9 @@ class consultaMedicaService {
                     tipoConsulta: datos.diagnostico.tipo
                 }, tx);
 
-                // Crear recetas si hay
-                if (datos.recetas?.length > 0) {
-                    await this.recetaRepository.crearMultiples(consulta.id, datos.recetas, tx);
+                // Crear recetas si hay (usando filtradas)
+                if (recetasValidas.length > 0) {
+                    await this.recetaRepository.crearMultiples(consulta.id, recetasValidas, tx);
                 }
 
                 // EXÁMENES 
@@ -86,8 +91,7 @@ class consultaMedicaService {
                         }));
 
                     await tx.consultaExamen.createMany({
-                        data: examenesData,
-                        skipDuplicates: true
+                        data: examenesData
                     });
                 }
 

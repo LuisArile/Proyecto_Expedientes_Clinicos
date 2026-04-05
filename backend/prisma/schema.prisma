@@ -168,6 +168,6 @@ model ConsultaExamen {
   createdAt     DateTime        @default(now())
   prioridad     String          @default("MEDIA")
 
-  @@unique([consultaId, examenId]) // evita duplicados
+  @@unique([consultaId, examenId]) 
   @@map("ConsultaExamen")
 }

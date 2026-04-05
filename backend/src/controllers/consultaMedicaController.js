@@ -7,7 +7,7 @@ class consultaMedicaController {
     }
 
     registrar = capturarAsync(async (req, res, next) => {
-        
+
             const { expedienteId } = req.params;
             const medicoId = req.usuario.id;
             const datos = req.body;

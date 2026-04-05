@@ -56,10 +56,15 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
     useEffect(() => {
         if (!STORAGE_KEY || isRestoring.current) return;
 
-        const tieneContenido = formValues?.diagnostico?.trim() || 
-                               (formValues?.medicamentos && formValues.medicamentos.length > 0) ||
-                               (formValues?.examenes && formValues.examenes.length > 0); 
-                      
+        const tieneMedicamentosValidos = formValues?.medicamentos?.some(med =>
+            med.nombre?.trim() && med.dosis?.trim()
+        );
+
+        const tieneContenido =
+            formValues?.diagnostico?.trim() ||
+            tieneMedicamentosValidos || 
+            (formValues?.examenes && formValues.examenes.length > 0); 
+
         if (!tieneContenido) return;
 
         const timeoutId = setTimeout(() => {
