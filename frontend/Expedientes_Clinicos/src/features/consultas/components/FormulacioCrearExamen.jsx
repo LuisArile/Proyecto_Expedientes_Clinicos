@@ -4,13 +4,12 @@ import { TestTube, Save, X } from "lucide-react";
 
 import { useExamenes } from "../hooks/useExamenes";
 
-import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Card, CardContent, CardHeader } from "@components/ui/card";
 
 import { PageHeader } from "@components/layout/PageHeader";
 import { FormHeader } from "@components/common/FormHeader";
-import { FormField } from "@components/common/FormField";
+import { ValidatedInput } from "@components/validaciones/validarInputExamen";
 import { FormSection } from "@components/common/FormSection";
 
 export function FormularioCrearExamen({ onVolver, onSuccess, onNavigate }) {
@@ -88,35 +87,25 @@ export function FormularioCrearExamen({ onVolver, onSuccess, onNavigate }) {
               <FormSection title="Información del Examen">
 
                 <div className="flex flex-col gap-6">
-
-                  <FormField
+                  <ValidatedInput
+                    name="nombre"
                     label="Nombre del Examen"
-                    required
+                    register={register}
                     error={errors.nombre?.message}
-                  >
-                    <Input
-                      {...register("nombre", { required: "El nombre es obligatorio" })}
-                      placeholder="Ej: Hemograma Completo"
-                      className={`w-full h-11 rounded-lg border transition-all 
-                      focus:ring-2 focus:ring-blue-500 focus:outline-none
-                      ${inputClass("nombre")}`}
-                    />
-                  </FormField>
+                    placeholder="Ej: Hemograma Completo"
+                    minLength={5}
+                    onlyLetters={true}
+                  />
 
-                  <FormField
+                  <ValidatedInput
+                    name="especialidad"
                     label="Especialidad"
-                    required
+                    register={register}
                     error={errors.especialidad?.message}
-                  >
-                    <Input
-                      {...register("especialidad", { required: "La especialidad es obligatoria" })}
-                      placeholder="Ej: Laboratorio Clínico"
-                      className={`w-full h-11 rounded-lg border transition-all 
-                      focus:ring-2 focus:ring-blue-500 focus:outline-none
-                      ${inputClass("especialidad")}`}
-                    />
-                  </FormField>
-
+                    placeholder="Ej: Laboratorio Clínico"
+                    minLength={4}
+                    onlyLetters={true}
+                  />
                 </div>
 
               </FormSection>

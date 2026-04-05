@@ -116,11 +116,25 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
         }
     };
 
+    const limpiarBorrador = () => {
+        if (STORAGE_KEY) {
+            localStorage.removeItem(STORAGE_KEY);
+        }
+        reset({
+            diagnostico: "",
+            tipoDiagnostico: "",
+            observacionesClinicas: "",
+            medicamentos: [],
+            examenes: []
+        });
+    };
+
     return { 
         guardarConsulta, 
         guardando, 
         modal, 
         setModal,
-        examenesDisponibles 
+        examenesDisponibles,
+        limpiarBorrador
     };
 };

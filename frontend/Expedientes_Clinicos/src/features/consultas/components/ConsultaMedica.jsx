@@ -3,7 +3,7 @@ import { useForm, useFieldArray, useWatch } from "react-hook-form";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useConsultaMedica } from "../hooks/useConsultaMedica";
-import { Stethoscope, FileText, Save, Clock, Pill, Plus, Trash2, Loader2, FlaskConical } from "lucide-react";
+import { Stethoscope, FileText, Save, Clock, Pill, Plus, Trash2, Loader2, FlaskConical, Library } from "lucide-react";
 
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
@@ -33,6 +33,7 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
   }, [errorValidacion]);
 
   const methods = useForm({
+    mode: "onChange",
     defaultValues: { 
       diagnostico: "", 
       tipoDiagnostico: "", 
@@ -54,7 +55,7 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
   const examenesWatch = useWatch({ control, name: "examenes" });
   const tipoDiag = useWatch({ control, name: "tipoDiagnostico" });
 
-  const { guardarConsulta, guardando, modal, setModal, examenesDisponibles } =
+  const { guardarConsulta, guardando, modal, setModal, examenesDisponibles, limpiarBorrador } =
     useConsultaMedica(paciente?.dni || null, methods, onSuccess);
 
   const alEnviar = async (data) => {
@@ -171,7 +172,10 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
                 <div className="md:col-span-2">
                   <FormField label="Descripción Clínica" required error={errors.diagnostico?.message}>
                     <Textarea 
-                      {...register("diagnostico", { required: "El diagnóstico es obligatorio" })}
+                      {...register("diagnostico", {required: "El diagnóstico es obligatorio", validate: (value) => {
+                                                  if (value.trim() === "") {return "No puede estar vacío o solo espacios";}
+                                                  if (value.length < 10) {return "Debe tener al menos 10 caracteres";}
+                                                  return true;}})}
                       placeholder="Describa el estado del paciente..."
                       className="border border-gray-300 focus-visible:ring-purple-500"
                     />
@@ -373,11 +377,7 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
                   Finalizar y Registrar
                 </Button>
 
-                <Button type="button" 
-                        variant="ghost" 
-                        onClick={() => {  
-                          onVolver()
-                        }} 
+                <Button type="button" variant="ghost" onClick={() => { limpiarBorrador(); onVolver(); }} 
                         className="h-12 px-8 text-gray-500 hover:text-red-600">
                   Descartar cambios
                 </Button>
