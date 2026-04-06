@@ -9,10 +9,12 @@ export const authService = {
 
             sessionStorage.setItem("token", result.token);
             sessionStorage.setItem("user", JSON.stringify(result.data));
+            sessionStorage.setItem("debeCambiarPassword", result.data.debeCambiarPassword ? "true" : "false");
 
             return {
             success: true,
             user: result.data,
+            debeCambiarPassword: result.data.debeCambiarPassword
             };
         }
 
@@ -36,6 +38,7 @@ export const authService = {
         } finally {
             sessionStorage.removeItem("user");
             sessionStorage.removeItem("token");
+            sessionStorage.removeItem("debeCambiarPassword");
         }
     },
 };

@@ -35,12 +35,19 @@ export function AuthProvider({ children }) {
         return user?.permisos?.includes(permiso);
     };
 
+    const updateUser = (updates) => {
+        const updatedUser = { ...user, ...updates };
+        setUser(updatedUser);
+        sessionStorage.setItem("user", JSON.stringify(updatedUser));
+    };
+
     const value = {
         user,
         login,
         logout,
         checkPermission,
         isAuthenticated: !!user,
+        updateUser,
     };
 
     return (

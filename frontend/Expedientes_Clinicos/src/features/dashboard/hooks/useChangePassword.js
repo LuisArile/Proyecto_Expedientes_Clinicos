@@ -10,7 +10,8 @@ export function useChangePassword() {
   const [success, setSuccess] = useState("");
 
   const changePassword = async (currentPassword, newPassword, confirmPassword) => {
-    setLoading(true);    setError("");
+    setLoading(true);    
+    setError("");
     setSuccess("");
     
     const validationError = validatePasswordSchema(currentPassword, newPassword, confirmPassword);
@@ -23,6 +24,7 @@ export function useChangePassword() {
       setLoading(true);
       await securityService.cambiarPassword(user.id, currentPassword, newPassword);
       setSuccess("Contraseña actualizada correctamente");
+      
       return true;
     } catch (err) {
       setError(err.message || "Error al cambiar la contraseña");

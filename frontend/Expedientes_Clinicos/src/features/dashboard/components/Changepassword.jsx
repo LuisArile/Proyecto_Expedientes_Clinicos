@@ -13,7 +13,7 @@ import { useChangePassword } from "../hooks/useChangePassword";
 import { FormHeader } from "@components/common/FormHeader";
 
 export function Changepassword( { onVolver } ) {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const navigate = useNavigate();
   const { changePassword, loading, error, success, setError, setSuccess } = useChangePassword();
 
@@ -33,6 +33,7 @@ export function Changepassword( { onVolver } ) {
 
     const isOk = await changePassword(currentPassword, newPassword, confirmPassword);
       if (isOk) {
+        updateUser({ debeCambiarPassword: false });
         setTimeout(() => {
           if (onVolver) onVolver();
           else navigate("/dashboard");
@@ -160,8 +161,10 @@ export function Changepassword( { onVolver } ) {
 
               <Button
                 type="button"
-                // onClick={onCancel}
-                onClick={() => { navigate("/dashboard");}}
+                onClick={() => {
+                  if (onVolver) onVolver();
+                  else navigate("/dashboard");
+                }}
                 className="w-full py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-red-600 hover:text-white"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" /> Cancelar y volver
