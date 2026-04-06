@@ -1,13 +1,18 @@
-import React, { useMemo, useCallback } from "react";
-import { Search, Eye, FileText, Loader2, Stethoscope } from "lucide-react";
+import React, { useCallback, useMemo } from "react";
+import { Search, FileText, Loader2 } from "lucide-react";
 
-import { Button } from "@components/ui/button";
 import { Card, CardContent } from "@components/ui/card";
-import { PageHeader } from "@components/layout/PageHeader";
+
 import { DataTable } from "@components/common/DataTable";
+import { PageHeader } from "@components/layout/PageHeader";
 import { PaginationControls } from "@components/common/PaginationControls";
-import { useBuscarPacientes } from "../hooks/useBuscarPaciente";
+
 import { SearchFilterCard } from "./SearchFilterCard";
+import { useBuscarPacientes } from "../hooks/useBuscarPaciente";
+
+import { useTableFactory } from "@/shared/hooks/useTableFactory";
+import { pacienteActions } from "@/features/expedientes/components/actions/pacienteActions";
+import { getPacienteBaseColumns } from "@/features/expedientes/components/columns/pacienteBaseColumns";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
@@ -18,12 +23,9 @@ export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica, on
     const {
         termino, setTermino,
         criterio, setCriterio,
-        pagina,
-        paginacion,
-        buscando,
-        resultados,
-        busquedaRealizada,
-        ejecutarBusqueda
+        pagina, paginacion,
+        buscando, resultados,
+        busquedaRealizada, ejecutarBusqueda
     } = useBuscarPacientes();
 
     const handleSeleccionarPaciente = useCallback((p) => {
@@ -36,68 +38,18 @@ export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica, on
         }
     }, [modo, onConsultaMedica, onNavigate]);
 
-    const columns = useMemo( () => {
-        return [
-            {
-                header: "Código de Expediente",
-                render: (p) => (
-                    <span className="font-mono text-sm text-blue-600">
-                        {p.expedientes?.numeroExpediente}
-                    </span>
-                ),
-            },
-            {
-                header: "Nombre Completo",
-                render: (p) => (
-                    <span className="font-medium text-gray-900">
-                        {`${p.nombre || ""} ${p.apellido || ""}`}
-                    </span>
-                ),
-            },
-            {
-                header: "Identidad",
-                render: (p) => (
-                    <span className="text-gray-600">
-                        {p.dni}
-                    </span>
-                ),
-            },
-            {
-                header: "Acciones",
-                className: "text-center",
-                render: (p) => (
-                    <div className="flex items-center justify-center gap-2 flex-wrap">
-                        <Button
-                            variant="outline" size="sm"
-                            onClick={() => onVerExpediente(p)}
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300"
-                        >
-                            <Eye className="size-4 mr-1" /> Ver expediente
-                        </Button>
+    const actions = useMemo(() => pacienteActions({
+        onVerExpediente,
+        onConsultaMedica,
+        checkPermission,
+        handleSeleccionarPaciente,
+        modo
+    }), [onVerExpediente, onConsultaMedica, checkPermission, handleSeleccionarPaciente, modo]);
 
-                        {checkPermission("CONSULTA_MEDICA") && (
-                            <Button
-                                size="sm" variant="outline"
-                                onClick={() => onConsultaMedica(p)}
-                                className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-300"
-                            >
-                                <Stethoscope className="size-4 mr-1" /> Consulta
-                            </Button>
-                        )}
-                        {modo && (
-                            <Button
-                                size="sm"
-                                onClick={() => handleSeleccionarPaciente(p)}
-                                className="bg-blue-600 hover:bg-blue-700 text-white"
-                            >
-                                Seleccionar
-                            </Button>
-                        )}
-                    </div>
-                ),
-            },
-        ];
-    }, [checkPermission, onVerExpediente, onConsultaMedica, handleSeleccionarPaciente, modo]);
+    const columns = useTableFactory({
+        columns: getPacienteBaseColumns(),
+        actions
+    });
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
@@ -165,6 +117,8 @@ export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica, on
                                 columns={columns}
                                 data={resultados}
                                 emptyMessage="No se encontraron pacientes con estos criterios."
+                                rowKey="dni"
+                                sortable
                             />
                         </Card>
 
