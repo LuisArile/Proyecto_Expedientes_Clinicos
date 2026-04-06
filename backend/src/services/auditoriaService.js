@@ -99,7 +99,7 @@ class AuditoriaService {
     _modulo(accion) {
         const a = accion.toUpperCase();
         if (a.includes('EXPEDIENTE')) return 'Expedientes';
-        if (a.includes('SESION')) return 'Seguridad';
+        if (a.includes('SESION') || a.includes('CONTRASEÑA') || a.includes('PASSWORD')) return 'Seguridad';
         if (a.includes('USUARIO')) return 'Administración';
         if (a.includes('PRECLINICO')) return 'Preclínica';
         if (a.includes('CONSULTA')) return 'Consulta Médica';
