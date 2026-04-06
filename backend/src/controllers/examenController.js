@@ -32,7 +32,10 @@ class ExamenController {
 
   crear = async (req, res, next) => {
     try {
-      const data = await this.service.crear(req.body);
+      const data = await this.service.crear(
+        req.body,
+        req.usuario.id 
+      );
       res.status(201).json({ success: true, data });
     } catch (e) {
       next(e);
@@ -41,7 +44,7 @@ class ExamenController {
 
   actualizar = async (req, res, next) => {
     try {
-      const data = await this.service.actualizar(req.params.id, req.body);
+      const data = await this.service.actualizar(req.params.id, req.body, req.usuario.id);
       res.json({ success: true, data });
     } catch (e) {
       next(e);
@@ -50,7 +53,7 @@ class ExamenController {
 
   alternarEstado = async (req, res, next) => {
     try {
-      const data = await this.service.alternarEstado(req.params.id);
+      const data = await this.service.alternarEstado( req.params.id , req.usuario.id );
       res.json({ success: true, data });
     } catch (e) {
       next(e);

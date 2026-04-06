@@ -35,7 +35,7 @@ export function ValidatedInput({
       <Input
         {...register(name, validationRules)}
         placeholder={placeholder}
-        className="w-full h-11 rounded-lg border focus:ring-4 focus:ring-blue-400"
+        className="w-full h-11 rounded-lg border"
       />
     </FormField>
   );

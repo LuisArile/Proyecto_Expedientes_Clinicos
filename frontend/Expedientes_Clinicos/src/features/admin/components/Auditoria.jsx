@@ -9,6 +9,7 @@ import { ScrollArea } from "@components/ui/scroll-area";
 import { ModalDetalleBase } from "@components/common/ModalDetalleBase";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
+import { DetalleAuditoria } from "../../../shared/components/ui/detalleAuditoria";
 
 import { ROLE_STRATEGIES } from "@/constants/roles";
 import { DataTable } from "@components/common/DataTable";
@@ -195,9 +196,7 @@ export function Auditoria({ onVolver }) {
                 <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Metadatos del Registro</Label>
                 <span className="text-[10px] text-slate-300 font-mono italic">application/json</span>
               </div>
-              <pre className="bg-slate-50 text-slate-700 p-5 rounded-xl text-xs font-mono max-h-[280px] overflow-auto border border-slate-200 shadow-inner leading-relaxed">
-                {eventoSeleccionado?.detalles}
-              </pre>
+              <DetalleAuditoria detallesRaw={eventoSeleccionado?.detalles} />
             </div>
           </div>
         </ModalDetalleBase>

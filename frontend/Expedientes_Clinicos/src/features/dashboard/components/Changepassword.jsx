@@ -160,8 +160,7 @@ export function Changepassword( { onVolver } ) {
 
               <Button
                 type="button"
-                // onClick={onCancel}
-                onClick={() => { navigate("/dashboard");}}
+                onClick={() => onVolver ? onVolver() : navigate("inicio")}
                 className="w-full py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-red-600 hover:text-white"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" /> Cancelar y volver

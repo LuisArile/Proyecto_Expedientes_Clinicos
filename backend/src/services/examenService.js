@@ -1,6 +1,9 @@
+const { ENTIDADES, ACCIONES } = require("../utils/auditoriaConstantesExamen");
+
 class ExamenService {
-  constructor(repository) {
+  constructor(repository, auditoriaService) {
     this.repository = repository;
+    this.auditoriaService = auditoriaService;
   }
 
   async buscar(filtros) {
@@ -20,19 +23,52 @@ class ExamenService {
     return examen;
   }
 
-  async crear(data) {
+  async crear(data, usuarioId) {
     if (!data.nombre) throw new Error("Nombre requerido");
     if (!data.especialidad) throw new Error("Especialidad requerida");
 
-    return await this.repository.crear(data);
+    const examen = await this.repository.crear(data);
+    console.log("Examen creado:", examen);
+    // Registro en auditoria
+    if (this.auditoriaService && usuarioId) {
+      await this.auditoriaService.registrarEntidad(
+        usuarioId,
+        ENTIDADES.EXAMEN,
+        ACCIONES.CREAR,
+        examen.id
+      );
+    }
+
+    return examen;
   }
 
-  async actualizar(id, data) {
-    return await this.repository.actualizar(id, data);
+  async actualizar(idexamen, data, usuarioId) {
+    const examen = await this.repository.actualizar(idexamen, data);
+    // Registro en auditoria
+    if (this.auditoriaService && usuarioId) {
+      await this.auditoriaService.registrarEntidad(
+        usuarioId,
+        ENTIDADES.EXAMEN,
+        ACCIONES.ACTUALIZAR,
+        idexamen
+      );
+    }
+    return examen;
   }
 
-  async alternarEstado(id) {
-    return await this.repository.alternarEstado(id);
+  async alternarEstado( examenid, usuarioId ) {
+    const examen = await this.repository.alternarEstado(examenid);
+    // Registro en auditoria
+    
+    if ( this.auditoriaService && usuarioId ) {
+      await this.auditoriaService.registrarEntidad(
+        usuarioId,
+        ENTIDADES.EXAMEN,
+        ACCIONES.CAMBIAR_ESTADO,
+        examenid
+      );
+    }
+    return examen;
   }
 }
 

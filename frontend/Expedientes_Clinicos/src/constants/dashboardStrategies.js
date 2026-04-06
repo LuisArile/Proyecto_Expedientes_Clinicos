@@ -25,10 +25,10 @@ export const DASHBOARD_CONFIG = {
     modulesTitle: "Gestión de Infraestructura",
     modulesSubtitle: "Herramientas de control total",
     modules: [
-      { id: 'usuarios', title: "Usuarios", sub: "Gestionar usuarios", icon: Shield, color: "text-red-600", path: "/usuarios" },
-      { id: 'auditoria', title: "Auditoría", sub: "Eventos del sistema", icon: BarChart3, color: "text-purple-600", path: "/auditoria" },
+      { id: 'usuarios', title: "Usuarios", sub: "Gestionar usuarios", icon: Shield, color: "text-red-600", path: "gestion-usuarios" },
+      { id: 'auditoria', title: "Auditoría", sub: "Eventos del sistema", icon: BarChart3, color: "text-purple-600", path: "auditoria" },
       { id: 'medicamentos', title: "Medicamentos", sub: "Catálogo", icon: Pill, color: "text-green-600", path: "/medicamentos" },
-      { id: 'examenes', title: "Exámenes", sub: "Tipos de examen", icon: TestTube, color: "text-teal-600", path: "/examenes" },
+      { id: 'examenes', title: "Exámenes", sub: "Tipos de examen", icon: TestTube, color: "text-teal-600", path: "catalogo-examenes" },
     ]
   },
 
@@ -54,9 +54,9 @@ export const DASHBOARD_CONFIG = {
     modulesTitle: "Consulta Médica",
     modulesSubtitle: "Gestión de atención al paciente",
     modules: [
-      { id: 'pacientes', title: "Pacientes", sub: "Mis pacientes", icon: Users, color: "text-blue-600", path: "/pacientes" },
+      { id: 'pacientes', title: "Pacientes", sub: "Mis pacientes", icon: Users, color: "text-blue-600", path: "pacientes-evaluados" },
       { id: 'citas', title: "Citas", sub: "Agenda del día", icon: Calendar, color: "text-orange-600", path: "/citas" },
-      { id: 'expedientes', title: "Expedientes", sub: "Historial clínico", icon: Shield, color: "text-indigo-600", path: "/expedientes" },
+      { id: 'expedientes', title: "Expedientes", sub: "Historial clínico", icon: Shield, color: "text-indigo-600", path: "gestion-pacientes" },
     ]
   },
 
@@ -81,7 +81,7 @@ export const DASHBOARD_CONFIG = {
     modulesTitle: "Atención de Enfermería",
     modulesSubtitle: "Gestión de pacientes en triaje",
     modules: [ 
-      { id: 'triaje', title: "Triaje", sub: "Evaluar signos vitales", icon: Activity, color: "text-green-600", path: "/triaje" },
+      { id: 'triaje', title: "Triaje", sub: "Evaluar signos vitales", icon: Activity, color: "text-green-600", path: "preclinica" },
     ]
   },
 
@@ -107,7 +107,7 @@ export const DASHBOARD_CONFIG = {
     modulesTitle: "Atención al Público",
     modulesSubtitle: "Ingresos y agendamiento",
     modules: [
-       { id: 'citas', title: "Agendar Cita", sub: "Nueva cita médica", icon: Calendar, color: "text-blue-600", path: "/citas" },
+       { id: 'citas', title: "Agendar Cita", sub: "Nueva cita médica", icon: Calendar, color: "text-blue-600", path: "crear-expediente" },
     ]
   }
 };

@@ -1,4 +1,3 @@
-const { skip } = require('@prisma/client/runtime/library');
 const prisma = require('../config/prisma');
 
 class consultaMedicaService {
@@ -96,12 +95,12 @@ class consultaMedicaService {
                 }
 
                 // Registrar en Auditoría 
-                await this.auditoriaService?.registrarAccionMedica(
-                    medicoId,
-                    'CONSULTA_MEDICA',
-                    `Consulta para expediente ${expedienteId}`, 
-                    tx
-                );
+                await this.auditoriaService.registrarAccionMedica(medicoId, "CONSULTA_MEDICA", {
+                    idExpediente: expedienteId,
+                    idConsulta: consulta.id,
+                    examenes: Array.isArray(datos.examenes) ? datos.examenes.length > 0 : false,
+                    medicamentos: recetasValidas.length > 0
+                }, tx);
 
                 return consulta;
             });

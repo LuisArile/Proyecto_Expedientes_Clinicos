@@ -8,13 +8,6 @@ class AuditoriaService {
         this.auditoriaRepository = auditoriaRepository;
     }
 
-    /**
-     * Registra una acción en la auditoría
-     * @param {number} usuarioId - ID del usuario que realiza la acción
-     * @param {string} accion - Acción realizada (ej: "INICIO_SESION", "Creacion de expediente")
-     * @param {string} detalles - Detalles adicionales de la acción
-     * @returns {Promise<Object>} Registro creado
-     */
     async registrar(usuarioId, accion, detalles = null, tx = null) {
         try {
             if (!usuarioId) return null;
@@ -26,30 +19,15 @@ class AuditoriaService {
             }, tx);
         } catch (error) {
             console.error(`Error al registrar auditoría [${accion}]: ${error.message}`);
-            // No lanzamos el error para no afectar la operación principal
             return null;
         }
     }
 
-    /**
-     * Registra acciones de sesión
-     * @param {number} usuarioId - ID del usuario
-     * @param {string} tipo - "INICIO_SESION" o "CIERRE_SESION"
-     * @param {string} nombreUsuario - Nombre del usuario (opcional)
-     * @returns {Promise<Object>}
-     */
     async registrarSesion(usuarioId, tipo, nombreUsuario = null) {
         const detalles = `Usuario ${nombreUsuario} ${tipo === 'INICIO_SESION' ? 'entró al' : 'salió del'} sistema`;
         return this.registrar(usuarioId, tipo, detalles);
     }
 
-    /**
-     * Registra acciones sobre expedientes
-     * @param {number} usuarioId - ID del usuario
-     * @param {string} tipo - "Creacion", "Actualizacion", "Eliminacion"
-     * @param {number} idExpediente - ID del expediente afectado
-     * @returns {Promise<Object>}
-     */
     async registrarExpediente(usuarioId, tipo, datos, tx = null) {
         const accion = `${tipo} DE EXPEDIENTE`;
 
@@ -61,30 +39,15 @@ class AuditoriaService {
         return this.registrar(usuarioId, accion, detallesFinales, tx);
     }
 
-    /**
-     * Registra acciones sobre usuarios
-     * @param {number} usuarioId - ID del usuario que realiza la acción
-     * @param {string} tipo - "Creacion", "Actualizacion", "Eliminacion"
-     * @param {number} usuarioAfectadoId - ID del usuario afectado
-     * @returns {Promise<Object>}
-     */
     async registrarUsuario(usuarioId, tipo, usuarioAfectadoId) {
         const accion = `${tipo} DE USUARIO`;
         const detalles = `${tipo.toLowerCase()} DE USUARIO ${usuarioAfectadoId}`;
         return this.registrar(usuarioId, accion, detalles);
     }
 
-    /**
-     * Registra acciones genéricas sobre cualquier entidad
-     * @param {number} usuarioId - ID del usuario
-     * @param {string} entidad - Nombre de la entidad (ej: "Paciente", "Medicamento")
-     * @param {string} tipoAccion - "Creacion", "Actualizacion", "Eliminacion"
-     * @param {string} idEntidad - ID de la entidad afectada
-     * @returns {Promise<Object>}
-     */
     async registrarEntidad(usuarioId, entidad, tipoAccion, idEntidad) {
         const accion = `${tipoAccion} de ${entidad}`;
-        const detalles = `${tipoAccion.toLowerCase()} de ${entidad.toLowerCase()} ${idEntidad}`;
+        const detalles = `${tipoAccion.charAt(0).toUpperCase() + tipoAccion.slice(1)} de ${entidad.toLowerCase()} ${idEntidad}`;
         return this.registrar(usuarioId, accion, detalles);
     }
 
@@ -92,8 +55,18 @@ class AuditoriaService {
         return this.registrar(usuarioId, "BUSQUEDA", `Búsqueda global con término: ${termino}`);
     }
 
-    async registrarAccionMedica(usuarioId, tipo, expedienteId, tx = null) {
-        return this.registrar(usuarioId, tipo, `Registro de ${tipo.toLowerCase()} para expediente ${expedienteId}`, tx);
+    //  (CONSULTA MÉDICA)
+    async registrarAccionMedica(usuarioId, tipo, datos, tx = null) {
+        const detalles = {
+            tipo: "CONSULTA_MEDICA",
+            accion: tipo,
+            idExpediente: datos.idExpediente,
+            idConsulta: datos.idConsulta,
+            examenes: datos.examenes || false,
+            medicamentos: datos.medicamentos || false
+        };
+
+        return this.registrar(usuarioId, tipo, detalles, tx);
     }
 
     _modulo(accion) {
@@ -104,6 +77,7 @@ class AuditoriaService {
         if (a.includes('PRECLINICO')) return 'Preclínica';
         if (a.includes('CONSULTA')) return 'Consulta Médica';
         if (a.includes('RECETA')) return 'Receta';
+        if (a.includes('EXAMEN')) return 'Exámenes';
         return 'General';
     }
 

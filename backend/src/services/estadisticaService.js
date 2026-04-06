@@ -1,5 +1,5 @@
 class EstadisticaService {
-    constructor(prisma, usuarioRepository, auditoriaRepository, pacienteRepository, expedienteRepository, consultaMedicaRepository, registroPreclinicoRepository, recetaMedicaRepository) {
+    constructor(prisma, usuarioRepository, auditoriaRepository, pacienteRepository, expedienteRepository, consultaMedicaRepository, registroPreclinicoRepository, recetaMedicaRepository, examenRepository) {
         this.prisma = prisma;
         this.usuarioRepository = usuarioRepository;
         this.auditoriaRepository = auditoriaRepository;
@@ -8,6 +8,7 @@ class EstadisticaService {
         this.consultaMedicaRepository = consultaMedicaRepository;
         this.registroPreclinicoRepository = registroPreclinicoRepository;
         this.recetaRepository = recetaMedicaRepository;
+        this.examenRepository = examenRepository;
 
         this.rolesPorId = {
             1: 'ADMINISTRADOR',
@@ -44,10 +45,11 @@ class EstadisticaService {
     }
 
     async obtenerAdminData() {
-        const [usuarios, logsHoy, logsRecientes] = await Promise.all([
+        const [usuarios, logsHoy, logsRecientes, examenesActivos] = await Promise.all([
             this.usuarioRepository.obtenerTodos(),
             this.auditoriaRepository.obtenerLogsDeHoy(),
-            this.auditoriaRepository.obtenerRecientes(10)
+            this.auditoriaRepository.obtenerRecientes(10),
+            this.examenRepository.obtenerActivos()
         ]);
 
         return {
@@ -55,7 +57,7 @@ class EstadisticaService {
                 { id: 'usuarios', valor: usuarios.length, pie: "Total en sistema" },
                 { id: 'auditoria', valor: logsHoy.length, pie: "Movimientos de hoy" },
                 { id: 'medicamentos', valor: 0, pie: "Próximamente" },
-                { id: 'examenes', valor: 0, pie: "Próximamente" }
+                { id: 'examenes', valor: examenesActivos.length, pie: "Activos" }
             ],
             actividad: logsRecientes.map(log => ({
                 id: log.id,
