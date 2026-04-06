@@ -43,7 +43,7 @@ class UsuarioRepository {
         if (data.especialidad !== undefined) actualizarData.especialidad = data.especialidad;
         if (data.activo !== undefined) actualizarData.activo = data.activo;
         if (data.idRol !== undefined) actualizarData.idRol = Number(data.idRol);
-        if (data.debeCambiarPasword !== undefined) actualizarData.debeCambiarPasword = data.debeCambiarPassword;
+        if (data.debeCambiarPassword !== undefined) actualizarData.debeCambiarPassword = data.debeCambiarPassword;
 
         const usuario = await prisma.usuario.update({
             where: {id:Number(id)},
@@ -86,6 +86,7 @@ class UsuarioRepository {
                 clave: data.clave,
                 idRol: data.idRol,
                 activo: data.activo,
+                debeCambiarPassword: data.debeCambiarPassword,
                 rolNombre: data.rol?.nombre || "SIN_ROL",
                 permisos: data.rol?.permisos?.map(p => p.permiso.nombre) || [],
                 ultimoAcceso: data.ultimoAcceso,
