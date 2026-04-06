@@ -1,21 +1,22 @@
-import React, { useState } from "react";
-import { Shield, Clock, Search, Filter, FileText, User, Calendar, Activity, AlertCircle } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { Shield, Clock, Search, Filter, User, Calendar, Activity, AlertCircle } from "lucide-react";
 
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
-import { Badge } from "@components/ui/badge";
 import { Button } from "@components/ui/button";
+import { StatCard } from "@components/common/StatCard"
 import { ScrollArea } from "@components/ui/scroll-area";
-import { DialogoDetalleAuditoria } from "./DialogoDetalleAuditoria";
+import { FilterInput, FilterSelect } from "@components/common/FilterSearch"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
 
-import { ROLE_STRATEGIES } from "@/constants/roles";
+import { useAuditoria } from "../hooks/useAuditoria";
 import { DataTable } from "@components/common/DataTable";
 import { PageHeader } from "@components/layout/PageHeader";
-import { useAuditoria } from "../hooks/useAuditoria";
+import { DialogoDetalleAuditoria } from "./DialogoDetalleAuditoria";
 
-import { StatCard } from "@components/common/StatCard"
-import { FilterInput, FilterSelect } from "@components/common/FilterSearch"
+import { useTableFactory } from "@/shared/hooks/useTableFactory";
+import { auditoriaActions } from "@/features/admin/components/actions/auditoriaActions";
+import { getAuditoriaBaseColumns } from "@/features/admin/components/columns/auditoriaBaseColumns";
 
 export function Auditoria({ onVolver }) {
   const {
@@ -30,64 +31,18 @@ export function Auditoria({ onVolver }) {
   const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
   const [modalDetallesAbierto, setModalDetallesAbierto] = useState(false);
 
-  const columns = [
-    {
-      header: "FECHA/HORA",
-      render: (log) => (
-        <div className="flex flex-col">
-          <span className="font-medium text-slate-900">{log.fecha}</span>
-          <span className="text-xs text-slate-500">{log.hora}</span>
-        </div>
-      )
-    },
-    {
-      header: "USUARIO",
-      render: (log) => (
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
-            <User className="h-4 w-4" />
-          </div>
-          <span className="font-medium text-slate-700">{log.usuario}</span>
-        </div>
-      )
-    },
-    {
-      header: "ROL",
-      render: (log) => {
-        const roleStyle = ROLE_STRATEGIES[log.rol?.toUpperCase()] || { label: log.rol, color: "bg-gray-100" };
-        return (
-          <Badge variant="outline" className={`${roleStyle.color} font-semibold text-[10px] px-2 py-0`}>
-            {roleStyle.label}
-          </Badge>
-        );
+  const actions = useMemo(() => auditoriaActions({
+      onVerDetalles: (evento) => {
+        setEventoSeleccionado(evento);
+        setModalDetallesAbierto(true);
       }
-    },
-    {
-      header: "MÓDULO",
-      render: (log) => (
-        <span className="text-xs font-medium px-2 py-1 bg-slate-100 rounded text-slate-600">
-          {log.modulo}
-        </span>
-      )
-    },
-    {
-      header: "ACCIÓN REALIZADA",
-      accessorKey: "accion",
-      cellClassName: "max-w-xs truncate text-slate-600 italic"
-    },
-    {
-      header: "DETALLES",
-      className: "text-center",
-      render: (log) => (
-        <Button 
-          aria-label="ver-detalles" variant="ghost" size="icon" className="rounded-full hover:bg-blue-100 text-blue-600"
-          onClick={() => { setEventoSeleccionado(log); setModalDetallesAbierto(true); }}
-        >
-          <FileText className="h-4 w-4" />
-        </Button>
-      )
-    }
-  ];
+    })
+  , []);
+
+  const columns = useTableFactory({
+    columns: getAuditoriaBaseColumns(),
+    actions
+  });
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen text-slate-500 font-medium animate-pulse">
