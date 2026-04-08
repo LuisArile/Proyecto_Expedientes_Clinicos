@@ -1,5 +1,7 @@
-import React, { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import React, { useEffect} from "react";
+
+import { useForm, useWatch, Controller } from "react-hook-form";
+
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Textarea } from "@components/ui/textarea";
@@ -9,47 +11,64 @@ import { Card, CardContent, CardHeader } from "@components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 import { FileText, User, Calendar, Phone, Mail, MapPin, IdCard, Search, Loader2, X } from "lucide-react";
 
-import { useExpedienteForm } from "../hooks/useExpedienteForm";
+import { useExpedienteForm } from "../../hooks/useExpedienteForm";
 import { FormField } from "@components/common/FormField";
 import { FormSection } from "@components/common/FormSection";
 import { StatusModal } from "@components/common/StatusModal";
 import { formatearFecha} from "@/utils/dateFormatter";
 
-export function FormularioExpediente({ onSuccess, onCancel, onVolver, modo = "crear", pacienteData = null }) {
+import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
+import { useExpedienteContext } from "../../hooks/useExpedienteContext";
 
-  const { register, handleSubmit, formState: { errors }, setValue, control } = useForm();
-  const generoSeleccionado = useWatch({ control, name: "sexo", defaultValue: "" });
+export function FormularioExpediente({ viewConfig }) {
 
-  const { loading, idDuplicado, modal, setModal, validarId, enviarFormulario } = useExpedienteForm(modo, pacienteData);
-  
-  const esEdicion = modo === "editar";
-  
-  // Prellenar el formulario si es edición
-  useEffect(() => {
-    if (esEdicion && pacienteData?.paciente) {
-      const p = pacienteData.paciente;
-      setValue("nombre", p.nombre || "");
-      setValue("apellido", p.apellido || "");
-      setValue("numeroIdentidad", p.dni || "");
-      setValue("fechaNacimiento", formatearFecha(p.fechaNacimiento) || "");
-      setValue("correo", p.correo || "");
-      setValue("telefono", p.telefono || "");
-      setValue("direccion", p.direccion || "");
-      setValue("sexo", p.sexo || "");
-    }
-  }, [esEdicion, pacienteData, setValue]);
-  
-  const inputClass = (name) => `${errors[name] || (name === 'numeroIdentidad' && idDuplicado) ? "border-red-500" : "border-gray-300"} transition-all`;
+const { paciente, setPaciente } = useExpedienteContext();
+const { goBack } = useSafeNavigation();
 
-  return (
+const esEdicion = viewConfig?.id === "editar-expediente";
+const modo = esEdicion ? "editar" : "crear";
+
+const { register, handleSubmit, formState: { errors }, control, reset } = useForm();
+
+const generoSeleccionado = useWatch({ control, name: "sexo", defaultValue: "" });
+
+const { loading, idDuplicado, modal, setModal, validarId, enviarFormulario } = useExpedienteForm(modo, paciente, setPaciente);
+
+// Prellenar el formulario si es edición
+useEffect(() => {
+  if (esEdicion && paciente) {
+    const p = paciente.paciente || paciente;
+
+    const sexoDB = p.sexo ? String(p.sexo).trim().toLowerCase() : "";
+    const sexoFinal = (sexoDB === "masculino" || sexoDB === "femenino") ? sexoDB : "";
+
+    console.log("Sincronizando formulario con:", p.nombre, "Sexo:", sexoFinal);
+    reset({
+      nombre: p.nombre || "",
+      apellido: p.apellido || "",
+      numeroIdentidad: p.dni || "",
+      fechaNacimiento: formatearFecha(p.fechaNacimiento) || "",
+      correo: p.correo || "",
+      telefono: p.telefono || "",
+      direccion: p.direccion || "",
+      sexo: sexoFinal
+    });
+  }
+}, [esEdicion, paciente, reset]);
+
+const onCancel = () => goBack(viewConfig.id);
+
+const inputClass = (name) => `${errors[name] || (name === 'numeroIdentidad' && idDuplicado) ? "border-red-500" : "border-gray-300"} transition-all`;
+
+return (
 
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
 
       <PageHeader 
-        title={esEdicion ? "Editar Expediente" : "Crear Expediente"} 
+        title={viewConfig.metadata?.title || "Expediente"} 
         subtitle={esEdicion ? "Modificar datos del expediente clínico" : "Crear expedientes clinicos"} 
         Icon={Search} 
-        onVolver={onVolver} 
+        onVolver={onCancel} 
       />
       
       <Card className="w-full max-w-3xl mx-auto shadow-lg border-blue-100 mt-4 overflow-hidden">
@@ -96,7 +115,10 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver, modo = "cr
                       value: /^[0-9]{4}-[0-9]{4}-[0-9]{5}$/,
                       message: "Formato requerido: 0000-0000-00000"
                   }})}
-                  onBlur={(e) => validarId(e.target.value)}
+                  onBlur={(e) => {
+                    const p = paciente?.paciente || paciente;
+                    validarId(e.target.value, p?.dni); 
+                  }}
                   className={inputClass("numeroIdentidad")}
                 />
               </FormField>
@@ -112,16 +134,25 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver, modo = "cr
               </FormField>
               {/* Género */}
               <FormField label="Sexo" required error={errors.sexo?.message}>
-                <Select value={generoSeleccionado} onValueChange={(val) => setValue("sexo", val)}>
-                  <SelectTrigger className={inputClass("sexo")}>
-                    <SelectValue placeholder="Seleccionar..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="masculino">Hombre</SelectItem>
-                    <SelectItem value="femenino">Mujer</SelectItem>
-                  </SelectContent>
-                </Select>
-                <input type="hidden" {...register("sexo", { required: "Seleccione sexo" })} />
+                <Controller
+                  control={control}
+                  name="sexo"
+                  rules={{ required: "Seleccione el sexo del paciente" }}
+                  render={({ field }) => (
+                    <Select 
+                      onValueChange={field.onChange} 
+                      value={field.value || ""}
+                    >
+                      <SelectTrigger className={inputClass("sexo")}>
+                        <SelectValue placeholder="Seleccionar..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="masculino">Hombre</SelectItem>
+                        <SelectItem value="femenino">Mujer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </FormField>
               {/* Correo Electrónico */}
               <FormField label="Correo Electrónico" icon={Mail} error={errors.correo?.message}>
@@ -168,8 +199,15 @@ export function FormularioExpediente({ onSuccess, onCancel, onVolver, modo = "cr
             </div>
           </form>
           {/* Modal de Resultado */}
-          <StatusModal isOpen={modal.open} result={modal.result} 
-            onClose={() => { setModal({ ...modal, open: false }); if (modal.result.success) onSuccess?.(); }} 
+          <StatusModal 
+            isOpen={modal.open} result={modal.result} 
+            onClose={() => {
+              setModal(prev => ({ ...prev, open: false }));
+              if (modal.result.success) {
+                console.log("Navegando de regreso a:", viewConfig.id);
+                goBack(viewConfig.id);
+              }
+            }} 
           />
         </CardContent>
       </Card>

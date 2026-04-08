@@ -1,6 +1,6 @@
 import { Mail, Power, Edit } from "lucide-react";
 
-export const usuarioActions = ({ onOpenMailModal, onNavigate, handleToggleStatus }) => {
+export const usuarioActions = ({ onOpenMailModal, go, handleToggleStatus }) => {
     return [
         {
             key: "mail",
@@ -16,8 +16,9 @@ export const usuarioActions = ({ onOpenMailModal, onNavigate, handleToggleStatus
             icon: Edit,
             title: "Editar",
             onClick: (usuario) => {
-                sessionStorage.setItem("edit_user_id", usuario.id);
-                onNavigate("formulario-usuario");
+                go("editar-usuario", {
+                    id: usuario.id
+                });
             },
             className: "h-8 w-8 text-blue-600 hover:bg-blue-50",
             variant: "ghost",

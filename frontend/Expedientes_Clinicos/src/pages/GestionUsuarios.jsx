@@ -12,12 +12,17 @@ import { Card, CardTitle, CardDescription, CardContent, CardHeader } from "@comp
 import { useUsuarios } from '@/features/admin/hooks/useUsuarios';
 import { DialogoEnvioCredenciales } from '@/features/admin/components/DialogoEnvioCredenciales';
 
-import { useTableFactory } from "../../shared/hooks/useTableFactory";
-import { usuarioActions } from "@/features/admin/components/actions/usuarioActions";
-import { getUsuarioBaseColumns } from "@/features/admin/components/columns/usuarioBaseColumns";
+import { useTableFactory } from "../shared/hooks/useTableFactory";
+import { usuarioActions } from "@/features/admin/config/actions/usuarioActions";
+import { getUsuarioBaseColumns } from "@/features/admin/config/columns/usuarioBaseColumns";
 
-export function GestionUsuarios({ onNavigate, onVolver }) {
+import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
+
+export function GestionUsuarios() {
     const { user: currentUser } = useAuth();
+
+    const { go, goBack } = useSafeNavigation();
+    const VIEW_ID = "gestion-usuarios";
 
     const { 
         usuarios, loading, busqueda, setBusqueda, handleToggleStatus, handleSendCredentials 
@@ -38,9 +43,9 @@ export function GestionUsuarios({ onNavigate, onVolver }) {
 
     const actions = useMemo(() => usuarioActions({
         onOpenMailModal: handleOpenMailModal,
-        onNavigate,
+        go,
         handleToggleStatus
-    }), [handleOpenMailModal, onNavigate, handleToggleStatus]);
+    }), [handleOpenMailModal, go, handleToggleStatus]);
 
     const columns = useTableFactory({
         columns: getUsuarioBaseColumns(),
@@ -66,7 +71,9 @@ export function GestionUsuarios({ onNavigate, onVolver }) {
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
 
-            <PageHeader title="Gestión de Usuarios" subtitle="Administrar accesos y roles del sistema" Icon={UserPlus} onVolver={onVolver}/>
+            <PageHeader 
+                title="Gestión de Usuarios" subtitle="Administrar accesos y roles del sistema" Icon={UserPlus} 
+                onVolver={() => goBack(VIEW_ID)}/>
 
             <main className="min-h-screen bg-slate-50/50 p-6 space-y-6">
 
@@ -85,8 +92,7 @@ export function GestionUsuarios({ onNavigate, onVolver }) {
                             </div>
                             <Button 
                                 onClick={() => {
-                                    sessionStorage.removeItem("edit_user_id");
-                                    onNavigate('formulario-usuario');
+                                    go("crear-usuario");
                                 }}
                                 className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
                             >

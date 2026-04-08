@@ -32,6 +32,8 @@ async function main() {
     'CONSULTA_MEDICA',
     'SOLICITUD_EXAMEN',
     'ADJUNTAR_DOCUMENTOS',
+
+    'CITAS',
     // --- PERMISOS DE VISUALIZACIÓN ---
     'VER_DATOS_BASICOS',
     'VER_HISTORIAL_CLINICO',
@@ -73,6 +75,7 @@ async function main() {
         'VER_HISTORIAL_CLINICO',
         'VER_CONSULTAS',
         'VER_PRECLINICAS',
+        'CITAS',
       ] 
     },
     { 

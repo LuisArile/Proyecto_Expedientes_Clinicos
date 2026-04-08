@@ -9,16 +9,20 @@ import { ScrollArea } from "@components/ui/scroll-area";
 import { FilterInput, FilterSelect } from "@components/common/FilterSearch"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
 
-import { useAuditoria } from "../hooks/useAuditoria";
+import { useAuditoria } from "../features/admin/hooks/useAuditoria";
 import { DataTable } from "@components/common/DataTable";
 import { PageHeader } from "@components/layout/PageHeader";
-import { DialogoDetalleAuditoria } from "./DialogoDetalleAuditoria";
+import { DialogoDetalleAuditoria } from "../features/admin/components/DialogoDetalleAuditoria";
 
 import { useTableFactory } from "@/shared/hooks/useTableFactory";
-import { auditoriaActions } from "@/features/admin/components/actions/auditoriaActions";
-import { getAuditoriaBaseColumns } from "@/features/admin/components/columns/auditoriaBaseColumns";
+import { auditoriaActions } from "@/features/admin/config/actions/auditoriaActions";
+import { getAuditoriaBaseColumns } from "@/features/admin/config/columns/auditoriaBaseColumns";
+import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
 
-export function Auditoria({ onVolver }) {
+export function Auditoria() {
+
+  const { go } = useSafeNavigation();
+
   const {
     eventos, loading, busqueda, setBusqueda,
     filtroUsuario, setFiltroUsuario, 
@@ -52,7 +56,9 @@ export function Auditoria({ onVolver }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
-      <PageHeader title="Auditoría del Sistema" subtitle="Historial completo de acciones realizadas en el sistema SGEC" Icon={Shield} onVolver={onVolver}/>
+      <PageHeader 
+        title="Auditoría del Sistema" subtitle="Historial completo de acciones realizadas en el sistema SGEC" Icon={Shield} 
+        onVolver={() => go("inicio")}/>
       
       <main className="min-h-screen bg-slate-50/50 p-6 space-y-6">
         {/* Grid de Estadísticas*/}

@@ -35,7 +35,7 @@ export function Changepassword( { onVolver } ) {
       if (isOk) {
         setTimeout(() => {
           if (onVolver) onVolver();
-          else navigate("/dashboard");
+          else navigate("/sistema");
         }, 2000);
       }    
   };

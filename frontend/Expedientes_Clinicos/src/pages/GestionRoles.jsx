@@ -4,12 +4,17 @@ import { Button } from "@components/ui/button";
 import { PageHeader } from "@components/layout/PageHeader";
 
 import React, { useState } from "react"; 
-import { useGestionRoles } from "../hooks/useGestionRoles";
-import { EditableItem } from "./EditableItem";
+import { useGestionRoles } from "../features/admin/hooks/useGestionRoles";
+import { EditableItem } from "../features/admin/components/EditableItem";
 
+import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
 
-export function GestionRoles({ onVolver }) {
+export function GestionRoles() {
   
+  const { go } = useSafeNavigation();
+  
+  const onVolver = () => go("inicio");
+
   const {
     roles, permisos, loading, rolSeleccionado, permisosSeleccionados, 
     handleCrearRol, handleSeleccionarRol, handleActualizarRol, handleEliminarRol, 

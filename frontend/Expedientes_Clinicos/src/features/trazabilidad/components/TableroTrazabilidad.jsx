@@ -7,7 +7,7 @@ import { ScrollArea } from "@components/ui/scroll-area";
 import { PageHeader } from "@components/layout/PageHeader";
 import { StatCard } from "@components/common/StatCard";
 import { FilterInput } from "@components/common/FilterSearch"
-
+import { useSafeNavigation } from "../../dashboard/hooks/useSafeNavigation"
 // Datos simulados
 const pacientesSimulados = [
     {
@@ -85,8 +85,9 @@ const pacientesSimulados = [
     },
 ];
 
-export function TableroTrazabilidad(onVolver) {
+export function TableroTrazabilidad() {
     const [pacientes] = useState(pacientesSimulados);
+    const { go } = useSafeNavigation();
     const [busqueda, setBusqueda] = useState("");
 
     const getEstadoConfig = (estado) => {
@@ -256,7 +257,7 @@ export function TableroTrazabilidad(onVolver) {
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-gray-50 pb-10">
             {/* Header */}
             <PageHeader title="Tablero de Trazabilidad" subtitle="Seguimiento en tiempo real del flujo asistencial de pacientes"
-                    Icon={Activity} onVolver={onVolver}
+                    Icon={Activity} onVolver={() => go("inicio")}
             />
 
             <main className="min-h-screen bg-slate-50/50 p-6 space-y-6">

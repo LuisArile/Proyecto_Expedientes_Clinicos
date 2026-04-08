@@ -6,17 +6,11 @@ import { Calendar as CalendarIcon, Plus, UserPlus, ClipboardList, Activity, Sear
 // import { useAuth } from "../../auth";
 import { PageHeader } from "@components/layout/PageHeader";
 import { CardCita } from "@/features/trazabilidad/components/CardCita"
-export function AgendaCitas({ onVolver, onNavigate }) {
-    // const { user } = useAuth();
+import { useSafeNavigation } from "../../dashboard/hooks/useSafeNavigation"
 
-    // Función para navegación
-    const irA = (ruta) => {
-        if (onNavigate) {
-            onNavigate(ruta);
-        } else {
-            console.warn("La prop onNavigate no está definida");
-        }
-    };
+export function AgendaCitas() {
+    // const { user } = useAuth();
+    const { go, goBack } = useSafeNavigation();
 
     const steps = [
         {
@@ -35,7 +29,7 @@ export function AgendaCitas({ onVolver, onNavigate }) {
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-gray-50 pb-10">
             {/* Header */}
             <PageHeader title="Agenda y Registro de Pacientes" subtitle="Programe citas o registre pacientes para atención del día"
-                    Icon={CalendarIcon} onVolver={onVolver}
+                    Icon={CalendarIcon} onVolver={goBack}
             />
 
             <main className="min-h-screen bg-slate-50/50 p-6 space-y-6">
@@ -46,7 +40,7 @@ export function AgendaCitas({ onVolver, onNavigate }) {
                         <CardCita
                             key={step.id}
                             {...step}
-                            onClick={() => irA(step.route)}
+                            onClick={() => go(step.route)}
                         />
                     ))}
                 </div>
@@ -101,7 +95,7 @@ export function AgendaCitas({ onVolver, onNavigate }) {
                         <Button 
                             variant="outline"
                             className="w-full border-purple-300 text-purple-700"
-                            onClick={() => irA('tablero-trazabilidad')}
+                            onClick={() => go('tablero-trazabilidad')}
                         >
                             <Search className="h-4 w-4 mr-2" />
                             Ir al Tablero de Trazabilidad

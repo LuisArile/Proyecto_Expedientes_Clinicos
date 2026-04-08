@@ -12,14 +12,24 @@ import { FormField } from "@components/common/FormField";
 import { FormHeader } from "@components/common/FormHeader";
 import { FormSection } from "@components/common/FormSection";
 import { PageHeader } from "@components/layout/PageHeader";
+import { useExpedienteContext } from "../../expedientes/hooks/useExpedienteContext";
+import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
 
-export function FormularioCita({ modo = "agendar", onVolver, paciente }) {
+export function FormularioCita({ viewConfig }) {
+
+  const { paciente } = useExpedienteContext();
+  const { go } = useSafeNavigation();
+
+  const targetBack = viewConfig?.parent || "agenda-citas";
+
+  const modo = viewConfig?.metadata?.modo || "agendar";
+  const esHoy = modo === "hoy";
 
   const { register, handleSubmit, setValue, control, formState: { errors } } = useForm({
     defaultValues: {
       prioridad: "normal",
       tipoIngreso: "primera-vez",
-      fechaCita: modo === "hoy" ? new Date().toISOString().split("T")[0] : ""
+      fechaCita: esHoy ? new Date().toISOString().split("T")[0] : ""
     }
   });
 
@@ -47,12 +57,13 @@ export function FormularioCita({ modo = "agendar", onVolver, paciente }) {
     console.log(`Datos enviados (${modo}):`, data);
   };
 
-  const esHoy = modo === "hoy";
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
 
-      <PageHeader title="Programar Cita Futura" subtitle="Reserva de cupo para fecha posterior" Icon={FileText} onVolver={onVolver}/>
+      <PageHeader 
+        title="Programar Cita Futura" subtitle="Reserva de cupo para fecha posterior" Icon={FileText} 
+        onVolver={() => go(targetBack)}
+      />
       
       <Card className="w-full max-w-3xl mx-auto shadow-lg border-blue-100 mt-4 overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-b border-blue-100 p-0">
@@ -140,10 +151,11 @@ export function FormularioCita({ modo = "agendar", onVolver, paciente }) {
             </FormSection>
 
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button type="button" variant="outline" onClick={onVolver}>
+              <Button type="button" variant="outline" onClick={() => {go(targetBack);}}>
                 Cancelar
               </Button>
               <Button 
+                onClick={() => {go(targetBack);}}
                 type="submit"
                 className={esHoy ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"}
                 disabled={procesando}

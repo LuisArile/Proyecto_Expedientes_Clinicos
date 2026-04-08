@@ -11,6 +11,10 @@ import { getPrioridadConfig } from "@/features/trazabilidad/utils/prioridad";
 import { useColaGestion } from "../hooks/useColaGestion";
 import { usePreclinicaColumns } from "../hooks/usePreclinicaColumns";
 
+import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
+import { usePacienteSelection } from "@/features/dashboard/hooks/usePacienteSelection";
+import { useTriajeState } from "@/features/dashboard/hooks/useTriajeState";
+
 const pacientesSimulados = [
   {
     id: "PAC-002",
@@ -32,15 +36,22 @@ const pacientesSimulados = [
   },
 ];
 
-export function ColaPreclinica({ onVolver, onNavigate, onSeleccionarPaciente, pacienteEnAtencion, setPacienteEnAtencion }) {
-    
+export function ColaPreclinica() {
+    const { go } = useSafeNavigation();
+    const { setSelectedPaciente } = usePacienteSelection();
+    const { pacienteEnAtencion, setPacienteEnAtencion } = useTriajeState();
+
     const [pacientes] = useState(pacientesSimulados);
     
     const {
         dialogo, setDialogo, procesando, pacienteSeleccionado, pacientesOrdenados, 
         abrirDialogoInicio, confirmarInicio, confirmarFinalizacion
     } = useColaGestion({
-        pacientes, onSeleccionarPaciente, onNavigate, setPacienteEnAtencion, tipoAtencion: "preclinica"
+        pacientes, 
+        onSeleccionarPaciente: setSelectedPaciente,
+        onNavigate: go, 
+        setPacienteEnAtencion, 
+        tipoAtencion: "preclinica"
     });
 
     const columns = usePreclinicaColumns({pacienteEnAtencion, iniciar: abrirDialogoInicio});
@@ -49,7 +60,9 @@ export function ColaPreclinica({ onVolver, onNavigate, onSeleccionarPaciente, pa
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-gray-50 pb-10">
             
             {/* Header */}
-            <PageHeader title="Cola de Preclínica" subtitle="Pacientes en espera de registro de signos vitales y preclínica" Icon={Activity} onVolver={onVolver}/>
+            <PageHeader 
+                title="Cola de Preclínica" subtitle="Pacientes en espera de registro de signos vitales y preclínica" Icon={Activity} 
+                onVolver={() => go("inicio")}/>
 
             <main className="min-h-screen bg-slate-50/50 p-6 space-y-6">
                 {/* Paciente en Atención */}

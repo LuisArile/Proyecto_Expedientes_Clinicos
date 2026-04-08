@@ -11,6 +11,10 @@ import { useConsultaColumns } from "../hooks/useConsultaColumns";
 import { useColaGestion } from "../hooks/useColaGestion";
 import { getPrioridadConfig } from "@/features/trazabilidad/utils/prioridad";
 
+import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
+import { usePacienteSelection } from "@/features/dashboard/hooks/usePacienteSelection";
+import { useTriajeState } from "@/features/dashboard/hooks/useTriajeState";
+
 const pacientesSimulados = [
     {
         id: "PAC-004",
@@ -29,18 +33,22 @@ const pacientesSimulados = [
     },
 ];
 
-export function ColaConsulta({onVolver, onNavigate, onSeleccionarPaciente, pacienteEnAtencion, setPacienteEnAtencion}) {
-    const [pacientes] = useState(pacientesSimulados);
+export function ColaConsulta() {
+    const { go } = useSafeNavigation();
+    const { setSelectedPaciente } = usePacienteSelection();
+    const { pacienteEnAtencion, setPacienteEnAtencion } = useTriajeState();
     
+    const [pacientes] = useState(pacientesSimulados);
+
     const {
         dialogo, setDialogo, procesando, pacienteSeleccionado, pacientesOrdenados, 
         abrirDialogoInicio, confirmarInicio, confirmarFinalizacion 
     } = useColaGestion({
         pacientes, 
-        onSeleccionarPaciente, 
-        onNavigate, 
+        onSeleccionarPaciente: setSelectedPaciente,
+        onNavigate: go, 
         setPacienteEnAtencion,
-        tipoAtencion: "consulta"
+        tipoAtencion: "consulta-medica"
     });
 
     const columns = useConsultaColumns({pacienteEnAtencion, iniciarConsulta: abrirDialogoInicio});
@@ -48,7 +56,9 @@ export function ColaConsulta({onVolver, onNavigate, onSeleccionarPaciente, pacie
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-gray-50 pb-10">
             {/* Header */}
-            <PageHeader title="Cola de Consulta Médica" subtitle="Pacientes en espera de consulta médica con resumen preclínico" Icon={Stethoscope} onVolver={onVolver}/>
+            <PageHeader 
+                title="Cola de Consulta Médica" subtitle="Pacientes en espera de consulta médica con resumen preclínico" Icon={Stethoscope} 
+                onVolver={() => go("inicio")}/>
 
             <main className="min-h-screen bg-slate-50/50 p-6 space-y-6">
 

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { useForm, useWatch } from 'react-hook-form'; 
+import { useForm, useWatch } from 'react-hook-form';
+import { useLocation } from "react-router-dom";
 import { User, Mail, ShieldCheck, Stethoscope, Save, X, Loader2, UserCog, Briefcase, UserPlus } from "lucide-react";
 
 import { Input } from "@components/ui/input";
@@ -14,9 +15,15 @@ import { FormSection } from "@components/common/FormSection";
 import { StatusModal } from "@components/common/StatusModal";
 
 import { useUsuarioForm } from "../hooks/useUsuarioForm";
+import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
 
-export function FormularioCreacionUsuario({ onVolver, onSuccess }) {
-  const id = sessionStorage.getItem("edit_user_id");
+export function FormularioCreacionUsuario() {
+  
+  const { goBack } = useSafeNavigation();
+  const location = useLocation();
+
+  const id = location.state?.id;
+  
   const isEdit = Boolean(id);
 
   const { roles, loading, modal, setModal, enviarFormulario, datosIniciales } = useUsuarioForm(id);
@@ -36,10 +43,15 @@ export function FormularioCreacionUsuario({ onVolver, onSuccess }) {
 
   const inputClass = (name) => `${errors[name] ? "border-red-500" : "border-gray-300"} transition-all focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed`;
 
+  const VIEW_ID = isEdit ? "editar-usuario" : "crear-usuario";
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 pb-10">
 
-      <PageHeader title={isEdit ? "Editar Personal" : "Registro de Personal"} subtitle="Gestión de credenciales y roles de acceso" Icon={UserCog} onVolver={onVolver}/>
+      <PageHeader 
+        title={isEdit ? "Editar Personal" : "Registro de Personal"} subtitle="Gestión de credenciales y roles de acceso" Icon={UserCog} 
+        onVolver={() => goBack(VIEW_ID)}
+      />
 
       <main className="max-w-3xl mx-auto p-4 sm:p-6">
         <Card className="w-full max-w-3xl mx-auto shadow-lg border-blue-100 mt-4 overflow-hidden">
@@ -153,7 +165,11 @@ export function FormularioCreacionUsuario({ onVolver, onSuccess }) {
                   {isEdit ? "Actualizar Usuario" : "Registrar Usuario"}
                 </Button>
                 
-                <Button type="button" variant="ghost" onClick={onVolver}>
+                <Button 
+                  type="button" variant="ghost" 
+                  onClick={() => goBack(VIEW_ID)}
+                  className="flex-1 h-12 text-gray-600 hover:bg-gray-100 border border-gray-200"
+                >
                   <X className="mr-2 size-4" /> Cancelar
                 </Button>
               </div>
@@ -167,8 +183,7 @@ export function FormularioCreacionUsuario({ onVolver, onSuccess }) {
           onClose={() => {
             setModal(prev => ({ ...prev, open: false }));
             if (modal.result.success) {
-              sessionStorage.removeItem("edit_user_id");
-              onSuccess();
+              goBack(VIEW_ID);
             }
           }} 
         />

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 import { Search, FileText, Loader2 } from "lucide-react";
 
 import { Card, CardContent } from "@components/ui/card";
@@ -8,18 +8,14 @@ import { PageHeader } from "@components/layout/PageHeader";
 import { PaginationControls } from "@components/common/PaginationControls";
 
 import { SearchFilterCard } from "./SearchFilterCard";
-import { useBuscarPacientes } from "../hooks/useBuscarPaciente";
+import { useBuscarPacientes } from "../../hooks/useBuscarPaciente";
 
-import { useTableFactory } from "@/shared/hooks/useTableFactory";
-import { pacienteActions } from "@/features/expedientes/components/actions/pacienteActions";
-import { getPacienteBaseColumns } from "@/features/expedientes/components/columns/pacienteBaseColumns";
+import { useTableFactory } from "../../../../shared/hooks/useTableFactory";
+import { pacienteActions } from "@/features/expedientes/config/actions/pacienteActions";
+import { getPacienteBaseColumns } from "@/features/expedientes/config/columns/pacienteBaseColumns";
 
-import { useAuth } from "@/features/auth/hooks/useAuth";
-
-export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica, onNavigate, modo }) {
+export function BuscarPaciente({ onVolver, controller = {} }) {
     
-    const { checkPermission } = useAuth();
-
     const {
         termino, setTermino,
         criterio, setCriterio,
@@ -28,23 +24,10 @@ export function BuscarPaciente({ onVolver, onVerExpediente, onConsultaMedica, on
         busquedaRealizada, ejecutarBusqueda
     } = useBuscarPacientes();
 
-    const handleSeleccionarPaciente = useCallback((p) => {
-        if (modo === "agendar") {
-            onConsultaMedica?.(p);
-            onNavigate("formulario-agendar-cita");
-        } else if (modo === "hoy") {
-            onConsultaMedica?.(p);
-            onNavigate("formulario-registro-hoy");
-        }
-    }, [modo, onConsultaMedica, onNavigate]);
-
     const actions = useMemo(() => pacienteActions({
-        onVerExpediente,
-        onConsultaMedica,
-        checkPermission,
-        handleSeleccionarPaciente,
-        modo
-    }), [onVerExpediente, onConsultaMedica, checkPermission, handleSeleccionarPaciente, modo]);
+        ... controller,
+        modo: controller.modo
+    }), [ controller ]);
 
     const columns = useTableFactory({
         columns: getPacienteBaseColumns(),
