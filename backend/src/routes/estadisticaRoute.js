@@ -13,6 +13,7 @@ const ConsultaMedicaRepository = require("../repositories/consultaMedicaReposito
 const RegistroPreclinicoRepository = require("../repositories/registroPreclinicoRepositorio");
 const RecetaMedicaRepository = require("../repositories/recetaMedicaRepositorio");
 const ExamenRepository = require("../repositories/examenRepository");
+const MedicamentoRepository = require("../repositories/medicamentoRepository");
 
 const router = express.Router();
 
@@ -24,8 +25,8 @@ const consultaMedicaRepository = new ConsultaMedicaRepository();
 const registroPreclinicoRepository = new RegistroPreclinicoRepository();
 const recetaMedicaRepository = new RecetaMedicaRepository();
 const examenRepository = new ExamenRepository();
-
-const estadisticaService = new EstadisticaService(prisma, usuarioRepository, auditoriaRepository, pacienteRepository, expedienteRepository, consultaMedicaRepository, registroPreclinicoRepository, recetaMedicaRepository, examenRepository);
+const medicamentoRepository = new MedicamentoRepository();
+const estadisticaService = new EstadisticaService(prisma, usuarioRepository, auditoriaRepository, pacienteRepository, expedienteRepository, consultaMedicaRepository, registroPreclinicoRepository, recetaMedicaRepository, examenRepository, medicamentoRepository);
 const estadisticaController = new EstadisticaController(estadisticaService);
 
 router.get("/resumen", validarToken, (req, res, next) => estadisticaController.obtenerDashboard(req, res, next));

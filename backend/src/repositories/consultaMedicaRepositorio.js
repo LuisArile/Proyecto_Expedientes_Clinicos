@@ -47,7 +47,11 @@ class consultaMedicaRepository {
                             apellido: true
                         }
                     },
-                    recetas: true,
+                    recetas: {
+                        include: {
+                            medicamento: true  
+                        }
+                    },
                     examenes: {
                         include: {
                             examen: true
@@ -71,7 +75,11 @@ class consultaMedicaRepository {
                             paciente: true
                         }
                     },
-                    recetas: true,
+                    recetas: {
+                        include: {
+                            medicamento: true
+                        }
+                    },
                     examenes: {
                         include: {
                             examen: true

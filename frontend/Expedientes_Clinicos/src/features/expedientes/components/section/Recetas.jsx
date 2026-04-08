@@ -45,7 +45,8 @@ export function Recetas({ data = [] }) {
                           <div className="flex items-start gap-3">
                             <Pill className="h-5 w-5 text-blue-600 mt-0.5" />
                             <div className="flex-1">
-                              <p className="font-semibold text-gray-900 mb-2">{receta.medicamento}</p>
+                              <p className="font-semibold text-gray-900 mb-2">{receta.medicamento.nombre}</p>
+                              <p className=" text-gray-600 mb-2">Categoría: <span className="font-medium text-gray-900">{receta.medicamento.categoria}</span></p>
                               
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                                 <div>

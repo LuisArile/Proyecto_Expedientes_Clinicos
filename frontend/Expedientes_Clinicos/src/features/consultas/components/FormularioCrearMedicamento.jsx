@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { TestTube, Save, X } from "lucide-react";
+import { Pill, Save, X } from "lucide-react";
 
-import { useExamenes } from "../hooks/useExamenes";
+import { useMedicamentos } from "../hooks/useMedicamentos";
 
 import { Button } from "@components/ui/button";
 import { Card, CardContent, CardHeader } from "@components/ui/card";
@@ -12,26 +12,22 @@ import { FormHeader } from "@components/common/FormHeader";
 import { ValidatedInput } from "@components/validaciones/validarInput";
 import { FormSection } from "@components/common/FormSection";
 
-export function FormularioCrearExamen({ onVolver, onSuccess, onNavigate }) {
+export function FormularioCrearMedicamento({ onVolver, onSuccess, onNavigate }) {
 
-  const { handleCrear, handleActualizar } = useExamenes();
+  const { handleCrear, handleActualizar } = useMedicamentos();
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm();
 
-  const isEdit = !!sessionStorage.getItem("edit_examen");
-
-  const inputClass = (name) =>
-    `${errors[name] ? "border-red-500" : "border-gray-300"} 
-     transition-all focus:ring-blue-500`;
+  const isEdit = !!sessionStorage.getItem("edit_medicamento");
 
   useEffect(() => {
-    const data = sessionStorage.getItem("edit_examen");
+    const data = sessionStorage.getItem("edit_medicamento");
 
     if (data) {
-      const examen = JSON.parse(data);
-      setValue("id", examen.id);
-      setValue("nombre", examen.nombre);
-      setValue("especialidad", examen.especialidad);
+      const medicamento = JSON.parse(data);
+      setValue("id", medicamento.id);
+      setValue("nombre", medicamento.nombre);
+      setValue("categoria", medicamento.categoria);
     }
   }, [setValue]);
 
@@ -43,10 +39,10 @@ export function FormularioCrearExamen({ onVolver, onSuccess, onNavigate }) {
         await handleCrear(data);
       }
 
-      sessionStorage.removeItem("edit_examen");
+      sessionStorage.removeItem("edit_medicamento");
       onSuccess();
 
-      onNavigate("catalogo-examenes");
+      onNavigate("catalogo-medicamentos");
 
     } catch (error) {
       console.error("Error:", error);
@@ -57,10 +53,10 @@ export function FormularioCrearExamen({ onVolver, onSuccess, onNavigate }) {
     <div>
 
       <PageHeader
-        title="Registro de Examen"
-        subtitle="Gestión de exámenes clínicos del sistema"
-        Icon={TestTube}
-        onVolver={() => onNavigate("catalogo-examenes")}
+        title="Registro de Medicamento"
+        subtitle="Gestión de medicamentos del sistema"
+        Icon={Pill}
+        onVolver={() => onNavigate("catalogo-medicamentos")}
       />
 
       <main className="max-w-3xl mx-auto p-4 sm:p-6">
@@ -69,13 +65,13 @@ export function FormularioCrearExamen({ onVolver, onSuccess, onNavigate }) {
 
           <CardHeader className="bg-gradient-to-r from-white to-indigo-200 p-0 border-b border-blue-100 text-white">
             <FormHeader
-              title={isEdit ? "Editar Examen" : "Nuevo Examen"}
+              title={isEdit ? "Editar Medicamento" : "Nuevo Medicamento"}
               subtitle={
                 isEdit
-                  ? "Modifique la información del examen"
-                  : "Complete la información del examen"
+                  ? "Modifique la información del medicamento"
+                  : "Complete la información del medicamento"
               }
-              icon={TestTube}
+              icon={Pill}
               align="left"
             />
           </CardHeader>
@@ -84,28 +80,30 @@ export function FormularioCrearExamen({ onVolver, onSuccess, onNavigate }) {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
 
-              <FormSection title="Información del Examen">
+              <FormSection title="Información del Medicamento">
 
                 <div className="flex flex-col gap-6">
+
                   <ValidatedInput
                     name="nombre"
-                    label="Nombre del Examen"
+                    label="Nombre del Medicamento"
                     register={register}
                     error={errors.nombre?.message}
-                    placeholder="Ej: Hemograma Completo"
-                    minLength={5}
+                    placeholder="Ej: Paracetamol"
+                    minLength={3}
                     onlyLetters={true}
                   />
 
                   <ValidatedInput
-                    name="especialidad"
-                    label="Especialidad"
+                    name="categoria"
+                    label="Categoría"
                     register={register}
-                    error={errors.especialidad?.message}
-                    placeholder="Ej: Laboratorio Clínico"
-                    minLength={4}
+                    error={errors.categoria?.message}
+                    placeholder="Ej: Analgésico"
+                    minLength={3}
                     onlyLetters={true}
                   />
+
                 </div>
 
               </FormSection>
@@ -127,7 +125,7 @@ export function FormularioCrearExamen({ onVolver, onSuccess, onNavigate }) {
                   className="h-11 px-6 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm hover:shadow-md transition-all cursor-pointer"
                 >
                   <Save className="mr-2 size-5" />
-                  {isEdit ? "Actualizar Examen" : "Guardar Examen"}
+                  {isEdit ? "Actualizar Medicamento" : "Guardar Medicamento"}
                 </Button>
 
               </div>

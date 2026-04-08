@@ -215,3 +215,60 @@ export const examenAPI = {
     return res.data;
   },
 };
+
+
+
+/**
+ * Métodos para consumir endpoints de medicamentos
+ */
+export const medicamentoAPI = {
+
+  // Buscar (nombre, categoría)
+  buscar: async (params = {}) => {
+    const cleanParams = Object.fromEntries(
+      Object.entries(params).filter(([_, v]) => v !== "" && v !== undefined)
+    );
+
+    const query = new URLSearchParams(cleanParams).toString();
+
+    const res = await apiCall(`/medicamentos${query ? `?${query}` : ""}`, {
+      method: "GET",
+    });
+
+    return res.data;
+  },
+
+  // Obtener solo activos
+  obtenerActivos: async () => {
+    const res = await apiCall("/medicamentos/activos", { method: "GET" });
+    return res;
+  },
+
+  obtenerPorId: async (id) => {
+    const res = await apiCall(`/medicamentos/${id}`, { method: "GET" });
+    return res.data;
+  },
+
+  crear: async (data) => {
+    const res = await apiCall("/medicamentos", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    return res.data;
+  },
+
+  actualizar: async (id, data) => {
+    const res = await apiCall(`/medicamentos/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+    return res.data;
+  },
+
+  alternarEstado: async (id) => {
+    const res = await apiCall(`/medicamentos/${id}/estado`, {
+      method: "PATCH",
+    });
+    return res.data;
+  },
+};

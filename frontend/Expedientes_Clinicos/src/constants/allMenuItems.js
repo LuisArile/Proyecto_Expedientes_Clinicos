@@ -61,12 +61,12 @@ export const ALL_MENU_ITEMS = [
         icon: Stethoscope, 
         permission: "CONSULTA_MEDICA" 
     },
-    { 
-        id: "solicitud-examen", 
-        label: "Solicitud de Examen", 
-        icon: TestTube, 
-        permission: "SOLICITUD_EXAMEN"
-    },
+    // { 
+    //     id: "solicitud-examen", 
+    //     label: "Solicitud de Examen", 
+    //     icon: TestTube, 
+    //     permission: "SOLICITUD_EXAMEN"
+    // },
     { 
         id: "adjuntar-documentos", 
         label: "Adjuntar Documentos", 

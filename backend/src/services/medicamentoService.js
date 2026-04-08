@@ -1,6 +1,6 @@
 const { ENTIDADES, ACCIONES } = require("../utils/auditoriaConstante");
 
-class ExamenService {
+class MedicamentoService {
   constructor(repository, auditoriaService) {
     this.repository = repository;
     this.auditoriaService = auditoriaService;
@@ -17,59 +17,59 @@ class ExamenService {
   async obtenerPorId(id) {
     if (!id) throw new Error("ID requerido");
 
-    const examen = await this.repository.obtenerPorId(id);
-    if (!examen) throw new Error("Examen no encontrado");
+    const medicamento = await this.repository.obtenerPorId(id);
+    if (!medicamento) throw new Error("Medicamento no encontrado");
 
-    return examen;
+    return medicamento;
   }
 
   async crear(data, usuarioId) {
     if (!data.nombre) throw new Error("Nombre requerido");
-    if (!data.especialidad) throw new Error("Especialidad requerida");
+    if (!data.categoria) throw new Error("Categoría requerida");
 
-    const examen = await this.repository.crear(data);
-    console.log("Examen creado:", examen);
-    // Registro en auditoria
+    const medicamento = await this.repository.crear(data);
+
     if (this.auditoriaService && usuarioId) {
       await this.auditoriaService.registrarEntidad(
         usuarioId,
-        ENTIDADES.EXAMEN,
+        ENTIDADES.MEDICAMENTO,
         ACCIONES.CREAR,
-        examen.id
+        medicamento.id
       );
     }
 
-    return examen;
+    return medicamento;
   }
 
-  async actualizar(idexamen, data, usuarioId) {
-    const examen = await this.repository.actualizar(idexamen, data);
-    // Registro en auditoria
+  async actualizar(idMedicamento, data, usuarioId) {
+    const medicamento = await this.repository.actualizar(idMedicamento, data);
+
     if (this.auditoriaService && usuarioId) {
       await this.auditoriaService.registrarEntidad(
         usuarioId,
-        ENTIDADES.EXAMEN,
+        ENTIDADES.MEDICAMENTO,
         ACCIONES.ACTUALIZAR,
-        idexamen
+        idMedicamento
       );
     }
-    return examen;
+
+    return medicamento;
   }
 
-  async alternarEstado( examenid, usuarioId ) {
-    const examen = await this.repository.alternarEstado(examenid);
-    // Registro en auditoria
-    
-    if ( this.auditoriaService && usuarioId ) {
+  async alternarEstado(idMedicamento, usuarioId) {
+    const medicamento = await this.repository.alternarEstado(idMedicamento);
+
+    if (this.auditoriaService && usuarioId) {
       await this.auditoriaService.registrarEntidad(
         usuarioId,
-        ENTIDADES.EXAMEN,
+        ENTIDADES.MEDICAMENTO,
         ACCIONES.CAMBIAR_ESTADO,
-        examenid
+        idMedicamento
       );
     }
-    return examen;
+
+    return medicamento;
   }
 }
 
-module.exports = ExamenService;
+module.exports = MedicamentoService;

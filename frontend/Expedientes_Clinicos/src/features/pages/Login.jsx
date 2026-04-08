@@ -29,6 +29,7 @@ export function Login() {
       const result = await login(usuarioLimpio, claveLimpia);
       if(result && result.success){
         console.log("Login exitoso, redirigiendo...");
+        localStorage.removeItem("sgec_view");
         navigate("/dashboard");
       } else {
         setError(result.error || "Credenciales incorrectas");

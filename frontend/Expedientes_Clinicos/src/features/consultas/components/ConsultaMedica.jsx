@@ -3,9 +3,8 @@ import { useForm, useFieldArray, useWatch } from "react-hook-form";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useConsultaMedica } from "../hooks/useConsultaMedica";
-import { Stethoscope, FileText, Save, Clock, Pill, Plus, Trash2, Loader2, FlaskConical, Library } from "lucide-react";
+import { Stethoscope, FileText, Save, Clock, Pill, Plus, Trash2, Loader2, FlaskConical } from "lucide-react";
 
-import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Textarea } from "@components/ui/textarea";
 import { Card, CardHeader } from "@components/ui/card";
@@ -13,6 +12,7 @@ import { FormField } from "@components/common/FormField";
 import { PageHeader } from "@components/layout/PageHeader";
 import { FormSection } from "@components/common/FormSection";
 import { Alert, AlertDescription } from "@components/ui/alert";
+import { ValidatedInput } from "@components/validaciones/validarInput";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 
 import { StatusModal } from "@components/common/StatusModal";
@@ -55,7 +55,7 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
   const examenesWatch = useWatch({ control, name: "examenes" });
   const tipoDiag = useWatch({ control, name: "tipoDiagnostico" });
 
-  const { guardarConsulta, guardando, modal, setModal, examenesDisponibles, limpiarBorrador } =
+  const { guardarConsulta, guardando, modal, setModal, examenesDisponibles, limpiarBorrador, medicamentosDisponibles } =
     useConsultaMedica(paciente?.dni || null, methods, onSuccess);
 
   const alEnviar = async (data) => {
@@ -86,7 +86,7 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
         return;
       }
 
-      const medicamentoValido = data.medicamentos.some(m => m.nombre);
+      const medicamentoValido = data.medicamentos.some(m => m.medicamentoId);
       if (!medicamentoValido) {
         setErrorValidacion("Debe ingresar al menos un medicamento válido");
         return;
@@ -282,7 +282,7 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
                 </div>
               </FormSection>
 
-              {/* MEDICAMENTOS (RESTAURADO COMPLETO) */}
+              {/* MEDICAMENTOS */}
               {tipoDiag === "DEFINITIVO" && (
                 <div className="space-y-4">
                   <div className="flex justify-between items-end border-b border-purple-100 pb-2">
@@ -294,7 +294,7 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
                       type="button" 
                       variant="outline" 
                       size="sm"
-                      onClick={() => append({ nombre: "", dosis: "", frecuencia: "", duracion: "" })}
+                      onClick={() => append({ medicamentoId: "", dosis: "", frecuencia: "", duracion: "" })}
                       className="text-purple-600 border-purple-200 hover:bg-purple-50 cursor-pointer"
                     >
                       <Plus className="mr-1 h-4 w-4" /> Agregar Medicamento
@@ -313,33 +313,62 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
                           className="grid w-full grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 bg-gray-50/50 p-4 rounded-xl border border-gray-100"
                         >
 
-                          {/* MEDICAMENTO */}
+                          {/* MEDICAMENTO SELECT */}
                           <FormField label="Medicamento">
-                            <Input {...register(`medicamentos.${index}.nombre`)} 
-                              className="border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200"
-                            />
+                            <Select
+                              value={methods.watch(`medicamentos.${index}.medicamentoId`)?.toString() || ""}
+                              onValueChange={(val) => setValue(`medicamentos.${index}.medicamentoId`, Number(val))}
+                            >
+                              <SelectTrigger className="w-full h-10 min-h-[40px] px-3 py-2 rounded-lg border-black">
+                                <SelectValue placeholder="Seleccionar medicamento" />
+                              </SelectTrigger>
+
+                              <SelectContent>
+                                {medicamentosDisponibles
+                                  ?.filter((med) => {
+                                    return !methods.watch("medicamentos")?.some((m, i) => {
+                                      if (i === index) return false;
+                                      return Number(m?.medicamentoId) === med.id;
+                                    });
+                                  })
+                                  .map((med) => (
+                                    <SelectItem key={med.id} value={String(med.id)}>
+                                      {med.nombre} - {med.categoria}
+                                    </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </FormField>
 
                           {/* DOSIS */}
-                          <FormField label="Dosis">
-                            <Input {...register(`medicamentos.${index}.dosis`)} 
-                              className="border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200"
-                            />
-                          </FormField>
+                          <ValidatedInput
+                            name={`medicamentos.${index}.dosis`}
+                            label="Dosis"
+                            register={register}
+                            error={errors?.medicamentos?.[index]?.dosis?.message}
+                            placeholder="Ej: 500 mg"
+                            type="dosis"
+                          />
 
                           {/* FRECUENCIA */}
-                          <FormField label="Frecuencia">
-                            <Input {...register(`medicamentos.${index}.frecuencia`)} 
-                              className="border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200"
-                            />
-                          </FormField>
+                          <ValidatedInput
+                            name={`medicamentos.${index}.frecuencia`}
+                            label="Frecuencia"
+                            register={register}
+                            error={errors?.medicamentos?.[index]?.frecuencia?.message}
+                            placeholder="Ej: cada 8 horas"
+                            type="frecuencia"
+                          />
 
                           {/* DURACIÓN */}
-                          <FormField label="Duración">
-                            <Input {...register(`medicamentos.${index}.duracion`)} 
-                              className="border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200"
-                            />
-                          </FormField>
+                          <ValidatedInput
+                            name={`medicamentos.${index}.duracion`}
+                            label="Duración"
+                            register={register}
+                            error={errors?.medicamentos?.[index]?.duracion?.message}
+                            placeholder="Ej: 7 días"
+                            type="duracion"
+                          />
 
                           {/* DELETE */}
                           <div className="flex items-center justify-center">
@@ -393,7 +422,7 @@ export function ConsultaMedica({ paciente, onVolver, onSuccess }) {
             result={modal.result}
             onClose={() => {
               setModal({ ...modal, open: false });
-              if (modal.result.success) onSuccess?.();
+              if (modal.result.success) {limpiarBorrador(); onSuccess?.();}
             }}
           />
         )}

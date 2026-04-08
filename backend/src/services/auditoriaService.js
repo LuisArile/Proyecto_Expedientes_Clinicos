@@ -78,6 +78,7 @@ class AuditoriaService {
         if (a.includes('CONSULTA')) return 'Consulta Médica';
         if (a.includes('RECETA')) return 'Receta';
         if (a.includes('EXAMEN')) return 'Exámenes';
+        if (a.includes('MEDICAMENTO')) return 'Medicamentos';
         return 'General';
     }
 

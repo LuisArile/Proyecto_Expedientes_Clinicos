@@ -12,7 +12,7 @@ class ExamenRepository {
                 .replace(/[\u0300-\u036f]/g, "")
                 .toLowerCase();
 
-        // Si NO hay búsqueda solo se traen 10 registros
+        // Si NO hay búsqueda solo se traen 15 registros
         if (!busqueda || busqueda.trim() === "") {
             return await prisma.examen.findMany({
                 take: 15,

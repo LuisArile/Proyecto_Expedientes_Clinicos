@@ -133,14 +133,16 @@ model ConsultaMedica {
 }
 
 model RecetaMedica {
-  id           Int            @id @default(autoincrement())
-  consultaId   Int
-  medicamento  String
-  dosis        String
-  duracion     String
-  indicaciones String?        @db.Text
-  createdAt    DateTime       @default(now())
-  consulta     ConsultaMedica @relation(fields: [consultaId], references: [id])
+  id             Int            @id @default(autoincrement())
+  consultaId     Int
+  medicamentoId  Int
+  dosis          String
+  duracion       String
+  indicaciones   String?        @db.Text
+  createdAt      DateTime       @default(now())
+
+  consulta       ConsultaMedica @relation(fields: [consultaId], references: [id])
+  medicamento    Medicamento    @relation(fields: [medicamentoId], references: [id])
 
   @@map("RecetaMedica")
 }
@@ -170,4 +172,16 @@ model ConsultaExamen {
 
   @@unique([consultaId, examenId]) 
   @@map("ConsultaExamen")
+}
+
+model Medicamento {
+  id              Int              @id @default(autoincrement())
+  nombre          String
+  categoria       String
+  estado          Boolean          @default(true)
+  fechaCreacion   DateTime         @default(now())
+
+  recetas         RecetaMedica[]
+
+  @@map("Medicamento")
 }

@@ -1,4 +1,4 @@
-import { AlertTriangle, Activity, Stethoscope, User, TestTube } from "lucide-react";
+import { AlertTriangle, Activity, Stethoscope, User, TestTube, Pill } from "lucide-react";
 import { CardContent } from "@components/ui/card";
 import { TabsContent } from "@components/ui/tabs";
 
@@ -39,6 +39,7 @@ export function Historial({ data }) {
                 return dateB - dateA;
               })
               .map((evento, index) => {
+                
                 const esConsulta = "medicoId" in evento;
 
                 const tipo = esConsulta ? "consulta" : "preclinica";
@@ -138,6 +139,34 @@ export function Historial({ data }) {
                                       {item.prioridad}
                                     </span>
 
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* MEDICAMENTOS */}
+                        {esConsulta && evento.recetas?.length > 0 && (
+                          <div className="mt-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Pill className="h-4 w-4 text-blue-600" />
+                              <p className="text-xs font-bold text-gray-500">
+                                Medicamentos recetados
+                              </p>
+                            </div>
+
+                            <ul className="space-y-1">
+                              {evento.recetas.map((receta, idx) => (
+                                <li key={idx} className="text-sm text-gray-700">
+                                  <div className="pl-6">
+                                    • {receta.medicamento?.nombre || `ID: ${receta.medicamentoId}`}
+                                  </div>
+
+                                  <div className="pl-8 text-xs text-gray-500">
+                                    {receta.dosis && <span>Dosis: {receta.dosis} </span>}
+                                    {receta.indicaciones && <span> | Frecuencia: {receta.indicaciones} </span>}
+                                    {receta.duracion && <span> | Duración: {receta.duracion}</span>}
                                   </div>
                                 </li>
                               ))}

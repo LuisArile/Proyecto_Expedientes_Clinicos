@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { registrarConsultaMedica, obtenerExamenesActivos } from "../services/consultaService";
+import { 
+    registrarConsultaMedica, 
+    obtenerExamenesActivos,
+    obtenerMedicamentosActivos
+} from "../services/consultaService";
 import { toast } from "sonner";
 
 export const useConsultaMedica = (pacienteId, formMethods) => {
@@ -8,6 +12,7 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
     const [modal, setModal] = useState({ open: false, result: { success: false, message: "" } });
 
     const [examenesDisponibles, setExamenesDisponibles] = useState([]);
+    const [medicamentosDisponibles, setMedicamentosDisponibles] = useState([]); 
 
     const { reset, watch } = formMethods;
     const formValues = watch();
@@ -16,19 +21,25 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
     const isRestoring = useRef(false);
     const hasLoaded = useRef(false);
 
-    //  CARGAR EXÁMENES
+    //  CARGAR EXÁMENES Y MEDICAMENTOS
     useEffect(() => {
-        const cargarExamenes = async () => {
+        const cargarDatos = async () => {
             try {
-                const data = await obtenerExamenesActivos();
-                setExamenesDisponibles(data);
+                const [examenes, medicamentos] = await Promise.all([
+                    obtenerExamenesActivos(),
+                    obtenerMedicamentosActivos() 
+                ]);
+
+                setExamenesDisponibles(examenes);
+                setMedicamentosDisponibles(medicamentos); 
+
             } catch (error) {
-                console.error("Error cargando exámenes", error);
-                toast.error("No se pudieron cargar los exámenes");
+                console.error("Error cargando datos", error);
+                toast.error("No se pudieron cargar los datos");
             }
         };
 
-        cargarExamenes();
+        cargarDatos();
     }, []);
 
     //  RESTORE LOCAL STORAGE
@@ -135,6 +146,7 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
         modal, 
         setModal,
         examenesDisponibles,
+        medicamentosDisponibles, 
         limpiarBorrador
     };
 };

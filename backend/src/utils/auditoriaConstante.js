@@ -1,5 +1,6 @@
 const ENTIDADES = {
-  EXAMEN: "Examen"
+  EXAMEN: "Examen",
+  MEDICAMENTO: "Medicamento",
 };
 
 const ACCIONES = {

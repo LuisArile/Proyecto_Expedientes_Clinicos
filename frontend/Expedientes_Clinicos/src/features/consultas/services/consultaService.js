@@ -1,4 +1,4 @@
-import { consultaMedicaAPI, examenAPI } from "@/shared/services/api";
+import { consultaMedicaAPI, examenAPI, medicamentoAPI } from "@/shared/services/api";
 
 //  REGISTRAR CONSULTA
 export async function registrarConsultaMedica(idExpediente, datos) {
@@ -15,7 +15,7 @@ export async function registrarConsultaMedica(idExpediente, datos) {
             observaciones: datos.observacionesClinicas || "",
             
             recetas: (datos.medicamentos || []).map(med => ({
-                medicamento: med.nombre,
+                medicamentoId: med.medicamentoId,
                 dosis: med.dosis,
                 duracion: med.duracion,
                 indicaciones: med.frecuencia || ""
@@ -47,6 +47,19 @@ export async function obtenerExamenesActivos() {
 
     } catch (error) {
         console.error("Error obteniendo exámenes:", error);
+        throw error;
+    }
+}
+
+// MEDICAMENTOS ACTIVOS
+export async function obtenerMedicamentosActivos() {
+    try {
+        const response = await medicamentoAPI.obtenerActivos();
+
+        return response.success ? response.data : [];
+
+    } catch (error) {
+        console.error("Error obteniendo medicamentos:", error);
         throw error;
     }
 }

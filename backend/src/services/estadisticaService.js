@@ -1,5 +1,5 @@
 class EstadisticaService {
-    constructor(prisma, usuarioRepository, auditoriaRepository, pacienteRepository, expedienteRepository, consultaMedicaRepository, registroPreclinicoRepository, recetaMedicaRepository, examenRepository) {
+    constructor(prisma, usuarioRepository, auditoriaRepository, pacienteRepository, expedienteRepository, consultaMedicaRepository, registroPreclinicoRepository, recetaMedicaRepository, examenRepository, medicamentoRepository) {
         this.prisma = prisma;
         this.usuarioRepository = usuarioRepository;
         this.auditoriaRepository = auditoriaRepository;
@@ -9,6 +9,7 @@ class EstadisticaService {
         this.registroPreclinicoRepository = registroPreclinicoRepository;
         this.recetaRepository = recetaMedicaRepository;
         this.examenRepository = examenRepository;
+        this.medicamentoRepository = medicamentoRepository;
 
         this.rolesPorId = {
             1: 'ADMINISTRADOR',
@@ -45,18 +46,19 @@ class EstadisticaService {
     }
 
     async obtenerAdminData() {
-        const [usuarios, logsHoy, logsRecientes, examenesActivos] = await Promise.all([
+        const [usuarios, logsHoy, logsRecientes, examenesActivos, medicamentosActivos] = await Promise.all([
             this.usuarioRepository.obtenerTodos(),
             this.auditoriaRepository.obtenerLogsDeHoy(),
             this.auditoriaRepository.obtenerRecientes(10),
-            this.examenRepository.obtenerActivos()
+            this.examenRepository.obtenerActivos(),
+            this.medicamentoRepository.obtenerActivos()
         ]);
 
         return {
             tarjetas: [
                 { id: 'usuarios', valor: usuarios.length, pie: "Total en sistema" },
                 { id: 'auditoria', valor: logsHoy.length, pie: "Movimientos de hoy" },
-                { id: 'medicamentos', valor: 0, pie: "Próximamente" },
+                { id: 'medicamentos', valor: medicamentosActivos.length, pie: "Activos" },
                 { id: 'examenes', valor: examenesActivos.length, pie: "Activos" }
             ],
             actividad: logsRecientes.map(log => ({

@@ -11,6 +11,8 @@ import { FormularioCreacionUsuario } from "@/features/admin/components/Formulari
 import { VerExpediente } from "@/features/pages/GestionPacientes";
 import { CatalogoExamenes } from "@/features/consultas/components/CatalogoExamenes";
 import { FormularioCrearExamen } from "@/features/consultas/components/FormulacioCrearExamen";
+import { FormularioCrearMedicamento } from "@/features/consultas/components/FormularioCrearMedicamento";
+import { CatalogoMedicamentos } from "@/features/consultas/components/CatalogoMedicamentos";
 const Auditoria = lazy(() => import("@/features/admin/components/Auditoria").then(module => ({ default: module.Auditoria })));
 const GestionRoles = lazy(() => import("@/features/admin/components/GestionRoles").then(module => ({ default: module.GestionRoles })));
 const ListaRegistrosPreclinicos = lazy(() => import("@/features/preclinica/components/ListaRegistrosPreclinicos").then(module => ({ default: module.ListaRegistrosPreclinicos })));
@@ -30,6 +32,8 @@ export const VIEW_COMPONENTS = {
     "formulario-usuario": { component: FormularioCreacionUsuario },
     "catalogo-examenes": { component: CatalogoExamenes },
     "formulario-examen": { component: FormularioCrearExamen },
+    "catalogo-medicamentos": { component: CatalogoMedicamentos },
+    "formulario-medicamento": { component: FormularioCrearMedicamento },
     // "ver-expediente": { component: VerExpediente },
     "gestion-pacientes": { component: VerExpediente },
     "error": { component: ModuloEnConstruccion }

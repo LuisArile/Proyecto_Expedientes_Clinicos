@@ -27,7 +27,7 @@ export const DASHBOARD_CONFIG = {
     modules: [
       { id: 'usuarios', title: "Usuarios", sub: "Gestionar usuarios", icon: Shield, color: "text-red-600", path: "gestion-usuarios" },
       { id: 'auditoria', title: "Auditoría", sub: "Eventos del sistema", icon: BarChart3, color: "text-purple-600", path: "auditoria" },
-      { id: 'medicamentos', title: "Medicamentos", sub: "Catálogo", icon: Pill, color: "text-green-600", path: "/medicamentos" },
+      { id: 'medicamentos', title: "Medicamentos", sub: "Catálogo", icon: Pill, color: "text-green-600", path: "catalogo-medicamentos" },
       { id: 'examenes', title: "Exámenes", sub: "Tipos de examen", icon: TestTube, color: "text-teal-600", path: "catalogo-examenes" },
     ]
   },
