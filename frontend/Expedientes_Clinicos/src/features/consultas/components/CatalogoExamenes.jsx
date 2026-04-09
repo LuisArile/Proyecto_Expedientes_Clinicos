@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useExamenes } from "../hooks/useExamenes";
+import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
 
 import { PageHeader } from "@components/layout/PageHeader";
 import { Card, CardContent, CardHeader } from "@components/ui/card";
@@ -10,7 +11,9 @@ import { DataTable } from "@components/common/DataTable";
 
 import { TestTube, CheckCircle2, Power, ListPlus, Edit } from "lucide-react";
 
-export function CatalogoExamenes({ onNavigate, onVolver }) {
+export function CatalogoExamenes() {
+
+  const { go } = useSafeNavigation();
 
   const {
     examenes,
@@ -64,7 +67,7 @@ export function CatalogoExamenes({ onNavigate, onVolver }) {
             variant="outline"
             onClick={() => {
               sessionStorage.setItem("edit_examen", JSON.stringify(row));
-              onNavigate("formulario-examen");
+              go("formulario-examen");
             }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-200 text-blue-600 
              hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 
@@ -108,7 +111,7 @@ export function CatalogoExamenes({ onNavigate, onVolver }) {
         title="Catálogo de Exámenes"
         subtitle="Gestión del catálogo de exámenes médicos del sistema"
         Icon={TestTube}
-        onVolver={onVolver}
+        onVolver={() => go("inicio")}
       />
 
       <main className="p-6 space-y-6">
@@ -154,7 +157,7 @@ export function CatalogoExamenes({ onNavigate, onVolver }) {
               <Button
                 onClick={() => {
                   sessionStorage.removeItem("edit_examen");
-                  onNavigate("formulario-examen");
+                  go("formulario-examen");
                 }}
                 className="bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
               >

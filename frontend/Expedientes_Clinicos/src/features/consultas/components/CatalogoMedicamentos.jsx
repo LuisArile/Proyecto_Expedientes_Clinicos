@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useMedicamentos } from "../hooks/useMedicamentos";
+import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
 
 import { PageHeader } from "@components/layout/PageHeader";
 import { Card, CardContent, CardHeader } from "@components/ui/card";
@@ -10,7 +11,9 @@ import { DataTable } from "@components/common/DataTable";
 
 import { Pill, CheckCircle2, Power, ListPlus, Edit } from "lucide-react";
 
-export function CatalogoMedicamentos({ onNavigate, onVolver }) {
+export function CatalogoMedicamentos() {
+
+  const { go } = useSafeNavigation();
 
   const {
     medicamentos,
@@ -63,7 +66,7 @@ export function CatalogoMedicamentos({ onNavigate, onVolver }) {
             variant="outline"
             onClick={() => {
               sessionStorage.setItem("edit_medicamento", JSON.stringify(row));
-              onNavigate("formulario-medicamento");
+              go("formulario-medicamento");
             }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-200 text-blue-600 
              hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 
@@ -107,7 +110,7 @@ export function CatalogoMedicamentos({ onNavigate, onVolver }) {
         title="Catálogo de Medicamentos"
         subtitle="Gestión del catálogo de medicamentos del sistema"
         Icon={Pill}
-        onVolver={onVolver}
+        onVolver={() => go("inicio")}
       />
 
       <main className="p-6 space-y-6">
@@ -151,7 +154,7 @@ export function CatalogoMedicamentos({ onNavigate, onVolver }) {
               <Button
                 onClick={() => {
                   sessionStorage.removeItem("edit_medicamento");
-                  onNavigate("formulario-medicamento");
+                  go("formulario-medicamento");
                 }}
                 className="bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
               >
