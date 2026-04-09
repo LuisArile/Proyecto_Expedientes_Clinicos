@@ -23,6 +23,10 @@ import { ColaPreclinica } from "../../trazabilidad/components/ColaPreclinica";
 import { TableroTrazabilidad } from "../../trazabilidad/components/TableroTrazabilidad";
 const Auditoria = lazy(() => import("@/pages/Auditoria").then(m => ({ default: m.Auditoria })));
 const GestionRoles = lazy(() => import("@/pages/GestionRoles").then(m => ({ default: m.GestionRoles })));
+import { CatalogoExamenes } from "@/features/consultas/components/CatalogoExamenes";
+import { CatalogoMedicamentos } from "@/features/consultas/components/CatalogoMedicamentos";
+import { FormularioCrearExamen } from "@/features/consultas/components/FormulacioCrearExamen";
+import { FormularioCrearMedicamento } from "@/features/consultas/components/FormularioCrearMedicamento";
 
 export function registerDashboardViews() {
     viewRegistry.register("inicio", {
@@ -79,7 +83,7 @@ export function registerDashboardViews() {
         component: BuscarPacienteConsulta,
         permissions: ["CONSULTA_MEDICA"],
         requiresPaciente: false,
-        metadata: { title: "Buscar Paciente para Consulta", modo: "consulta" }
+        metadata: { title: "Buscar Paciente para Consulta", modo: "consulta-medica" }
     });
 
     viewRegistry.register("buscar-paciente-preclinica", {
@@ -235,7 +239,7 @@ export function registerDashboardViews() {
 
     viewRegistry.register("catalogo-medicamentos", {
         path: "/gestion/medicamentos",
-        component: ModuloEnConstruccion,
+        component: CatalogoMedicamentos,
         permissions: ["CATALOGO_MEDICAMENTOS"],
         requiresPaciente: false,
         metadata: { title: "Catálogo de Medicamentos" }
@@ -243,19 +247,10 @@ export function registerDashboardViews() {
 
     viewRegistry.register("catalogo-examenes", {
         path: "/gestion/examenes",
-        component: ModuloEnConstruccion,
+        component: CatalogoExamenes,
         permissions: ["CATALOGO_EXAMENES"],
         requiresPaciente: false,
         metadata: { title: "Catálogo de Exámenes" }
-    });
-
-    viewRegistry.register("solicitud-examen", {
-        path: "/consulta/solicitud-examen",
-        component: ModuloEnConstruccion,
-        parent: "consulta-medica",
-        permissions: ["SOLICITUD_EXAMEN"],
-        requiresPaciente: true,
-        metadata: { title: "Solicitud de Examen" }
     });
 
     viewRegistry.register("adjuntar-documentos", {
@@ -265,6 +260,22 @@ export function registerDashboardViews() {
         permissions: ["ADJUNTAR_DOCUMENTOS"],
         requiresPaciente: true,
         metadata: { title: "Adjuntar Documentación" }
+    });
+
+    viewRegistry.register("formulario-examen", {
+        path: "/formulario/Examen",
+        component: FormularioCrearExamen,
+        permissions: ["CATALOGO_EXAMENES"],
+        requiresPaciente: true,
+        metadata: { title: "Gestión de Examen Clínico" }
+    });
+
+    viewRegistry.register("formulario-medicamento", {
+        path: "/formulario/medicamento",
+        component: FormularioCrearMedicamento,
+        permissions: ["CATALOGO_MEDICAMENTOS"],
+        requiresPaciente: true,
+        metadata: { title: "Gestión de Medicamento" }
     });
 }
 
