@@ -47,7 +47,16 @@ class consultaMedicaRepository {
                             apellido: true
                         }
                     },
-                    recetas: true
+                    recetas: {
+                        include: {
+                            medicamento: true  
+                        }
+                    },
+                    examenes: {
+                        include: {
+                            examen: true
+                        }
+                    }
                 }
             });
         } catch (error) {
@@ -66,7 +75,16 @@ class consultaMedicaRepository {
                             paciente: true
                         }
                     },
-                    recetas: true
+                    recetas: {
+                        include: {
+                            medicamento: true
+                        }
+                    },
+                    examenes: {
+                        include: {
+                            examen: true
+                        }
+                    }
                 }
             });
         } catch (error) {

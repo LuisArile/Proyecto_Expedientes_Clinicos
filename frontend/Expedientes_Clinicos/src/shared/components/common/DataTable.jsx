@@ -41,10 +41,14 @@ export function DataTable({ columns = [], data = [], rowKey = "id", emptyMessage
   };
 
   return (
-    <div className="relative w-full">
-      <Table>
-        <TableHeader className="sticky top-0 z-10 bg-slate-50 shadow-sm">
-          <TableRow className="hover:bg-slate-50 border-b">
+    <div className="relative w-full overflow-x-auto rounded-xl border border-slate-200 bg-white">
+
+      <Table className="min-w-[700px]">
+        
+        {/* HEADER */}
+        <TableHeader className="sticky top-0 z-10 bg-slate-50">
+          <TableRow className="border-b border-slate-200">
+
             {columns.map((column, index) => (
               <TableHead 
                 key={column.id ?? `column-${index}`}
@@ -68,8 +72,11 @@ export function DataTable({ columns = [], data = [], rowKey = "id", emptyMessage
                 </div>
               </TableHead>
             ))}
+
           </TableRow>
         </TableHeader>
+
+        {/* BODY */}
         <TableBody>
           {sortedData.length > 0 ? (
             sortedData.map((row, rowIndex) => {
@@ -89,8 +96,8 @@ export function DataTable({ columns = [], data = [], rowKey = "id", emptyMessage
           })
           ) : (
             <TableRow>
-              <TableCell 
-                colSpan={columns.length} 
+              <TableCell
+                colSpan={columns.length}
                 className="h-32 text-center py-10 text-gray-500"
               >
                 {emptyMessage}
@@ -98,6 +105,7 @@ export function DataTable({ columns = [], data = [], rowKey = "id", emptyMessage
             </TableRow>
           )}
         </TableBody>
+
       </Table>
     </div>
   );

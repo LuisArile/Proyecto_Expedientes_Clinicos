@@ -1,12 +1,10 @@
 import React from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 
-import { toast } from "sonner";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useConsultaMedica } from "../hooks/useConsultaMedica";
 import { Stethoscope, FileText, Save, Clock, Pill, Plus, Trash2, Loader2, Search } from "lucide-react";
 
-import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Textarea } from "@components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@components/ui/card";
@@ -14,6 +12,7 @@ import { FormField } from "@components/common/FormField";
 import { PageHeader } from "@components/layout/PageHeader";
 import { FormSection } from "@components/common/FormSection";
 import { Alert, AlertDescription } from "@components/ui/alert";
+import { ValidatedInput } from "@components/validaciones/validarInput";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 
 import { StatusModal } from "@components/common/StatusModal";
@@ -31,7 +30,14 @@ export function ConsultaMedica({ onSuccess }) {
   const paciente = pacienteEnAtencion || selectedPaciente;
 
   const methods = useForm({
-    defaultValues: { diagnostico: "", tipoDiagnostico: "", observacionesClinicas: "", medicamentos: [] }
+    mode: "onChange",
+    defaultValues: { 
+      diagnostico: "", 
+      tipoDiagnostico: "", 
+      observacionesClinicas: "", 
+      medicamentos: [],
+      examenes: []
+    }
   });
 
   const { 
@@ -50,8 +56,39 @@ export function ConsultaMedica({ onSuccess }) {
     onSuccess );
 
   const alEnviar = async (data) => {
+    setErrorValidacion("");
+
     const idExpediente = paciente?.expedientes?.idExpediente;
-    if (!idExpediente) return toast.error("No se pudo identificar el expediente");
+    if (!idExpediente) {
+      setErrorValidacion("No se pudo identificar el expediente");
+      return;
+    }
+
+    if (data.tipoDiagnostico === "PRESUNTIVO") {
+      if (!data.examenes || data.examenes.length === 0) {
+        setErrorValidacion("Debe agregar al menos un examen para diagnóstico presuntivo");
+        return;
+      }
+
+      const examenValido = data.examenes.some(e => e.examenId);
+      if (!examenValido) {
+        setErrorValidacion("Debe seleccionar al menos un examen válido");
+        return;
+      }
+    }
+
+    if (data.tipoDiagnostico === "DEFINITIVO") {
+      if (!data.medicamentos || data.medicamentos.length === 0) {
+        setErrorValidacion("Debe agregar al menos un medicamento para diagnóstico definitivo");
+        return;
+      }
+
+      const medicamentoValido = data.medicamentos.some(m => m.medicamentoId);
+      if (!medicamentoValido) {
+        setErrorValidacion("Debe ingresar al menos un medicamento válido");
+        return;
+      }
+    }
 
     await guardarConsulta(idExpediente, data);
 
