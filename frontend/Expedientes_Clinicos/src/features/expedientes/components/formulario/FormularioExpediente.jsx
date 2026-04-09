@@ -22,45 +22,45 @@ import { useExpedienteContext } from "../../hooks/useExpedienteContext";
 
 export function FormularioExpediente({ viewConfig }) {
 
-const { paciente, setPaciente } = useExpedienteContext();
-const { goBack } = useSafeNavigation();
+  const { paciente, setPaciente } = useExpedienteContext();
+  const { goBack } = useSafeNavigation();
 
-const esEdicion = viewConfig?.id === "editar-expediente";
-const modo = esEdicion ? "editar" : "crear";
+  const esEdicion = viewConfig?.id === "editar-expediente";
+  const modo = esEdicion ? "editar" : "crear";
 
-const { register, handleSubmit, formState: { errors }, control, reset } = useForm();
+  const { register, handleSubmit, formState: { errors }, control, reset } = useForm();
 
-const generoSeleccionado = useWatch({ control, name: "sexo", defaultValue: "" });
+  const generoSeleccionado = useWatch({ control, name: "sexo", defaultValue: "" });
 
-const { loading, idDuplicado, modal, setModal, validarId, enviarFormulario } = useExpedienteForm(modo, paciente, setPaciente);
+  const { loading, idDuplicado, modal, setModal, validarId, enviarFormulario } = useExpedienteForm(modo, paciente, setPaciente);
 
-// Prellenar el formulario si es edición
-useEffect(() => {
-  if (esEdicion && paciente) {
-    const p = paciente.paciente || paciente;
+  // Prellenar el formulario si es edición
+  useEffect(() => {
+    if (esEdicion && paciente) {
+      const p = paciente.paciente || paciente;
 
-    const sexoDB = p.sexo ? String(p.sexo).trim().toLowerCase() : "";
-    const sexoFinal = (sexoDB === "masculino" || sexoDB === "femenino") ? sexoDB : "";
+      const sexoDB = p.sexo ? String(p.sexo).trim().toLowerCase() : "";
+      const sexoFinal = (sexoDB === "masculino" || sexoDB === "femenino") ? sexoDB : "";
 
-    console.log("Sincronizando formulario con:", p.nombre, "Sexo:", sexoFinal);
-    reset({
-      nombre: p.nombre || "",
-      apellido: p.apellido || "",
-      numeroIdentidad: p.dni || "",
-      fechaNacimiento: formatearFecha(p.fechaNacimiento) || "",
-      correo: p.correo || "",
-      telefono: p.telefono || "",
-      direccion: p.direccion || "",
-      sexo: sexoFinal
-    });
-  }
-}, [esEdicion, paciente, reset]);
+      console.log("Sincronizando formulario con:", p.nombre, "Sexo:", sexoFinal);
+      reset({
+        nombre: p.nombre || "",
+        apellido: p.apellido || "",
+        numeroIdentidad: p.dni || "",
+        fechaNacimiento: formatearFecha(p.fechaNacimiento) || "",
+        correo: p.correo || "",
+        telefono: p.telefono || "",
+        direccion: p.direccion || "",
+        sexo: sexoFinal
+      });
+    }
+  }, [esEdicion, paciente, reset]);
 
-const onCancel = () => goBack(viewConfig.id);
+  const onCancel = () => goBack(viewConfig.id);
 
-const inputClass = (name) => `${errors[name] || (name === 'numeroIdentidad' && idDuplicado) ? "border-red-500" : "border-gray-300"} transition-all`;
+  const inputClass = (name) => `${errors[name] || (name === 'numeroIdentidad' && idDuplicado) ? "border-red-500" : "border-gray-300"} transition-all`;
 
-return (
+  return (
 
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
 

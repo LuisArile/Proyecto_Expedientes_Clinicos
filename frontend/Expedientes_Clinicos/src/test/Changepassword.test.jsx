@@ -31,7 +31,8 @@ function renderWithAuth(ui) {
         user: {
           id: 1,
           nombreUsuario: "admin"
-        }
+        },
+        updateUser: vi.fn()
       }}
     >
       <MemoryRouter>{ui}</MemoryRouter>

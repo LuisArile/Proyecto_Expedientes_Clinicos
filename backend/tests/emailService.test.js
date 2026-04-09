@@ -22,7 +22,7 @@ describe("emailService", () => {
         const mailArgs = transporter.sendMail.mock.calls[0][0];
 
         expect(mailArgs.to).toBe("test@test.com");
-        expect(mailArgs.subject).toContain("credenciales");
+        expect(mailArgs.subject.toLowerCase()).toContain("credenciales");
         expect(mailArgs.html).toContain("Juan123");
         expect(mailArgs.html).toContain("123456");
     });

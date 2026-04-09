@@ -33,7 +33,12 @@ export function useLoginForm() {
     try {
       const result = await login(formData.nombreUsuario.trim(), formData.clave.trim());
       if (result && result.success) {
-        navigate("/dashboard");
+        // Si debe cambiar contraseña, redirigir a formulario de cambio
+        if (result.debeCambiarPassword) {
+          navigate("/dashboard/cambiar-password");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
         setError(result.error || "Credenciales incorrectas");
       }

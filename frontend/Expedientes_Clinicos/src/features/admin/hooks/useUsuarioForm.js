@@ -90,6 +90,7 @@ export function useUsuarioForm(id) {
         modal, 
         setModal, 
         enviarFormulario,
-        datosIniciales
+        datosIniciales,
+        setLoading
     };
 }
