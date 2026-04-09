@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { Pill, Save, X } from "lucide-react";
 
 import { useMedicamentos } from "../hooks/useMedicamentos";
+import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
 
 import { Button } from "@components/ui/button";
 import { Card, CardContent, CardHeader } from "@components/ui/card";
@@ -12,7 +13,9 @@ import { FormHeader } from "@components/common/FormHeader";
 import { ValidatedInput } from "@components/validaciones/validarInput";
 import { FormSection } from "@components/common/FormSection";
 
-export function FormularioCrearMedicamento({ onVolver, onSuccess, onNavigate }) {
+export function FormularioCrearMedicamento() {
+
+  const { go } = useSafeNavigation();
 
   const { handleCrear, handleActualizar } = useMedicamentos();
 
@@ -40,9 +43,8 @@ export function FormularioCrearMedicamento({ onVolver, onSuccess, onNavigate }) 
       }
 
       sessionStorage.removeItem("edit_medicamento");
-      onSuccess();
-
-      onNavigate("catalogo-medicamentos");
+     
+      go("catalogo-medicamentos");
 
     } catch (error) {
       console.error("Error:", error);
@@ -56,7 +58,7 @@ export function FormularioCrearMedicamento({ onVolver, onSuccess, onNavigate }) 
         title="Registro de Medicamento"
         subtitle="Gestión de medicamentos del sistema"
         Icon={Pill}
-        onVolver={() => onNavigate("catalogo-medicamentos")}
+        onVolver={() => go("catalogo-medicamentos")}
       />
 
       <main className="max-w-3xl mx-auto p-4 sm:p-6">
@@ -113,7 +115,7 @@ export function FormularioCrearMedicamento({ onVolver, onSuccess, onNavigate }) 
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={onVolver}
+                  onClick={() => go("catalogo-medicamentos")}
                   className="h-11 px-5 border-gray-300 text-gray-600 hover:bg-red-500 hover:text-white transition-all cursor-pointer"
                 >
                   <X className="mr-2 size-4" />

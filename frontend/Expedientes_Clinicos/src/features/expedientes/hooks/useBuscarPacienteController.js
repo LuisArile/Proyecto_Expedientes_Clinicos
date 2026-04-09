@@ -21,13 +21,18 @@ export function useBuscarPacienteController({
         return;
         }
 
-        if (modo === "consulta") {
+        if (modo === "consulta-medica") {
             onConsultaMedica(p);
             return;
         }
 
         if (modo === "preclinica") {
             onPreclinica(p);
+            return;
+        }
+
+        if (modo === "gestion") {
+            onVerExpediente(p);
             return;
         }
 

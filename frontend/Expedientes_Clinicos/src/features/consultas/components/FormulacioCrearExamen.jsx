@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { TestTube, Save, X } from "lucide-react";
 
 import { useExamenes } from "../hooks/useExamenes";
+import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
 
 import { Button } from "@components/ui/button";
 import { Card, CardContent, CardHeader } from "@components/ui/card";
@@ -12,17 +13,18 @@ import { FormHeader } from "@components/common/FormHeader";
 import { ValidatedInput } from "@components/validaciones/validarInput";
 import { FormSection } from "@components/common/FormSection";
 
-export function FormularioCrearExamen({ onVolver, onSuccess, onNavigate }) {
+export function FormularioCrearExamen() {
 
+  const { go } = useSafeNavigation();
   const { handleCrear, handleActualizar } = useExamenes();
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm();
 
   const isEdit = !!sessionStorage.getItem("edit_examen");
 
-  const inputClass = (name) =>
-    `${errors[name] ? "border-red-500" : "border-gray-300"} 
-     transition-all focus:ring-blue-500`;
+  // const inputClass = (name) =>
+  //   `${errors[name] ? "border-red-500" : "border-gray-300"} 
+  //    transition-all focus:ring-blue-500`;
 
   useEffect(() => {
     const data = sessionStorage.getItem("edit_examen");
@@ -44,9 +46,8 @@ export function FormularioCrearExamen({ onVolver, onSuccess, onNavigate }) {
       }
 
       sessionStorage.removeItem("edit_examen");
-      onSuccess();
 
-      onNavigate("catalogo-examenes");
+      go("catalogo-examenes")
 
     } catch (error) {
       console.error("Error:", error);
@@ -60,7 +61,7 @@ export function FormularioCrearExamen({ onVolver, onSuccess, onNavigate }) {
         title="Registro de Examen"
         subtitle="Gestión de exámenes clínicos del sistema"
         Icon={TestTube}
-        onVolver={() => onNavigate("catalogo-examenes")}
+        onVolver={() => go("catalogo-examenes")}
       />
 
       <main className="max-w-3xl mx-auto p-4 sm:p-6">
@@ -115,7 +116,7 @@ export function FormularioCrearExamen({ onVolver, onSuccess, onNavigate }) {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={onVolver}
+                  onClick={() => go("catalogo-examenes")}
                   className="h-11 px-5 border-gray-300 text-gray-600 hover:bg-red-500 hover:text-white transition-all cursor-pointer"
                 >
                   <X className="mr-2 size-4" />

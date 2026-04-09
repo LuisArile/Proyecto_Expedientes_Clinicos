@@ -23,7 +23,7 @@ export function BuscarPacienteContainer({
         modo,
         onVerExpediente: (p) => {
             onSeleccionarPaciente(p);
-            go("gestion-pacientes");
+            go("gestion");
         },
         onConsultaMedica: (p) => {
             onSeleccionarPaciente(p);

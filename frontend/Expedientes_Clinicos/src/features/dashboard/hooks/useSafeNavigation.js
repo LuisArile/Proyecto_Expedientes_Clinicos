@@ -24,7 +24,7 @@ export function useSafeNavigation() {
         if (viewId === "buscar-paciente-preclinica") {
             navigationState.modo = "preclinica";
         } else if (viewId === "buscar-paciente-consulta") {
-            navigationState.modo = "consulta";
+            navigationState.modo = "consulta-medica";
         }
 
         if (view.requiresPaciente && !selectedPaciente) {
