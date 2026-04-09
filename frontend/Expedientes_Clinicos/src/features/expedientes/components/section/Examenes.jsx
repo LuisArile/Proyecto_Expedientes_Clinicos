@@ -30,7 +30,7 @@ export function Examenes({ data = [] }) {
                                         Exámenes - {consulta.id}
                                     </CardTitle>
                                     <CardDescription>
-                                        {new Date(consulta.fechaConsulta).toLocaleDateString()} - Dr. {consulta.medico?.nombre} {consulta.medico?.apellido}
+                                        {formatearFechaHora(consulta.fechaConsulta)} - Dr. {consulta.medico?.nombre} {consulta.medico?.apellido}
                                     </CardDescription>
                                 </CardHeader>
 

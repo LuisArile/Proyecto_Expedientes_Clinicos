@@ -40,7 +40,7 @@ export function DetalleAuditoria({ detallesRaw }) {
       </pre>
     );
 
-  } catch (e) {
+  } catch {
     // Texto plano
     return (
       <pre className="bg-slate-50 text-slate-700 p-5 rounded-xl text-xs font-mono max-h-[280px] overflow-auto border border-slate-200 shadow-inner leading-relaxed">

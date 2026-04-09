@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { vi, describe, test, beforeEach, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Dashboard } from "../features/pages/Dashboard";
 

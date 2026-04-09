@@ -51,6 +51,7 @@ export function ConsultaMedica({ onSuccess }) {
   });
 
   const examenesWatch = useWatch({ control, name: "examenes" });
+  const medicamentosWatch = useWatch({ control, name: "medicamentos" }) || [];
   const tipoDiag = useWatch({ control, name: "tipoDiagnostico" });
 
   const { guardarConsulta, guardando, modal, setModal, examenesDisponibles, limpiarBorrador, medicamentosDisponibles } =
@@ -300,7 +301,7 @@ export function ConsultaMedica({ onSuccess }) {
                             {/* MEDICAMENTO SELECT */}
                             <FormField label="Medicamento">
                               <Select
-                                value={methods.watch(`medicamentos.${index}.medicamentoId`)?.toString() || ""}
+                                value={medicamentosWatch[index]?.medicamentoId?.toString() || ""}
                                 onValueChange={(val) => setValue(`medicamentos.${index}.medicamentoId`, Number(val))}
                               >
                                 <SelectTrigger className="w-full h-10 min-h-[40px] px-3 py-2 rounded-lg border-black">
@@ -310,7 +311,7 @@ export function ConsultaMedica({ onSuccess }) {
                                 <SelectContent>
                                   {medicamentosDisponibles
                                     ?.filter((med) => {
-                                      return !methods.watch("medicamentos")?.some((m, i) => {
+                                      return !medicamentosWatch.some((m, i) => {
                                         if (i === index) return false;
                                         return Number(m?.medicamentoId) === med.id;
                                       });

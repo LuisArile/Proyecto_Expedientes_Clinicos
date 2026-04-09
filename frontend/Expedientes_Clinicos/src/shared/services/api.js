@@ -168,7 +168,7 @@ export const examenAPI = {
   // Buscar (nombre, especialidad)
   buscar: async (params = {}) => {
     const cleanParams = Object.fromEntries(
-      Object.entries(params).filter(([_, v]) => v !== "" && v !== undefined)
+      Object.entries(params).filter(([, v]) => v !== "" && v !== undefined)
     );
 
     const query = new URLSearchParams(cleanParams).toString();
@@ -225,7 +225,7 @@ export const medicamentoAPI = {
   // Buscar (nombre, categoría)
   buscar: async (params = {}) => {
     const cleanParams = Object.fromEntries(
-      Object.entries(params).filter(([_, v]) => v !== "" && v !== undefined)
+      Object.entries(params).filter(([, v]) => v !== "" && v !== undefined)
     );
 
     const query = new URLSearchParams(cleanParams).toString();
