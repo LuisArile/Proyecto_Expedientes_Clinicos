@@ -35,9 +35,9 @@ export function useLoginForm() {
       if (result && result.success) {
         // Si debe cambiar contraseña, redirigir a formulario de cambio
         if (result.debeCambiarPassword) {
-          navigate("/dashboard/cambiar-password");
+          navigate("/sistema/cambiar-contrasena");
         } else {
-          navigate("/dashboard");
+          navigate("/sistema");
         }
       } else {
         setError(result.error || "Credenciales incorrectas");

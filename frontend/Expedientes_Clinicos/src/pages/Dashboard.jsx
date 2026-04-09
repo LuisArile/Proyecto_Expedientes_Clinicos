@@ -26,6 +26,12 @@ export function Dashboard() {
   const cleanPath = location.pathname.replace("/sistema", "") || "/";
   const currentView = views.find(v => v.path === cleanPath);
 
+  useEffect(() => {
+    if (user?.debeCambiarPassword && currentView?.id !== "changepassword") {
+      go("changepassword");
+    }
+  }, [user?.debeCambiarPassword, currentView?.id, go]);
+
   const modoActual = location.state?.modo || currentView?.params?.modo || currentView?.metadata?.modo;
   
   const controller = {
@@ -34,19 +40,11 @@ export function Dashboard() {
     onPreclinica: (p) => { setSelectedPaciente(p); go("preclinica"); },
     checkPermission: (perm) => user?.permisos?.includes(perm),
     handleSeleccionarPaciente: (p) => {
-      if (modoActual === "preclinica") {
-          setSelectedPaciente(p);
-          go("preclinica");
-      } else if (modoActual === "consulta" || modoActual === "consulta-medica") {
-          setSelectedPaciente(p);
-          go("consulta-medica");
-      } else if (modoActual === "agendar") {
-          go("formulario-agendar-cita"); 
-      } else if (modoActual === "hoy") {
-          go("formulario-registro-hoy");
-      } else {
-          setSelectedPaciente(p);
-      }
+      if (modoActual === "preclinica") { setSelectedPaciente(p); go("preclinica");
+      } else if (modoActual === "consulta" || modoActual === "consulta-medica") { setSelectedPaciente(p); go("consulta-medica");
+      } else if (modoActual === "agendar") { go("formulario-agendar-cita"); 
+      } else if (modoActual === "hoy") { go("formulario-registro-hoy");
+      } else { setSelectedPaciente(p); }
     },
     modo: modoActual
   };
@@ -56,6 +54,9 @@ export function Dashboard() {
       go("inicio");
       return;
     }
+    
+    if (user?.debeCambiarPassword) return;
+
     const tienePaciente = selectedPaciente || pacienteEnAtencion;
 
     if (currentView?.id === "consulta-medica" && !tienePaciente) {
@@ -67,13 +68,17 @@ export function Dashboard() {
     else if (currentView?.id === "gestion-pacientes" && !selectedPaciente) {
       go("buscar-paciente");
     }
-  }, [currentView, selectedPaciente, pacienteEnAtencion, go, location.pathname]);
+  }, [currentView, selectedPaciente, pacienteEnAtencion, go, location.pathname, user?.debeCambiarPassword]);
 
   if (!user || !currentView) return <LoaderModulo />;
 
   const renderElement = (view) => {
     const Component = view.component;
     const pacienteActual = pacienteEnAtencion || selectedPaciente;
+
+    if (user?.debeCambiarPassword && view.id !== "changepassword") {
+      return <LoaderModulo />; 
+    }
 
     switch (view.id) {
       case "gestion-pacientes":
@@ -168,6 +173,9 @@ export function Dashboard() {
   console.log("PATH:", location.pathname);
   console.log("VIEWS:", views);
   console.log("CURRENT VIEW:", currentView);
+
+  console.log("Intentando renderizar ID:", currentView?.id);
+  console.log("¿Componente existe?:", !!currentView?.component);
 
   return (
     <DashboardLayout currentView={currentView?.id} onNavigate={go}>

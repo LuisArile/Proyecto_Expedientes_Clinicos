@@ -57,7 +57,16 @@ export function useUsuarioForm(id) {
            if (isEdit) {
                 await usuarioService.update(id, payload);
             } else {
-                await usuarioService.create(payload);
+                const response = await usuarioService.create(payload);
+                const nuevoUsuarioId = response.data?.idUsuario || response.data?.id;
+
+                if (nuevoUsuarioId) {
+                    try {
+                        await usuarioService.sendCredentials(nuevoUsuarioId);
+                    } catch (emailError) {
+                        console.error("Usuario creado pero falló el envío de correo:", emailError);
+                    }
+                }
             }
 
             setModal({

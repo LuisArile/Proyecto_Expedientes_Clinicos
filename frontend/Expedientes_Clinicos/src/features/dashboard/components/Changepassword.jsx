@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
+
 import { Lock, User, Eye, EyeOff, Search, ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
 
 import { Input } from "@components/ui/input";
@@ -12,9 +13,9 @@ import { PageHeader } from "@components/layout/PageHeader";
 import { useChangePassword } from "../hooks/useChangePassword";
 import { FormHeader } from "@components/common/FormHeader";
 
-export function Changepassword( { onVolver } ) {
+export function Changepassword() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { go } = useSafeNavigation();
   const { changePassword, loading, error, success, setError, setSuccess } = useChangePassword();
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -34,17 +35,19 @@ export function Changepassword( { onVolver } ) {
     const isOk = await changePassword(currentPassword, newPassword, confirmPassword);
       if (isOk) {
         setTimeout(() => {
-          if (onVolver) onVolver();
-          else navigate("/sistema");
+          go("inicio");
         }, 2000);
       }    
   };
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 px-4 pb-8">
+    <div>
     
-      <PageHeader title="Cambiar contraseña" subtitle="Cambiar contraseña de usuario" Icon={Search} onVolver={onVolver} />
+      <PageHeader 
+        title="Cambiar contraseña" subtitle="Cambiar contraseña de usuario" Icon={Search} 
+        onVolver={() => go("inicio")} 
+      />
 
       <Card className="w-full max-w-md mx-auto shadow-lg border-blue-100 mt-6 rounded-2xl overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-b border-blue-100 py-4">
@@ -160,7 +163,7 @@ export function Changepassword( { onVolver } ) {
 
               <Button
                 type="button"
-                onClick={() => onVolver ? onVolver() : navigate("inicio")}
+                onClick={() => go("inicio")}
                 className="w-full py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-red-600 hover:text-white"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" /> Cancelar y volver

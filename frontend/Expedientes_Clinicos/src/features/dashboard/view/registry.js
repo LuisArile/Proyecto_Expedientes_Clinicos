@@ -103,9 +103,8 @@ export function registerDashboardViews() {
     });
 
     viewRegistry.register("changepassword", {
-        path: "/cambiar-contraseña",
+        path: "/cambiar-contrasena",
         component: Changepassword,
-        permissions: [],
         requiresPaciente: false,
         metadata: { title: "Cambiar Contraseña" }
     });
