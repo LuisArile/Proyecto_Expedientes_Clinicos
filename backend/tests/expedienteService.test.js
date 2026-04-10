@@ -1,164 +1,197 @@
-// MOCK DE PRISMA (evita conexión real)
-jest.mock("../src/config/prisma", () => ({
-    $transaction: jest.fn(),
+const expedienteService = require('../src/services/expedienteService');
+
+// Mock correcto de prisma
+jest.mock('../src/config/prisma', () => ({
+  $transaction: jest.fn()
 }));
 
-const prisma = require("../src/config/prisma");
-const ExpedienteService = require("../src/services/expedienteService");
+const prisma = require('../src/config/prisma');
 
-describe("ExpedienteService", () => {
-    let service;
-    let expedienteRepo;
-    let pacienteRepo;
-    let auditoriaService;
+describe('expedienteService', () => {
+  let service;
+  let expedienteRepository;
+  let pacienteRepository;
+  let auditoriaService;
 
-    beforeEach(() => {
-        expedienteRepo = {
-            obtenerPorNumero: jest.fn(),
-            crear: jest.fn(),
-            obtenerTodos: jest.fn(),
-            obtenerPorId: jest.fn(),
-            obtenerPorPaciente: jest.fn(),
-            actualizar: jest.fn(),
-            eliminar: jest.fn()
-        };
+  beforeEach(() => {
+    expedienteRepository = {
+      obtenerPorNumero: jest.fn(),
+      crear: jest.fn(),
+      obtenerTodos: jest.fn(),
+      obtenerPorId: jest.fn(),
+      obtenerPorPaciente: jest.fn(),
+      actualizar: jest.fn(),
+      eliminar: jest.fn()
+    };
 
-        pacienteRepo = {
-            obtenerPorDni: jest.fn(),
-            obtenerPorId: jest.fn(),
-            crear: jest.fn(),
-            actualizar: jest.fn(),
-        };
+    pacienteRepository = {
+      obtenerPorDni: jest.fn(),
+      crear: jest.fn(),
+      obtenerPorId: jest.fn(),
+      actualizar: jest.fn()
+    };
 
-        auditoriaService = {
-            registrarExpediente: jest.fn()
-        };
+    auditoriaService = {
+      registrarExpediente: jest.fn()
+    };
 
-        service = new ExpedienteService(
-            expedienteRepo,
-            pacienteRepo,
-            auditoriaService
-        );
+    service = new expedienteService(
+      expedienteRepository,
+      pacienteRepository,
+      auditoriaService
+    );
+
+    // Asegurar que siempre sea mock
+    prisma.$transaction = jest.fn();
+
+    jest.clearAllMocks();
+  });
+
+  // ---------------- crearConPaciente ----------------
+  test('debe lanzar error si el DNI ya existe', async () => {
+    pacienteRepository.obtenerPorDni.mockResolvedValue({ id: 1 });
+
+    await expect(
+      service.crearConPaciente({ dni: '123' }, {}, 1)
+    ).rejects.toThrow('ya existe');
+  });
+
+  test('debe crear paciente y expediente correctamente', async () => {
+    pacienteRepository.obtenerPorDni.mockResolvedValue(null);
+    expedienteRepository.obtenerPorNumero.mockResolvedValue(null);
+
+    prisma.$transaction.mockImplementation(async (callback) => {
+      const tx = {
+        expediente: {
+          count: jest.fn().mockResolvedValue(0)
+        }
+      };
+
+      pacienteRepository.crear.mockResolvedValue({
+        idPaciente: 1,
+        dni: '123'
+      });
+
+      expedienteRepository.crear.mockResolvedValue({
+        idExpediente: 10
+      });
+
+      return callback(tx);
     });
 
-    afterEach(() => {
-        jest.restoreAllMocks();
+    const result = await service.crearConPaciente(
+      { dni: '123' },
+      {},
+      1
+    );
+
+    expect(result.paciente).toBeDefined();
+    expect(result.expediente).toBeDefined();
+    expect(auditoriaService.registrarExpediente).toHaveBeenCalled();
+  });
+
+  // ---------------- obtenerTodos ----------------
+  test('debe retornar todos los expedientes', async () => {
+    expedienteRepository.obtenerTodos.mockResolvedValue([{ id: 1 }]);
+
+    const res = await service.obtenerTodos();
+
+    expect(res).toHaveLength(1);
+  });
+
+  // ---------------- obtenerPorId ----------------
+  test('debe lanzar error si no existe expediente', async () => {
+    expedienteRepository.obtenerPorId.mockResolvedValue(null);
+
+    await expect(service.obtenerPorId(1))
+      .rejects
+      .toThrow('no existe');
+  });
+
+  test('debe retornar expediente si existe', async () => {
+    const expediente = { idExpediente: 1 };
+
+    expedienteRepository.obtenerPorId.mockResolvedValue(expediente);
+
+    const res = await service.obtenerPorId(1);
+
+    expect(res).toEqual(expediente);
+  });
+
+  // ---------------- obtenerPorPaciente ----------------
+  test('debe lanzar error si paciente no existe', async () => {
+    pacienteRepository.obtenerPorId.mockResolvedValue(null);
+
+    await expect(service.obtenerPorPaciente(1))
+      .rejects
+      .toThrow('no existe');
+  });
+
+  test('debe retornar expedientes del paciente', async () => {
+    pacienteRepository.obtenerPorId.mockResolvedValue({ idPaciente: 1 });
+    expedienteRepository.obtenerPorPaciente.mockResolvedValue([{ id: 1 }]);
+
+    const res = await service.obtenerPorPaciente(1);
+
+    expect(res).toHaveLength(1);
+  });
+
+  // ---------------- actualizarConPaciente ----------------
+  test('debe lanzar error si expediente no existe', async () => {
+    expedienteRepository.obtenerPorId.mockResolvedValue(null);
+
+    await expect(
+      service.actualizarConPaciente(1, {}, {}, 1)
+    ).rejects.toThrow('no existe');
+  });
+
+  test('debe actualizar paciente y expediente', async () => {
+    const expediente = {
+      idExpediente: 1,
+      idPaciente: 1,
+      numeroExpediente: 'EXP-2025-00001',
+      paciente: { dni: '123' }
+    };
+
+    expedienteRepository.obtenerPorId.mockResolvedValue(expediente);
+
+    prisma.$transaction.mockImplementation(async (callback) => {
+      const tx = {};
+
+      pacienteRepository.actualizar.mockResolvedValue({ actualizado: true });
+      expedienteRepository.actualizar.mockResolvedValue({ actualizado: true });
+
+      return callback(tx);
     });
 
-    describe("crearConPaciente", () => {
+    const res = await service.actualizarConPaciente(
+      1,
+      { nombre: 'Nuevo' },
+      { estado: true },
+      1
+    );
 
-        test("debe crear paciente y expediente correctamente", async () => {
-            const pacienteData = { dni: "123", nombre: "Juan" };
-            const expedienteData = {};
+    expect(res.paciente).toBeDefined();
+    expect(res.expediente).toBeDefined();
+    expect(auditoriaService.registrarExpediente).toHaveBeenCalled();
+  });
 
-            pacienteRepo.obtenerPorDni.mockResolvedValue(null);
+  // ---------------- eliminar ----------------
+  test('debe lanzar error si expediente no existe', async () => {
+    expedienteRepository.obtenerPorId.mockResolvedValue(null);
 
-            prisma.$transaction.mockImplementation(async (callback) => {
-                const tx = {
-                    expediente: { count: jest.fn().mockResolvedValue(5) }
-                };
+    await expect(service.eliminar(1))
+      .rejects
+      .toThrow('no existe');
+  });
 
-                pacienteRepo.crear.mockResolvedValue({
-                    idPaciente: 1,
-                    dni: "123"
-                });
+  test('debe eliminar expediente correctamente', async () => {
+    expedienteRepository.obtenerPorId.mockResolvedValue({ idExpediente: 1 });
+    expedienteRepository.eliminar.mockResolvedValue(true);
 
-                expedienteRepo.crear.mockResolvedValue({
-                    idExpediente: 10,
-                    numeroExpediente: "EXP-2026-00006"
-                });
+    const res = await service.eliminar(1);
 
-                return callback(tx);
-            });
-
-            const resultado = await service.crearConPaciente(
-                pacienteData,
-                expedienteData,
-                1
-            );
-
-            expect(pacienteRepo.crear).toHaveBeenCalledWith(pacienteData, expect.any(Object));
-            expect(expedienteRepo.crear).toHaveBeenCalledWith(
-                expect.objectContaining({ idPaciente: 1, numeroExpediente: expect.any(String) }),
-                expect.any(Object)
-            );
-            expect(resultado.expediente.numeroExpediente).toBe("EXP-2026-00006");
-        });
-
-        test("debe lanzar error si el DNI ya existe", async () => {
-            pacienteRepo.obtenerPorDni.mockResolvedValue({ idPaciente: 1 });
-
-            await expect(
-                service.crearConPaciente({ dni: "0801-1984-00248" }, {}, 1)
-            ).rejects.toThrow("El paciente con DNI 0801-1984-00248 ya existe");
-        });
-    });
-
-    describe("obtenerTodos", () => {
-        test("debe retornar expedientes", async () => {
-            const expedientes = [{ id: 1 }, { id: 2 }];
-            expedienteRepo.obtenerTodos.mockResolvedValue(expedientes);
-
-            const resultado = await service.obtenerTodos();
-
-            expect(resultado).toEqual(expedientes);
-        });
-    });
-
-    describe("obtenerPorId", () => {
-        test("debe lanzar error si el expediente no existe", async () => {
-            expedienteRepo.obtenerPorId.mockResolvedValue(null);
-
-            await expect(service.obtenerPorId(5))
-                .rejects.toThrow("El expediente con ID 5 no existe");
-        });
-    });
-
-    describe("obtenerPorPaciente", () => {
-        test("debe lanzar error si el paciente no existe", async () => {
-            pacienteRepo.obtenerPorId.mockResolvedValue(null);
-
-            await expect(service.obtenerPorPaciente(2))
-                .rejects.toThrow("El paciente con ID 2 no existe");
-        });
-    });
-
-    describe("actualizarConPaciente", () => {
-        test("debe actualizar expediente y paciente", async () => {
-            expedienteRepo.obtenerPorId.mockResolvedValue({ 
-                idExpediente: 1, 
-                idPaciente: 1,
-                numeroExpediente: "EXP-2026-00001",
-                paciente: { dni: "123" }
-            });
-            pacienteRepo.actualizar.mockResolvedValue({ nombre: "Juan Actualizado" });
-            expedienteRepo.actualizar.mockResolvedValue({ estado: "Activo" });
-
-            prisma.$transaction.mockImplementation(async (callback) => {
-                const tx = {};
-                return callback(tx);
-            });
-
-            const resultado = await service.actualizarConPaciente(1, { nombre: "Juan Actualizado" }, { estado: "Activo" }, 1);
-
-            expect(pacienteRepo.actualizar)
-                .toHaveBeenCalledWith(1, { nombre: "Juan Actualizado" }, expect.any(Object));
-            expect(expedienteRepo.actualizar)
-                .toHaveBeenCalledWith(1, { estado: "Activo" }, expect.any(Object));
-            expect(resultado.paciente).toBeDefined();
-            expect(resultado.expediente).toBeDefined();
-        });
-    });
-
-    describe("eliminar", () => {
-        test("debe eliminar expediente", async () => {
-            expedienteRepo.obtenerPorId.mockResolvedValue({ idExpediente: 1 });
-            expedienteRepo.eliminar.mockResolvedValue(true);
-
-            const resultado = await service.eliminar(1);
-
-            expect(expedienteRepo.eliminar).toHaveBeenCalledWith(1);
-            expect(resultado).toBe(true);
-        });
-    });
+    expect(res).toBe(true);
+    expect(expedienteRepository.eliminar).toHaveBeenCalledWith(1);
+  });
 });

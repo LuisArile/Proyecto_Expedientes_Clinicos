@@ -1,110 +1,136 @@
+import { vi, describe, test, beforeEach, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { describe, test, expect, vi } from "vitest";
-import { DashboardFeature } from "../features/dashboard/components/DashboardFeature";
-import { MemoryRouter } from "react-router-dom";
+import { Dashboard } from "../features/pages/Dashboard";
 
-/* ---------------- MOCKS ---------------- */
-
-// Mock useAuth
-vi.mock("@/features/auth/hooks/useAuth", () => ({
-  useAuth: () => ({
-    user: {
-      nombre: "Juan",
-      apellido: "Perez",
-      rol: "ADMINISTRADOR"
-    }
-  })
+// Mocks
+vi.mock("../features/auth/hooks/useAuth", () => ({
+  useAuth: vi.fn(),
 }));
 
-// Mock hook de dashboard nuevo
-vi.mock("../features/dashboard/hooks/useDashboardData", () => ({
-  useDashboardData: () => ({
-    loading: false,
-    tarjetas: [
-      { id: "usuarios", valor: 10, pie: "usuarios conectados" },
-      { id: "auditoria", valor: 5, pie: "eventos hoy" },
-      { id: "medicamentos", valor: 20, pie: "catálogo" },
-      { id: "examenes", valor: 8, pie: "tipos" }
-    ],
-    actividad: [
-      {
-        usuario: "admin",
-        accion: "Creó un usuario",
-        fecha: "2026-03-16T10:30:00.000Z"
-      }
-    ]
-  })
+vi.mock("../features/dashboard/utils/verRegistro", () => ({
+  getView: vi.fn(),
 }));
 
-// Mock componentes UI (para evitar dependencias visuales)
-vi.mock("@components/ui/card", () => ({
-  Card: ({ children, ...props }) => <div {...props}>{children}</div>,
-  CardContent: ({ children, ...props }) => <div {...props}>{children}</div>,
-  CardHeader: ({ children, ...props }) => <div {...props}>{children}</div>,
-  CardTitle: ({ children, ...props }) => <div {...props}>{children}</div>,
-  CardDescription: ({ children, ...props }) => <div {...props}>{children}</div>
+vi.mock("../shared/components/layout/DashboardLayout", () => ({
+  DashboardLayout: ({ children }) => <div data-testid="layout">{children}</div>,
 }));
 
-/* ---------------- TESTS ---------------- */
+vi.mock("../shared/components/ui/loaderModulo", () => ({
+  LoaderModulo: () => <div data-testid="loader">Loading...</div>,
+}));
 
-describe("DashboardAdministrador", () => {
+import { useAuth } from "../features/auth/hooks/useAuth";
+import { getView } from "../features/dashboard/utils/verRegistro";
 
-  test("renderiza nombre del usuario", () => {
+describe("Dashboard Component", () => {
+  const mockComponent = vi.fn(() => <div>Vista mock</div>);
 
-    render(
-      <MemoryRouter>
-        <DashboardFeature onNavigate={vi.fn()} />
-      </MemoryRouter>
-    );
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
 
-    expect(
-      screen.getByText("Bienvenido/a, Juan Perez")
-    ).toBeInTheDocument();
-
+    getView.mockReturnValue({
+      component: mockComponent,
+    });
   });
 
-  test("renderiza estadísticas", () => {
+  test("muestra loader si no hay usuario", () => {
+    useAuth.mockReturnValue({ user: null });
 
-    render(
-      <MemoryRouter>
-        <DashboardFeature onNavigate={vi.fn()} />
-      </MemoryRouter>
-    );
+    render(<Dashboard />);
 
-    expect(screen.getByText("Usuarios Activos")).toBeInTheDocument();
-    expect(screen.getByText("Eventos de Auditoría")).toBeInTheDocument();
-    expect(screen.getAllByText("Medicamentos")[0]).toBeInTheDocument();
-    expect(screen.getAllByText("Exámenes")[0]).toBeInTheDocument();
-
+    expect(screen.getByTestId("loader")).toBeInTheDocument();
   });
 
-  test("renderiza actividad reciente", () => {
+  test("renderiza layout cuando hay usuario", () => {
+    useAuth.mockReturnValue({ user: { id: 1 } });
 
-    render(
-      <MemoryRouter>
-        <DashboardFeature onNavigate={vi.fn()} />
-      </MemoryRouter>
-    );
+    render(<Dashboard />);
 
-    expect(screen.getByText("Creó un usuario")).toBeInTheDocument();
-    expect(screen.getByText("admin")).toBeInTheDocument();
-
+    expect(screen.getByTestId("layout")).toBeInTheDocument();
   });
 
-  test("navega al seleccionar un modulo", () => {
+  test("usa vista por defecto 'inicio'", () => {
+    useAuth.mockReturnValue({ user: { id: 1 } });
 
-    const onNavigate = vi.fn();
+    render(<Dashboard />);
 
-    render(
-      <MemoryRouter>
-        <DashboardFeature onNavigate={onNavigate} />
-      </MemoryRouter>
-    );
-
-    screen.getByText("Usuarios").click();
-
-    expect(onNavigate).toHaveBeenCalledWith("/usuarios");
-
+    expect(getView).toHaveBeenCalledWith("inicio");
   });
 
+  test("usa vista desde localStorage", () => {
+    localStorage.setItem("sgec_view", "consulta-medica");
+
+    useAuth.mockReturnValue({ user: { id: 1 } });
+
+    render(<Dashboard />);
+
+    expect(getView).toHaveBeenCalledWith("consulta-medica");
+  });
+
+  test("guarda vista en localStorage", () => {
+    useAuth.mockReturnValue({ user: { id: 1 } });
+
+    render(<Dashboard />);
+
+    expect(localStorage.getItem("sgec_view")).toBe("inicio");
+  });
+
+  test("usa paciente simulado si no hay en localStorage", () => {
+    useAuth.mockReturnValue({ user: { id: 1 } });
+
+    render(<Dashboard />);
+
+    const stored = JSON.parse(localStorage.getItem("sgec_selected_paciente"));
+
+    expect(stored.codigo).toBe("PAC-001");
+  });
+
+  test("usa paciente desde localStorage", () => {
+    const paciente = { codigo: "X1" };
+    localStorage.setItem("sgec_selected_paciente", JSON.stringify(paciente));
+
+    useAuth.mockReturnValue({ user: { id: 1 } });
+
+    render(<Dashboard />);
+
+    const stored = JSON.parse(localStorage.getItem("sgec_selected_paciente"));
+
+    expect(stored.codigo).toBe("X1");
+  });
+
+  test("redirige a buscar-paciente si no hay paciente y vista protegida", () => {
+    localStorage.setItem("sgec_view", "consulta-medica");
+
+    useAuth.mockReturnValue({ user: { id: 1 } });
+
+    // CLAVE: forzar null real
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation((key) => {
+      if (key === "sgec_selected_paciente") return "null";
+      if (key === "sgec_view") return "consulta-medica";
+      return null;
+    });
+
+    render(<Dashboard />);
+
+    expect(getView).toHaveBeenCalledWith("buscar-paciente");
+  });
+
+  test("pasa props correctamente al componente dinámico", () => {
+    useAuth.mockReturnValue({ user: { id: 1 } });
+
+    render(<Dashboard />);
+
+    const props = mockComponent.mock.calls[0][0];
+
+    expect(props).toEqual(
+      expect.objectContaining({
+        paciente: expect.any(Object),
+        onVolver: expect.any(Function),
+        onConsultaMedica: expect.any(Function),
+        onEditarExpediente: expect.any(Function),
+        onNavigate: expect.any(Function),
+      })
+    );
+  });
 });

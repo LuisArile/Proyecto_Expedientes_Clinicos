@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { crearExpediente, actualizarExpediente } from "../services/expedienteService";
 import { validarIdentidadDuplicada } from "../services/buscarPacienteService";
 
-export function useExpedienteForm(modo = "crear", datosIniciales = null) {
+export function useExpedienteForm(modo = "crear", datosIniciales = null, setPaciente) {
   const [loading, setLoading] = useState(false);
   const [idDuplicado, setIdDuplicado] = useState(false);
   const [modal, setModal] = useState({ open: false, result: {} });
@@ -32,24 +32,27 @@ export function useExpedienteForm(modo = "crear", datosIniciales = null) {
     }
   };
 
-  const enviarFormulario = async (data) => {
-    const idActual = esEdicion ? datosIniciales?.paciente?.dni : null;
-    const existe = await validarId(data.numeroIdentidad, idActual);
-    
-    if (existe) {
-      toast.error("El número de identidad ya existe en el sistema");
-      return;
-    }
-
+  const enviarFormulario = async (data, generoSeleccionado) => {
     setLoading(true);
+    
     try {
+      const idExpediente = datosIniciales?.expedientes?.idExpediente;
+      const idActual = esEdicion ? datosIniciales?.dni : null;
+      const existe = await validarId(data.dni, idActual);
+      
+      if (existe) {
+        toast.error("El número de identidad ya existe en el sistema");
+        setLoading(false);
+        return;
+      }
+
       const pacienteData = {
         nombre: data.nombre,
         apellido: data.apellido,
         dni: data.numeroIdentidad,
         correo: data.correo || null,
         fechaNacimiento: data.fechaNacimiento,
-        sexo: data.sexo,
+        sexo: generoSeleccionado,
         direccion: data.direccion,
         telefono: data.telefono,
       };
@@ -58,8 +61,8 @@ export function useExpedienteForm(modo = "crear", datosIniciales = null) {
       
       if (esEdicion) {
         // Actualizar expediente existente
-        const idExpediente = datosIniciales?.idExpediente;
         if (!idExpediente) {
+          console.error("Estructura recibida en el error:", datosIniciales);
           throw new Error("No se encontró el ID del expediente para actualizar");
         }
         response = await actualizarExpediente(idExpediente, pacienteData);
@@ -70,6 +73,28 @@ export function useExpedienteForm(modo = "crear", datosIniciales = null) {
       }
 
       if (response.success) {
+        if (esEdicion && setPaciente) {
+          setPaciente(prev => {
+            const base = prev?.paciente || prev;
+
+            const pacienteActualizado = {
+              ...base,
+              nombre: data.nombre,
+              apellido: data.apellido,
+              dni: data.numeroIdentidad,
+              sexo: generoSeleccionado,
+              correo: data.correo,
+              telefono: data.telefono,
+              direccion: data.direccion,
+              fechaNacimiento: data.fechaNacimiento
+            };
+
+            return prev?.paciente 
+              ? { ...prev, paciente: pacienteActualizado } 
+              : pacienteActualizado;
+          });
+        }
+
         setModal({
           open: true,
           result: {
@@ -84,7 +109,8 @@ export function useExpedienteForm(modo = "crear", datosIniciales = null) {
           result: { success: false, mensaje: response.error || `Error al ${esEdicion ? "actualizar" : "crear"} expediente` }
         });
       }
-    } catch {
+    } catch(error) {
+      console.error("Error detallado:", error);
       setModal({
         open: true,
         result: { success: false, mensaje: "Error de conexión con el servidor" }

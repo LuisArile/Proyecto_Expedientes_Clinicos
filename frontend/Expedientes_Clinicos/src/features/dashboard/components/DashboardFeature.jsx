@@ -1,38 +1,30 @@
-import { Clock, UserCheck, PillBottle, Activity, Users, BarChart3, Pill, TestTube, FileText, Stethoscope, Calendar, NotebookText } from "lucide-react";
+import { Clock } from "lucide-react";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useDashboardData } from "../hooks/useDashboardData";
 import { DASHBOARD_CONFIG } from "@/constants/dashboardStrategies";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
 import { Badge } from "@components/ui/badge";
+import { Button } from "@components/ui/Button";
 import { obtenerFechaActual } from "@/utils/dateFormatter";
+import { StatCard } from "@components/common/StatCard"
 
-const ICON_MAP = {
-  Users: Users,
-  BarChart3: BarChart3,
-  Pill: Pill,
-  TestTube: TestTube,
-  UserCheck: UserCheck,
-  Activity: Activity,
-  Calendar: Calendar,
-  PillBottle: PillBottle,
-  NotebookText: NotebookText,
-  Stethoscope: Stethoscope,
-  FileText: FileText,
-
-};
+import { ROLE_STRATEGIES } from "@/constants/roles";
 
 export function DashboardFeature({ onNavigate }) {
     const { user } = useAuth();
     const userRole = user?.rol?.toUpperCase().trim();
     const config = DASHBOARD_CONFIG[userRole];
     
+    const roleBaseColor = ROLE_STRATEGIES[userRole]?.color || "bg-gray-50";
+    const bgClass = roleBaseColor.split(' ')[0];
+
     const { tarjetas, actividad, loading } = useDashboardData(userRole);
 
     if (loading) return <p className="p-6 text-center animate-pulse">Sincronizando datos del sistema...</p>;
 
     return (
-        <div className="p-6 space-y-6">    
+        <div className={`min-h-screen p-6 space-y-6 transition-colors duration-500 ${bgClass}/20`}>
             <div>
                 <h1 className="text-2xl font-bold text-gray-900">
                     Bienvenido/a, {user?.nombre} {user?.apellido}
@@ -56,28 +48,29 @@ export function DashboardFeature({ onNavigate }) {
             </Card>
 
             {/* Estadisticas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${config.gradient}">
                 {tarjetas?.map((stat) => {
                     const configVisual = config.cards?.[stat.id];
                     const navigateTo = configVisual?.navigateTo;
 
                 return (
-                    <StatsCard 
+                    <StatCard 
                         key={stat.id}
-                        titulo={configVisual?.titulo || stat.titulo}
-                        valor={stat.valor}
+                        title={configVisual?.titulo || stat.titulo}
+                        value={stat.valor}
                         icon={configVisual?.icon || "Activity"}
+                        iconColor={configVisual?.textColor || "text-gray-600"}
                         border={configVisual?.border || "border-gray-100"}
-                        textColor={configVisual?.textColor || "text-gray-600"}
-                        pie={stat.pie}
+                        footer={stat.pie}
                         onClick={navigateTo && onNavigate ? () => onNavigate(navigateTo) : undefined}
+                        variant="large"
                     />
                 );
                 })}
             </div>
 
             {/* Sección de Módulos */}
-            <Card className="border-none shadow-sm bg-gray-50/50">
+            <Card className="border-none shadow-sm bg-white/80">
                 <CardHeader>
                     <CardTitle className="text-xl font-bold text-gray-800">
                         {config.modulesTitle}
@@ -92,7 +85,7 @@ export function DashboardFeature({ onNavigate }) {
                             <div 
                                 key={modulo.id}
                                 onClick={() => onNavigate(modulo.path)}
-                                className="p-5 bg-white border border-gray-100 rounded-xl hover:shadow-md hover:border-blue-200 cursor-pointer transition-all group"
+                                className="p-5 bg-gray-50/50 border border-gray-100 rounded-xl hover:shadow-md hover:border-blue-200 cursor-pointer transition-all group"
                             >
                                 <div className="flex flex-col items-center text-center gap-3">
                                     <div className={`p-3 rounded-full bg-gray-50 group-hover:bg-white transition-colors`}>
@@ -109,8 +102,51 @@ export function DashboardFeature({ onNavigate }) {
                 </CardContent>
             </Card>
 
+            {/* Módulos de Trazabilidad */}
+            {config.trazabilidad && (
+                <Card className="border-none shadow-sm bg-white/80">
+                    <CardHeader>
+                        <CardTitle className="text-xl font-bold text-gray-800">{config.trazabilidad.title}</CardTitle>
+                        <CardDescription>{config.trazabilidad.subtitle}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {config.trazabilidad.items?.map((item) => (
+                                <Card 
+                                    key={item.id}
+                                    onClick={() => onNavigate(item.navigateTo)}
+                                    className={`hover:shadow-lg transition-all cursor-pointer border-2 ${item.border} ${item.hoverBorder} bg-gradient-to-br ${item.bg}`}
+                                >
+                                    <CardHeader>
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-3 ${item.color} rounded-lg`}>
+                                                <item.icon className={`h-6 w-6 ${item.color} text-white`} />
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-blue-900 text-sm">{item.title}</CardTitle>
+                                                <CardDescription className="text-xs">{item.sub}</CardDescription>
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Button
+                                            onClick={() => onNavigate(item.action)}
+                                            className={`w-full ${item.color} hover:opacity-90 text-white`}
+                                            size="sm"
+                                        >
+                                            <item.icon className="mr-2 h-4 w-4" />
+                                            Ver {item.title}
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
             {/* Sección de Actividad Reciente */}
-            <Card className="shadow-md border-none overflow-hidden">
+            <Card className="shadow-md border-none overflow-hidden bg-white/80">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div>
@@ -146,45 +182,24 @@ export function DashboardFeature({ onNavigate }) {
             </Card>
         </div>
     );
-    }
+}
 
-    function StatsCard({ titulo, valor, icon, border, textColor, pie, onClick }) {
-        const IconComponent = ICON_MAP[icon] || Activity;
-        return (
-        <Card 
-            className={`hover:shadow-md transition-shadow border-l-4 ${border} ${onClick ? 'cursor-pointer' : ''}`}
-            onClick={onClick}
-        >
-            <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-xs font-bold uppercase text-gray-500 tracking-wider">
-                    {titulo}
-                </CardTitle>
-                <IconComponent className={`h-5 w-5 ${textColor}`} />
-            </CardHeader>
-            <CardContent>
-                <div className={`text-3xl font-bold ${textColor}`}>{valor}</div>
-                <p className="text-xs text-gray-500 mt-1 font-medium">{pie}</p>
-            </CardContent>
-        </Card>
-    );
-    }
+function ListItem({ item, accent, bg }) {
 
-    function ListItem({ item, accent, bg }) {
+    const horaFormateada = item.fecha ? new Date(item.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--";
 
-        const horaFormateada = item.fecha ? new Date(item.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--";
-
-        return (
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-white transition-all">
-                <div className="flex items-center gap-3">
-                    <div className={`h-10 w-10 ${bg} rounded-full flex items-center justify-center`}>
-                        <Clock className={`h-5 w-5 ${accent}`} />
-                    </div>
-                    <div>
-                        <p className="font-medium text-gray-900">{item.primaryText || item.usuario || item.nombre}</p>
-                        <p className="text-xs text-gray-500">{item.secondaryText || item.accion || item.tipo}</p>
-                    </div>
+    return (
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-white transition-all">
+            <div className="flex items-center gap-3">
+                <div className={`h-10 w-10 ${bg} rounded-full flex items-center justify-center`}>
+                    <Clock className={`h-5 w-5 ${accent}`} />
                 </div>
-                <div className="text-right text-sm text-gray-600 font-mono">{horaFormateada}</div>
+                <div>
+                    <p className="font-medium text-gray-900">{item.primaryText || item.usuario || item.nombre}</p>
+                    <p className="text-xs text-gray-500">{item.secondaryText || item.accion || item.tipo}</p>
+                </div>
             </div>
-        );
-    }
+            <div className="text-right text-sm text-gray-600 font-mono">{horaFormateada}</div>
+        </div>
+    );
+}

@@ -8,7 +8,7 @@ class recetaMedicaRepository {
             return await client.recetaMedica.create({
                 data: {
                     consultaId: Number(data.consultaId),
-                    medicamento: data.medicamento,
+                    medicamentoId: Number(data.medicamentoId), 
                     dosis: data.dosis,
                     duracion: data.duracion,
                     indicaciones: data.indicaciones
@@ -24,7 +24,10 @@ class recetaMedicaRepository {
         try {
             const data = recetas.map(receta => ({
                 consultaId: Number(consultaId),
-                ...receta
+                medicamentoId: Number(receta.medicamentoId), 
+                dosis: receta.dosis,
+                duracion: receta.duracion,
+                indicaciones: receta.indicaciones
             }));
 
             return await client.recetaMedica.createMany({

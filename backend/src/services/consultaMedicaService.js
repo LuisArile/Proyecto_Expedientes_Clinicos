@@ -8,56 +8,76 @@ class consultaMedicaService {
         this.auditoriaService = auditoriaService;
     }
 
-    // Validaciones 
+   // Validaciones 
     validarDiagnostico(diagnostico) {
         const errores = [];
+
         if (!diagnostico) {
             errores.push('El diagnóstico es obligatorio');
             return errores;
         }
-        
+
         if (!diagnostico.id) errores.push('El ID del diagnóstico es requerido');
-        
-        if (!diagnostico.descripcion) errores.push('La descripción es requerida');
+
+        if (!diagnostico.descripcion || !diagnostico.descripcion.trim()) {
+            errores.push('La descripción es requerida');
+        }
 
         if (!diagnostico.tipo) errores.push('El tipo (PRESUNTIVO/DEFINITIVO) es requerido');
-        
+
         return errores;
     }
 
-    // Validación  de recetas
+    // Validación de recetas 
     validarRecetas(recetas) {
         const errores = [];
+
         if (!recetas || recetas.length === 0) {
             errores.push('Debe incluir al menos una receta');
             return errores;
         }
 
         recetas.forEach((r, i) => {
-            if (!r.medicamento) errores.push(`Receta ${i+1}: medicamento requerido`);
-            if (!r.dosis) errores.push(`Receta ${i+1}: dosis requerida`);
+            if (!r.medicamentoId) {
+                errores.push(`Receta ${i + 1}: medicamento requerido`);
+            }
+
+            if (!r.dosis || !r.dosis.trim()) {
+                errores.push(`Receta ${i + 1}: dosis requerida`);
+            }
         });
+
         return errores;
     }
 
     async registrar(expedienteId, medicoId, datos) {
         try {
-            // Verificar si existe expediente
+            // Verificar expediente
             const expediente = await this.expedienteRepository.obtenerPorId(expedienteId);
             if (!expediente) throw new Error('Expediente no encontrado');
 
-            // Validar diagnóstico presuntivo
+            // Validar diagnóstico
             const errDiag = this.validarDiagnostico(datos.diagnostico);
             if (errDiag.length > 0) throw new Error(errDiag.join(', '));
 
-            // Si es definitivo se requiere recetas
+            // FILTRAR RECETAS VÁLIDAS 
+            const recetasValidas = (datos.recetas || []).filter(r =>
+                r.medicamentoId &&
+                r.dosis && r.dosis.trim()
+            );
+
+            console.log("DATOS RECETAS:", datos.recetas);
+            console.log("RECETAS VALIDAS:", recetasValidas);
+
+            // Si es definitivo → requiere recetas
             if (datos.diagnostico.tipo === 'DEFINITIVO') {
-                const errRec = this.validarRecetas(datos.recetas);
+                const errRec = this.validarRecetas(recetasValidas);
                 if (errRec.length > 0) throw new Error(errRec.join(', '));
             }
 
-            // Guardar todo 
+            // Transacción
             return await prisma.$transaction(async (tx) => {
+
                 // Crear consulta
                 const consulta = await this.consultaRepository.crear({
                     expedienteId,
@@ -68,16 +88,40 @@ class consultaMedicaService {
                     tipoConsulta: datos.diagnostico.tipo
                 }, tx);
 
-                // Crear recetas si hay
-                if (datos.recetas?.length > 0) {
-                    await this.recetaRepository.crearMultiples(consulta.id, datos.recetas, tx);
+                // Crear recetas
+                if (recetasValidas.length > 0) {
+                    await this.recetaRepository.crearMultiples(
+                        consulta.id,
+                        recetasValidas,
+                        tx
+                    );
                 }
 
-                // Registrar en Auditoría 
-                await this.auditoriaService?.registrarAccionMedica(
+                // EXÁMENES
+                if (datos.examenes?.length > 0) {
+                    const examenesData = datos.examenes
+                        .filter(e => e.examenId)
+                        .map(e => ({
+                            consultaId: consulta.id,
+                            examenId: e.examenId,
+                            prioridad: (e.prioridad || "MEDIA").toUpperCase()
+                        }));
+
+                    await tx.consultaExamen.createMany({
+                        data: examenesData
+                    });
+                }
+
+                // Auditoría
+                await this.auditoriaService.registrarAccionMedica(
                     medicoId,
-                    'CONSULTA_MEDICA',
-                    `Consulta para expediente ${expedienteId}`, 
+                    "CONSULTA_MEDICA",
+                    {
+                        idExpediente: expedienteId,
+                        idConsulta: consulta.id,
+                        examenes: Array.isArray(datos.examenes) && datos.examenes.length > 0,
+                        medicamentos: recetasValidas.length > 0
+                    },
                     tx
                 );
 
@@ -85,6 +129,7 @@ class consultaMedicaService {
             });
 
         } catch (error) {
+            console.error("ERROR EN REGISTRAR CONSULTA:", error);
             throw new Error(`Error: ${error.message}`);
         }
     }
