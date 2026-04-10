@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { useForm, useFieldArray, useWatch } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useConsultaMedica } from "../hooks/useConsultaMedica";
-import { Stethoscope, Save, Clock, Pill, Plus, Trash2, Loader2, Search, FlaskConical } from "lucide-react";
+import { Stethoscope, Save, Clock, Loader2, Search } from "lucide-react";
 
 import { Button } from "@components/ui/button";
 import { Textarea } from "@components/ui/textarea";
@@ -12,8 +12,10 @@ import { FormField } from "@components/common/FormField";
 import { PageHeader } from "@components/layout/PageHeader";
 import { FormSection } from "@components/common/FormSection";
 import { Alert, AlertDescription } from "@components/ui/alert";
-import { ValidatedInput } from "@components/validaciones/validarInput";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
+
+import { SeccionExamenes } from "./SeccionExamenes";
+import { SeccionTratamiento } from "./SeccionTratamiento";
+import { SeccionDiagnostico } from "./SeccionDiagnostico";
 
 import { StatusModal } from "@components/common/StatusModal";
 
@@ -42,16 +44,7 @@ export function ConsultaMedica({ onSuccess }) {
   });
 
   const { register, handleSubmit, control, setValue, formState: { errors } } = methods;
-  
-  const { fields, append, remove } = useFieldArray({ control, name: "medicamentos" });
 
-  const { fields: examFields, append: appendExamen, remove: removeExamen } = useFieldArray({ 
-    control, 
-    name: "examenes" 
-  });
-
-  const examenesWatch = useWatch({ control, name: "examenes" });
-  const medicamentosWatch = useWatch({ control, name: "medicamentos" }) || [];
   const tipoDiag = useWatch({ control, name: "tipoDiagnostico" });
 
   const { guardarConsulta, guardando, modal, setModal, examenesDisponibles, limpiarBorrador, medicamentosDisponibles } =
@@ -138,35 +131,13 @@ export function ConsultaMedica({ onSuccess }) {
                 </AlertDescription>
               </Alert>
 
-              <div className="space-y-8">
+              <div>
 
                 {/* DIAGNÓSTICO */}
-                <FormSection title="Diagnóstico y Evaluación">
-                  <FormField label="Tipo de Diagnóstico" required error={errors.tipoDiagnostico?.message}>
-                    <Select value={tipoDiag} onValueChange={(val) => setValue("tipoDiagnostico", val)}>
-                      <SelectTrigger className="w-full rounded-lg border-gray-300">
-                        <SelectValue placeholder="Seleccione..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="PRESUNTIVO">Presuntivo</SelectItem>
-                        <SelectItem value="DEFINITIVO">Definitivo</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormField>
-
-                  <div className="md:col-span-2">
-                    <FormField label="Descripción Clínica" required error={errors.diagnostico?.message}>
-                      <Textarea 
-                        {...register("diagnostico", {required: "El diagnóstico es obligatorio", validate: (value) => {
-                                                    if (value.trim() === "") {return "No puede estar vacío o solo espacios";}
-                                                    if (value.length < 10) {return "Debe tener al menos 10 caracteres";}
-                                                    return true;}})}
-                        placeholder="Describa el estado del paciente..."
-                        className="border border-gray-300 focus-visible:ring-purple-500"
-                      />
-                    </FormField>
-                  </div>
-                </FormSection>
+                <SeccionDiagnostico 
+                  register={register} errors={errors}
+                  tipoDiag={tipoDiag} setValue={setValue}
+                />
 
                 {/* NOTAS */}
                 <FormSection title="Notas Adicionales">
@@ -182,197 +153,18 @@ export function ConsultaMedica({ onSuccess }) {
                 </FormSection>
 
                 {/* EXÁMENES */}
-                <FormSection title="Exámenes Médicos">
-                  <div className="space-y-4">
-
-                    <div className="flex justify-between items-end border-b border-purple-100 pb-2">
-                      <h3 className="text-sm font-semibold text-purple-800 uppercase tracking-wider flex items-center gap-2">
-                        <FlaskConical className="size-4" /> Exámenes
-                      </h3>
-
-                      <Button 
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => appendExamen({ examenId: "" })}
-                        className="text-purple-600 border-purple-200 hover:bg-purple-50 cursor-pointer"
-                      >
-                        <Plus className="mr-1 h-4 w-4" /> Agregar Examen
-                      </Button>
-                    </div>
-
-                    {examFields.length === 0 ? (
-                      <p className="text-center py-8 text-gray-400 italic text-sm border-2 border-dashed border-gray-100 rounded-xl">
-                        No hay exámenes agregados
-                      </p>
-                    ) : (
-                      <div className="grid gap-3">
-                        {examFields.map((field, index) => (
-                          <div key={field.id} className="grid w-full grid-cols-1 md:grid-cols-[2fr_1fr_auto] gap-4 bg-gray-50/50 p-4 rounded-xl border border-gray-100">
-
-                            <FormField label="Examen">
-                              <Select
-                                value={examenesWatch?.[index]?.examenId?.toString() || ""}
-                                onValueChange={(val) => setValue(`examenes.${index}.examenId`, Number(val))}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Seleccionar examen" />
-                                </SelectTrigger>
-
-                                <SelectContent>
-                                  {examenesDisponibles
-                                    ?.filter((ex) => {
-                                      return !examenesWatch?.some((e, i) => {
-                                        if (i === index) return false; 
-                                        return Number(e?.examenId) === ex.id;
-                                      });
-                                    })
-                                    .map((ex) => (
-                                      <SelectItem key={ex.id} value={String(ex.id)}>
-                                        {ex.nombre} - {ex.especialidad}
-                                      </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FormField>
-
-                            <FormField label="Prioridad">
-                              <Select
-                                value={examenesWatch?.[index]?.prioridad || "MEDIA"}
-                                onValueChange={(val) => setValue(`examenes.${index}.prioridad`, val)}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Prioridad" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="BAJA">Baja</SelectItem>
-                                  <SelectItem value="MEDIA">Media</SelectItem>
-                                  <SelectItem value="ALTA">Alta</SelectItem>
-                                  <SelectItem value="URGENTE">Urgente</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </FormField>
-
-                            <div className="flex items-center justify-center">
-                              <Button type="button" variant="ghost" size="icon" onClick={() => removeExamen(index)} className="text-red-400 hover:text-red-600">
-                                <Trash2 className="size-5" />
-                              </Button>
-                            </div>
-
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                  </div>
-                </FormSection>
+                <SeccionExamenes 
+                  control={control} setValue={setValue} 
+                  disponibles={examenesDisponibles} 
+                />
 
                 {/* MEDICAMENTOS */}
                 {tipoDiag === "DEFINITIVO" && (
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-end border-b border-purple-100 pb-2">
-                      <h3 className="text-sm font-semibold text-purple-800 uppercase tracking-wider flex items-center gap-2">
-                        <Pill className="size-4" /> Plan de Tratamiento
-                      </h3>
-
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => append({ medicamentoId: "", dosis: "", frecuencia: "", duracion: "" })}
-                        className="text-purple-600 border-purple-200 hover:bg-purple-50 cursor-pointer"
-                      >
-                        <Plus className="mr-1 h-4 w-4" /> Agregar Medicamento
-                      </Button>
-                    </div>
-
-                    {fields.length === 0 ? (
-                      <p className="text-center py-8 text-gray-400 italic text-sm border-2 border-dashed border-gray-100 rounded-xl">
-                        No hay medicamentos registrados.
-                      </p>
-                    ) : (
-                      <div className="grid gap-3">
-                        {fields.map((field, index) => (
-                          <div
-                            key={field.id}
-                            className="grid w-full grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 bg-gray-50/50 p-4 rounded-xl border border-gray-100"
-                          >
-
-                            {/* MEDICAMENTO SELECT */}
-                            <FormField label="Medicamento">
-                              <Select
-                                value={medicamentosWatch[index]?.medicamentoId?.toString() || ""}
-                                onValueChange={(val) => setValue(`medicamentos.${index}.medicamentoId`, Number(val))}
-                              >
-                                <SelectTrigger className="w-full h-10 min-h-[40px] px-3 py-2 rounded-lg border-black">
-                                  <SelectValue placeholder="Seleccionar medicamento" />
-                                </SelectTrigger>
-
-                                <SelectContent>
-                                  {medicamentosDisponibles
-                                    ?.filter((med) => {
-                                      return !medicamentosWatch.some((m, i) => {
-                                        if (i === index) return false;
-                                        return Number(m?.medicamentoId) === med.id;
-                                      });
-                                    })
-                                    .map((med) => (
-                                      <SelectItem key={med.id} value={String(med.id)}>
-                                        {med.nombre} - {med.categoria}
-                                      </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FormField>
-
-                            {/* DOSIS */}
-                            <ValidatedInput
-                              name={`medicamentos.${index}.dosis`}
-                              label="Dosis"
-                              register={register}
-                              error={errors?.medicamentos?.[index]?.dosis?.message}
-                              placeholder="Ej: 500 mg"
-                              type="dosis"
-                            />
-
-                            {/* FRECUENCIA */}
-                            <ValidatedInput
-                              name={`medicamentos.${index}.frecuencia`}
-                              label="Frecuencia"
-                              register={register}
-                              error={errors?.medicamentos?.[index]?.frecuencia?.message}
-                              placeholder="Ej: cada 8 horas"
-                              type="frecuencia"
-                            />
-
-                            {/* DURACIÓN */}
-                            <ValidatedInput
-                              name={`medicamentos.${index}.duracion`}
-                              label="Duración"
-                              register={register}
-                              error={errors?.medicamentos?.[index]?.duracion?.message}
-                              placeholder="Ej: 7 días"
-                              type="duracion"
-                            />
-
-                            {/* DELETE */}
-                            <div className="flex items-center justify-center">
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => remove(index)}
-                                className="text-red-400 hover:text-red-600"
-                              >
-                                <Trash2 className="size-5" />
-                              </Button>
-                            </div>
-
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                <SeccionTratamiento 
+                    control={control} register={register}
+                    setValue={setValue}
+                    disponibles={medicamentosDisponibles} errors={errors}
+                  />
                 )}
 
                 {/* ALERTA DE VALIDACIÓN */}

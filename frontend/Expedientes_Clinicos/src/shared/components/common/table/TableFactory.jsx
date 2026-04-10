@@ -28,7 +28,13 @@ const renderActions = (actions, row) => (
                         }
                     >
                         {Icon && <Icon className="h-4 w-4" />}
-                        {action.label && <span className="ml-1">{action.label}</span>}
+                        {action.label && (
+                            <span className="ml-1">
+                                {typeof action.label === "function" 
+                                    ? action.label(row) 
+                                    : action.label}
+                            </span>
+                        )}
                     </Button>
                 );
             })}
