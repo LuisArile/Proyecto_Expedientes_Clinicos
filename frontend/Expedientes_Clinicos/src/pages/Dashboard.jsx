@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useMemo } from "react";
 import { useLocation, Routes, Route } from "react-router-dom";
 import { DashboardLayout } from "@components/layout/dashboardLayout";
 
@@ -14,6 +14,19 @@ import { ConsultaProvider } from "@/features/consultas/context/ConsultaProvider"
 import { PreclinicaProvider } from "@/features/preclinica/context/PreclinicaProvider";
 import { viewRegistry } from "@/shared/services/ViewRegistry";
 
+const WRAPPER_CONFIG = {
+  expediente: ["gestion-pacientes", "crear-expediente", "editar-expediente", "formulario-agendar-cita", "formulario-registro-hoy"],
+  consulta: ["consulta-medica", "cola-consulta"],
+  preclinica: ["preclinica", "cola-preclinica"],
+};
+
+const getWrapperType = (viewId) => {
+  for (const [type, views] of Object.entries(WRAPPER_CONFIG)) {
+    if (views.includes(viewId)) return type;
+  }
+  return null;
+};
+
 export function Dashboard() {
   const { user } = useAuth();
   const { go } = useSafeNavigation();
@@ -22,7 +35,7 @@ export function Dashboard() {
   const { selectedPaciente, setSelectedPaciente } = usePacienteSelection();
   const { pacienteEnAtencion, setPacienteEnAtencion } = useTriajeState();
   
-  const views = viewRegistry.getAllViews();
+  const views = useMemo(() => viewRegistry.getAllViews(), []);
   const cleanPath = location.pathname.replace("/sistema", "") || "/";
   const currentView = views.find(v => v.path === cleanPath);
 
@@ -41,10 +54,11 @@ export function Dashboard() {
     checkPermission: (perm) => user?.permisos?.includes(perm),
     handleSeleccionarPaciente: (p) => {
       if (modoActual === "preclinica") { setSelectedPaciente(p); go("preclinica");
-      } else if (modoActual === "consulta" || modoActual === "consulta-medica") { setSelectedPaciente(p); go("consulta-medica");
+      } else if (modoActual === "consulta-medica") { setSelectedPaciente(p); go("consulta-medica");
       } else if (modoActual === "agendar") { go("formulario-agendar-cita"); 
       } else if (modoActual === "hoy") { go("formulario-registro-hoy");
-      } else { setSelectedPaciente(p); }
+      } else { setSelectedPaciente(p); 
+      }
     },
     modo: modoActual
   };
@@ -59,20 +73,17 @@ export function Dashboard() {
 
     const tienePaciente = selectedPaciente || pacienteEnAtencion;
 
-    if (currentView?.id === "consulta-medica" && !tienePaciente) {
-      go("buscar-paciente-consulta");
+    if (currentView?.id === "consulta-medica" && !tienePaciente) { go("buscar-paciente-consulta");
     }
-    else if (currentView?.id === "preclinica" && !tienePaciente) {
-      go("buscar-paciente-preclinica");
+    else if (currentView?.id === "preclinica" && !tienePaciente) { go("buscar-paciente-preclinica");
     }
-    else if (currentView?.id === "gestion-pacientes" && !selectedPaciente) {
-      go("buscar-paciente");
+    else if (currentView?.id === "gestion-pacientes" && !selectedPaciente) { go("buscar-paciente");
     }
   }, [currentView, selectedPaciente, pacienteEnAtencion, go, location.pathname, user?.debeCambiarPassword]);
 
   if (!user || !currentView) return <LoaderModulo />;
 
-  const renderElement = (view) => {
+  const renderElementWithWrapper = (view) => {
     const Component = view.component;
     const pacienteActual = pacienteEnAtencion || selectedPaciente;
 
@@ -80,102 +91,94 @@ export function Dashboard() {
       return <LoaderModulo />; 
     }
 
-    switch (view.id) {
-      case "gestion-pacientes":
-      case "crear-expediente":
-      case "editar-expediente":
-      case "formulario-agendar-cita":
-      case "formulario-registro-hoy":
-        return (
-          <ExpedienteProvider
-            paciente={selectedPaciente}
-            onSuccess={() => go(view.id.includes("cita") ? "agenda-citas" : "crear-expediente")}
-            onEditarExpediente={(exp) => {
-              setSelectedPaciente(exp?.paciente || selectedPaciente);
-              go("editar-expediente");
-            }}
-          >
-            <Component viewConfig={view} />
-          </ExpedienteProvider>
-        );
+    const wrapperType = getWrapperType(view.id);
 
-      case "consulta-medica":
-        return (
-          <ConsultaProvider
-            pacienteEnAtencion={pacienteActual}
-            onSuccess={() => {
-              setPacienteEnAtencion(null);
-              setSelectedPaciente(null);
-              go("cola-consulta");
-            }}
-          >
-            <Component 
-              viewConfig={view}
-              paciente={pacienteActual}
-              onNavigate={go}
-              onVolver={() => go("inicio")}
-              setPacienteEnAtencion={(p) => {
-                setPacienteEnAtencion(p);
-                if(p) go("consulta-medica");
-              }}
-            />
-          </ConsultaProvider>
-        );
-      case "cola-consulta":
+    if (wrapperType === "expediente") {
+      return (
+        <ExpedienteProvider
+          paciente={selectedPaciente}
+          onSuccess={() => go(view.id.includes("cita") ? "agenda-citas" : "crear-expediente")}
+          onEditarExpediente={(exp) => {
+            setSelectedPaciente(exp?.paciente || selectedPaciente);
+            go("editar-expediente");
+          }}
+        >
+          <Component viewConfig={view} />
+        </ExpedienteProvider>
+      );
+    }
+
+    if (wrapperType === "consulta") {
+      if (view.id === "cola-consulta") {
         return (
           <ConsultaProvider> 
             <Component /> 
           </ConsultaProvider>
         );
+      }
       
-      case "preclinica":
-      case "cola-preclinica":
-        return (
-          <PreclinicaProvider 
-            paciente={pacienteActual}
-            setPacienteEnAtencion={setPacienteEnAtencion}
-            setSelectedPaciente={setSelectedPaciente}
-            onSuccess={() => {
-              setPacienteEnAtencion(null);
-              setSelectedPaciente(null);
-              go("cola-preclinica");
-            }}
-          >
-            <Component 
-              viewConfig={view}
-              paciente={pacienteActual}
-              onNavigate={go}
-              onVolver={() => go("inicio")}
-              onSeleccionarPaciente={setSelectedPaciente}
-              setPacienteEnAtencion={(p) => {
-                setPacienteEnAtencion(p);
-                if(p) go("preclinica");
-              }}
-          />
-          </PreclinicaProvider>
-        );
-
-      default:
-        return (
-          <Component
+      return (
+        <ConsultaProvider
+          pacienteEnAtencion={pacienteActual}
+          onSuccess={() => {
+            setPacienteEnAtencion(null);
+            setSelectedPaciente(null);
+            go("cola-consulta");
+          }}
+        >
+          <Component 
             viewConfig={view}
-            controller={{...controller, modo: modoActual}}
-            paciente={selectedPaciente}
-            onSeleccionarPaciente={setSelectedPaciente}
+            paciente={pacienteActual}
             onNavigate={go}
-            pacienteEnAtencion={pacienteEnAtencion}
-            setPacienteEnAtencion={setPacienteEnAtencion}
+            onVolver={() => go("inicio")}
+            setPacienteEnAtencion={(p) => {
+              setPacienteEnAtencion(p);
+              if(p) go("consulta-medica");
+            }}
           />
-        );
+        </ConsultaProvider>
+      );
     }
+
+    if (wrapperType === "preclinica") {
+      return (
+        <PreclinicaProvider 
+          paciente={pacienteActual}
+          setPacienteEnAtencion={setPacienteEnAtencion}
+          setSelectedPaciente={setSelectedPaciente}
+          onSuccess={() => {
+            setPacienteEnAtencion(null);
+            setSelectedPaciente(null);
+            go("cola-preclinica");
+          }}
+        >
+          <Component 
+            viewConfig={view}
+            paciente={pacienteActual}
+            onNavigate={go}
+            onVolver={() => go("inicio")}
+            onSeleccionarPaciente={setSelectedPaciente}
+            setPacienteEnAtencion={(p) => {
+              setPacienteEnAtencion(p);
+              if(p) go("preclinica");
+            }}
+          />
+        </PreclinicaProvider>
+      );
+    }
+
+    return (
+      <Component
+        viewConfig={view}
+        controller={{...controller, modo: modoActual}}
+        paciente={selectedPaciente}
+        onSeleccionarPaciente={setSelectedPaciente}
+        onNavigate={go}
+        pacienteEnAtencion={pacienteEnAtencion}
+        setPacienteEnAtencion={setPacienteEnAtencion}
+      />
+    );
   };
-
-  console.log("PATH:", location.pathname);
-  console.log("VIEWS:", views);
-  console.log("CURRENT VIEW:", currentView);
-
-  console.log("Intentando renderizar ID:", currentView?.id);
-  console.log("¿Componente existe?:", !!currentView?.component);
 
   return (
     <DashboardLayout currentView={currentView?.id} onNavigate={go}>
@@ -185,7 +188,7 @@ export function Dashboard() {
             <Route
               key={view.id}
               path={view.path}
-              element={renderElement(view)}
+              element={renderElementWithWrapper(view)}
             />
           ))}
         </Routes>
