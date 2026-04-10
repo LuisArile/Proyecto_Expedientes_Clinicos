@@ -32,7 +32,7 @@ export function Dashboard() {
     }
   }, [user?.debeCambiarPassword, currentView?.id, go]);
 
-  const modoActual = location.state?.modo || currentView?.params?.modo || currentView?.metadata?.modo;
+  const modoActual = location.state?.modo || currentView?.metadata?.modo;
   
   const controller = {
     onVerExpediente: (p) => { setSelectedPaciente(p); go("gestion-pacientes"); },
