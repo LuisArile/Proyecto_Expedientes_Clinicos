@@ -265,7 +265,7 @@ export function registerDashboardViews() {
         path: "/formulario/Examen",
         component: FormularioCrearExamen,
         permissions: ["CATALOGO_EXAMENES"],
-        requiresPaciente: true,
+        requiresPaciente: false,
         metadata: { title: "Gestión de Examen Clínico" }
     });
 
@@ -273,7 +273,7 @@ export function registerDashboardViews() {
         path: "/formulario/medicamento",
         component: FormularioCrearMedicamento,
         permissions: ["CATALOGO_MEDICAMENTOS"],
-        requiresPaciente: true,
+        requiresPaciente: false,
         metadata: { title: "Gestión de Medicamento" }
     });
 }
