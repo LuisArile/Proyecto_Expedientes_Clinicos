@@ -226,10 +226,16 @@ class usuarioService{
         const usuario = await this.usuarioRepository.obtenerPorId(UsuarioId);
         if (!usuario) throw new Error("Usuario no encontrado");
 
-        // Generar clave aleatoria
-        const tempPassword = Math.random().toString(36).slice(-10);
+        // Generar clave aleatoria: caracteres seguros (a-z, 0-9)
+        // Método más confiable que evita longitudes inconsistentes
+        const caracteres = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let tempPassword = '';
+        for (let i = 0; i < 16; i++) {
+            tempPassword += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+        }
+        
         const hashed = await bcrypt.hash(tempPassword, 10);
-
+         
         await this.usuarioRepository.actualizar(UsuarioId, { 
             clave: hashed, 
             debeCambiarPassword: true 
