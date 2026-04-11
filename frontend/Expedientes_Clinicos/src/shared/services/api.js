@@ -273,3 +273,25 @@ export const medicamentoAPI = {
     return res.data;
   },
 };
+
+
+// api de cita y trazabilidad
+export const citaAPI = {
+  // Tablero
+  obtenerTablero: () => apiCall("/citas/tablero", { method: "GET" }),
+  obtenerPorEstado: (estado) => apiCall(`/citas/estado/${estado}`, { method: "GET" }),
+  obtenerSeguimiento: (idCita) => apiCall(`/citas/seguimiento/${idCita}`, { method: "GET" }),
+  
+  // Recepcionista
+  agendar: (data) => apiCall("/citas/agendar", { method: "POST", body: JSON.stringify(data) }),
+  registrarHoy: (data) => apiCall("/citas/registrar-hoy", { method: "POST", body: JSON.stringify(data) }),
+  enviarPreclinica: (idCita) => apiCall(`/citas/${idCita}/enviar-preclinica`, { method: "PUT" }),
+  
+  // Enfermero
+  iniciarPreclinica: (idCita) => apiCall(`/citas/${idCita}/iniciar-preclinica`, { method: "PUT" }),
+  finalizarPreclinica: (idCita) => apiCall(`/citas/${idCita}/finalizar-preclinica`, { method: "PUT" }),
+  
+  // Doctor
+  iniciarConsulta: (idCita) => apiCall(`/citas/${idCita}/iniciar-consulta`, { method: "PUT" }),
+  finalizarConsulta: (idCita) => apiCall(`/citas/${idCita}/finalizar-consulta`, { method: "PUT" }),
+};

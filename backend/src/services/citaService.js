@@ -16,7 +16,7 @@ class CitaService {
 
         const citaData = {
             pacienteId: data.pacienteId,
-            fechaCita: data.fechaCita,
+            fechaCita: new Date(data.fechaCita),
             horaCita: data.horaCita,
             motivo: data.motivo,
             prioridad: data.prioridad || 'NORMAL',

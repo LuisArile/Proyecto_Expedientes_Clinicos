@@ -27,6 +27,7 @@ const CatalogoExamenes = lazy(() => import("@/features/consultas/components/Cata
 const CatalogoMedicamentos = lazy(() => import("@/features/consultas/components/CatalogoMedicamentos").then(m => ({ default: m.CatalogoMedicamentos })));
 import { FormularioCrearExamen } from "@/features/consultas/components/FormulacioCrearExamen";
 import { FormularioCrearMedicamento } from "@/features/consultas/components/FormularioCrearMedicamento";
+import EnviarPreclinica from "@/features/trazabilidad/components/EnviarPreclinica";
 
 export function registerDashboardViews() {
     viewRegistry.register("inicio", {
@@ -35,6 +36,14 @@ export function registerDashboardViews() {
         permissions: [],
         requiresPaciente: false,
         metadata: { title: "Inicio", icon: "home" }
+    });
+
+        viewRegistry.register("enviar-preclinica", {
+        path: "/enviar-preclinica",
+        component: EnviarPreclinica,
+        permissions: ["PRECLINICA"],
+        requiresPaciente: false,
+        metadata: { title: "Enviar a Preclínica"}
     });
 
     viewRegistry.register("crear-expediente", {

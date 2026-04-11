@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { Badge } from "@components/ui/badge";
@@ -10,35 +10,49 @@ import { ConfirmModal } from "@components/common/ConfirmModal";
 import { useConsultaColumns } from "../hooks/useConsultaColumns";
 import { useColaGestion } from "../hooks/useColaGestion";
 import { getPrioridadConfig } from "@/features/trazabilidad/utils/prioridad";
-
 import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
 import { usePacienteSelection } from "@/features/dashboard/hooks/usePacienteSelection";
 import { useTriajeState } from "@/features/dashboard/hooks/useTriajeState";
-
-const pacientesSimulados = [
-    {
-        id: "PAC-004",
-        nombre: "Luis Rodríguez",
-        identidad: "0801-1988-45678",
-        prioridad: "media",
-        tipoIngreso: "subsecuente",
-        motivoConsulta: "Seguimiento post-operatorio",
-        horaRegistro: "08:15",
-        resumenPreclinico: {
-            presion: "120/80 mmHg",
-            temperatura: "36.5°C",
-            peso: "75 kg",
-            enfermero: "Juan Pérez",
-        },
-    },
-];
+import { obtenerPacientesPorEstado, iniciarConsulta, finalizarConsulta } from "../services/trazabilidadService";
 
 export function ColaConsulta() {
     const { go } = useSafeNavigation();
     const { setSelectedPaciente } = usePacienteSelection();
     const { pacienteEnAtencion, setPacienteEnAtencion } = useTriajeState();
     
-    const [pacientes] = useState(pacientesSimulados);
+    const [pacientes, setPacientes] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const cargarPacientes = async () => {
+        try {
+            setLoading(true);
+            const data = await obtenerPacientesPorEstado('ESPERA_CONSULTA');
+            
+            const pacientesTransformados = data.map(cita => ({
+                id: cita.idCita,
+                nombre: `${cita.paciente?.nombre || ''} ${cita.paciente?.apellido || ''}`.trim(),
+                identidad: cita.paciente?.dni || '',
+                prioridad: cita.prioridad === 'URGENTE' ? 'alta' : 
+                           cita.prioridad === 'EMERGENCIA' ? 'urgente' : 'normal',
+                tipoIngreso: cita.tipo === 'PROGRAMADA' ? 'Cita programada' : 'Registro del día',
+                motivoConsulta: cita.motivo,
+                horaRegistro: cita.horaCita,
+                citaId: cita.idCita,
+                idExpediente: cita.paciente?.expediente?.idExpediente || cita.paciente?.expedientes?.idExpedient,
+                resumenPreclinico: null
+            }));
+            
+            setPacientes(pacientesTransformados);
+        } catch (error) {
+            console.error('Error cargando pacientes:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        cargarPacientes();
+    }, []);
 
     const {
         dialogo, setDialogo, procesando, pacienteSeleccionado, pacientesOrdenados, 
@@ -48,17 +62,46 @@ export function ColaConsulta() {
         onSeleccionarPaciente: setSelectedPaciente,
         onNavigate: go, 
         setPacienteEnAtencion,
-        tipoAtencion: "consulta-medica"
+        pacienteEnAtencion,
+        tipoAtencion: "consulta-medica",
+        mensajeExito: "Consulta",
+        onIniciarReal: async (paciente) => {
+            await iniciarConsulta(paciente.citaId);
+            await cargarPacientes();
+        },
+        onFinalizarReal: async (paciente) => {
+            await finalizarConsulta(paciente.citaId);
+            await cargarPacientes();
+        }
     });
 
-    const columns = useConsultaColumns({pacienteEnAtencion, iniciarConsulta: abrirDialogoInicio});
-    
+    const columns = useConsultaColumns({ pacienteEnAtencion, iniciarConsulta: abrirDialogoInicio });
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-gray-50 pb-10">
+                <PageHeader 
+                    title="Cola de Consulta Médica" 
+                    subtitle="Cargando pacientes..." 
+                    Icon={Stethoscope} 
+                    onVolver={() => go("inicio")}
+                />
+                <div className="flex justify-center items-center h-64">
+                    <div className="text-gray-500">Cargando lista de espera...</div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-gray-50 pb-10">
             {/* Header */}
             <PageHeader 
-                title="Cola de Consulta Médica" subtitle="Pacientes en espera de consulta médica con resumen preclínico" Icon={Stethoscope} 
-                onVolver={() => go("inicio")}/>
+                title="Cola de Consulta Médica" 
+                subtitle="Pacientes en espera de consulta médica con resumen preclínico" 
+                Icon={Stethoscope} 
+                onVolver={() => go("inicio")}
+            />
 
             <main className="min-h-screen bg-slate-50/50 p-6 space-y-6">
 
@@ -84,8 +127,8 @@ export function ColaConsulta() {
                                     </div>
                                     <Button
                                         onClick={() => setDialogo("Finalizar")}
-                                            className="bg-purple-600 hover:bg-purple-700"
-                                        >
+                                        className="bg-purple-600 hover:bg-purple-700"
+                                    >
                                         <CheckCircle2 className="h-4 w-4 mr-2" />
                                         Finalizar Consulta
                                     </Button>

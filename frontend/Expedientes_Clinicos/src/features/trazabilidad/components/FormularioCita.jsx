@@ -1,4 +1,6 @@
-import { useEffect } from "react";
+
+import { registrarPacienteHoy, agendarCita } from "../services/trazabilidadService";
+import { useEffect, useState } from "react";
 import { useForm, useWatch } from 'react-hook-form';
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
@@ -19,6 +21,10 @@ export function FormularioCita({ viewConfig }) {
 
   const { paciente } = useExpedienteContext();
   const { go } = useSafeNavigation();
+  
+  // Estados para loading y error
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const targetBack = viewConfig?.parent || "agenda-citas";
 
@@ -27,7 +33,7 @@ export function FormularioCita({ viewConfig }) {
 
   const { register, handleSubmit, setValue, control, formState: { errors } } = useForm({
     defaultValues: {
-      prioridad: "normal",
+      prioridad: "NORMAL",
       tipoIngreso: "primera-vez",
       fechaCita: esHoy ? new Date().toISOString().split("T")[0] : ""
     }
@@ -41,8 +47,6 @@ export function FormularioCita({ viewConfig }) {
     }
   }, [paciente, setValue]);
 
-  const procesando = false;
-
   const prioridadSeleccionada = useWatch({
     control: control,
     name: "prioridad",
@@ -53,8 +57,56 @@ export function FormularioCita({ viewConfig }) {
     name: "tipoIngreso",
   });
 
-  const onSubmit = (data) => {
-    console.log(`Datos enviados (${modo}):`, data);
+  // Mapeo de prioridad 
+  const prioridadToBackend = {
+    "normal": "NORMAL",
+    "media": "URGENTE",
+    "alta": "URGENTE",
+    "urgente": "EMERGENCIA"
+  };
+
+  // Mapeo de prioridad , aqui se muestra
+  const prioridadDisplay = {
+    "NORMAL": "normal",
+    "URGENTE": "alta",
+    "EMERGENCIA": "urgente"
+  };
+
+  
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      let resultado;
+      
+      if (esHoy) {
+        // Registrar paciente hoy
+        resultado = await registrarPacienteHoy({
+          pacienteId: paciente.idPaciente,
+          motivo: data.motivoConsulta,
+          prioridad: prioridadToBackend[data.prioridad] || "NORMAL"
+        });
+      } else {
+        // Agendar cita futura
+        resultado = await agendarCita({
+          pacienteId: paciente.idPaciente,
+          fechaCita: data.fechaCita,
+          horaCita: data.horaCita,
+          motivo: data.motivoConsulta,
+          prioridad: prioridadToBackend[data.prioridad] || "NORMAL"
+        });
+      }
+      
+      console.log("Cita creada:", resultado);
+      go(targetBack);
+      
+    } catch (err) {
+      console.error("Error:", err);
+      setError(err.message || "Error al procesar la solicitud");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,6 +128,16 @@ export function FormularioCita({ viewConfig }) {
         </CardHeader> 
 
         <CardContent className="pt-6">
+          
+          {/*muestra error si existe */}
+          {error && (
+            <Alert className="mb-4 bg-red-50 border-red-200">
+              <AlertDescription className="text-red-600">
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             
             <FormSection title="Información del Paciente">
@@ -127,7 +189,7 @@ export function FormularioCita({ viewConfig }) {
               )}
 
               <FormField label="Prioridad / Triaje" className="md:col-span-2">
-                <Select value={prioridadSeleccionada} onValueChange={(val) => setValue("prioridad", val, {shouldValidate: true, shouldDirty: true })}>
+                <Select value={prioridadSeleccionada} onValueChange={(val) => setValue("prioridad", val)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="normal"><Badge variant="outline" className="text-blue-600">Normal</Badge></SelectItem>
@@ -151,16 +213,15 @@ export function FormularioCita({ viewConfig }) {
             </FormSection>
 
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button type="button" variant="outline" onClick={() => {go(targetBack);}}>
+              <Button type="button" variant="outline" onClick={() => go(targetBack)}>
                 Cancelar
               </Button>
               <Button 
-                onClick={() => {go(targetBack);}}
                 type="submit"
                 className={esHoy ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"}
-                disabled={procesando}
+                disabled={loading}
               >
-                {procesando ? <Loader2 className="animate-spin mr-2" /> : null}
+                {loading && <Loader2 className="animate-spin mr-2" />}
                 {esHoy ? "Registrar Ingreso" : "Agendar Cita"}
               </Button>
             </div>

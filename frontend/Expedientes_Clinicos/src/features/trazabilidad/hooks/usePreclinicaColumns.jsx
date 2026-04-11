@@ -55,7 +55,7 @@ export function usePreclinicaColumns({ pacienteEnAtencion, iniciar }) {
             render: (row) => (
                 <Button
                     size="sm"
-                    disabled={!!pacienteEnAtencion}
+                    disabled={false}
                     onClick={() => iniciar(row)}
                     className="bg-green-600 hover:bg-green-700"
                 >
