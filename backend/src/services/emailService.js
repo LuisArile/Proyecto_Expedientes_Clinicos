@@ -106,7 +106,10 @@ const emailService = {
                 </div>
             `,
         };
-        return await transporter.sendMail(mailOptions);
+        
+        const resultado = await transporter.sendMail(mailOptions);
+        console.log(`[EMAIL_SERVICE] Correo enviado exitosamente a ${usuario.correo}`);
+        return resultado;
     }
 };
 

@@ -16,6 +16,10 @@ class InicioSesionService {
             throw new Error('Credenciales incorrectas');
         }
 
+        if (!usuario.activo) {
+            throw new Error('Credenciales incorrectas');
+        }
+
         const claveValida = await bcrypt.compare(clave, usuario.clave);
 
         if (!claveValida) {
