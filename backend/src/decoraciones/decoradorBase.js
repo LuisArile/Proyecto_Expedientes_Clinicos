@@ -1,0 +1,35 @@
+/**
+ * Decorador Base
+ */
+class DecoradorBase {
+    constructor(service) {
+        this.service = service;
+    }
+
+    // Métodos ha  decorar
+    async crear(data, usuarioId) {
+        return this.service.crear(data, usuarioId);
+    }
+
+    async actualizar(id, data, usuarioId) {
+        return this.service.actualizar(id, data, usuarioId);
+    }
+
+    async eliminar(id, usuarioId) {
+        return this.service.eliminar(id, usuarioId);
+    }
+
+    async obtenerTodos() {
+        return this.service.obtenerTodos();
+    }
+
+    async obtenerPorId(id) {
+        return this.service.obtenerPorId(id);
+    }
+
+    async cambiarPassword(userId, currentPassword, newPassword) {
+        return this.service.cambiarPassword(userId, currentPassword, newPassword);
+    }
+}
+
+module.exports = DecoradorBase;
