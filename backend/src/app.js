@@ -16,6 +16,7 @@ const auditoriaRouters = require("./routes/auditoriaRoute");
 const examenRoutes = require("./routes/examenRoute");
 const medicamentoRouters = require("./routes/medicamentoRoute");
 const citaRouters=require("./routes/citaRoute");
+const documentoRouters = require("./routes/documentoRoute");
 
 const manejadorErrores = require("./middlewares/manejoErrores")
 
@@ -26,6 +27,9 @@ const app= express();
 app.get("/", (req, res) => {
     res.status(200).send("API funcionando correctamente");
 });
+
+// Utiliza form-data para manejar archivos adjuntos en solicitudes POST/PUT
+app.use("/api/documentos", documentoRouters); //gestión de documentos
 
 // Lista de orígenes permitidos
 const allowedOrigins = [
