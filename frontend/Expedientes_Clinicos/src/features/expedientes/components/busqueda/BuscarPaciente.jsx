@@ -107,7 +107,7 @@ export function BuscarPaciente({ onVolver, controller = {} }) {
 
                         {/* Paginación */}
                         {paginacion.totalPaginas > 1 && (
-                            <div className="mt-6 flex justify-center">
+                            <div className="mt-6 flex justify-end">
                                 <PaginationControls
                                     currentPage={pagina}
                                     totalPages={paginacion.totalPaginas}
