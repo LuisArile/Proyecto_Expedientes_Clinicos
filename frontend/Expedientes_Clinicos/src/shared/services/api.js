@@ -24,6 +24,7 @@ export const apiCall = async (endpoint, options = {}) => {
       method: options.method || "GET",
       headers,
       body: options.body || null,
+      signal: options.signal,
     });
 
     const contentType = response.headers.get("content-type");
@@ -91,9 +92,10 @@ export const expedienteAPI = {
 };
 
 export const buscarAPI = {
-  buscar: ({ termino, criterio = "nombre", pagina = 1, limite = 10 }) =>
+  buscar: ({ termino, criterio = "nombre", pagina = 1, limite = 10 }, signal) =>
     apiCall(`/busqueda?q=${encodeURIComponent(termino)}&pagina=${pagina}&limite=${limite}&criterio=${criterio}`, {
       method: "GET",
+      signal,
     }),
 }
 /**
