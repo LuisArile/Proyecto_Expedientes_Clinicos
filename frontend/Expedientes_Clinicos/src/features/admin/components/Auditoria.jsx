@@ -6,14 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ModalDetalleBase } from "../../../components/common/ModalDetalleBase";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 import { ROLE_STRATEGIES } from "@/constants/roles";
 import { DataTable } from "@/components/common/DataTable";
 import { PageHeader } from "@/components/layout/PageHeader";
-
+import { DetailBox } from "@/components/common/DetailBox";
 import { useAuditoria } from "../hooks/useAuditoria";
 
 export function Auditoria({ onVolver }) {
@@ -171,58 +171,36 @@ export function Auditoria({ onVolver }) {
         </Card>
 
         {/* Modal de Detalles */}
-        <Dialog open={modalDetallesAbierto} onOpenChange={setModalDetallesAbierto}>
-          <DialogContent className="max-w-2xl gap-0 p-0 border-slate-200 shadow-xl overflow-hidden bg-white"> 
-            <DialogHeader className="p-6 border-b border-slate-100 bg-white">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
-                  <FileText className="h-5 w-5 text-slate-500" />
-                </div>
-                <div className="space-y-1">
-                  <DialogTitle className="text-lg font-bold text-slate-900 tracking-tight">
-                    Detalle del Evento
-                  </DialogTitle>
-                  <DialogDescription className="text-xs text-slate-400 font-medium uppercase tracking-wider">
-                    Referencia: <span className="font-mono text-slate-600">{eventoSeleccionado?.id}</span>
-                  </DialogDescription>
-                </div>
-              </div>
-            </DialogHeader>
-
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <DetailBox label="Usuario" value={eventoSeleccionado?.usuario} icon={User} />
-                <DetailBox label="Módulo" value={eventoSeleccionado?.modulo} icon={Activity}/>
-              </div>
-
-              {/* Vista de Datos, en caso de que se necesite más información y sea transferida a través de un JSON */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between px-1">
-                  <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    Metadatos del Registro
-                  </Label>
-                  <span className="text-[10px] text-slate-300 font-mono italic">application/json</span>
-                </div>
-                
-                <div className="relative">
-                  <pre className="bg-slate-50 text-slate-700 p-5 rounded-xl text-xs font-mono max-h-[280px] overflow-auto border border-slate-200 shadow-inner custom-scrollbar leading-relaxed">
-                    {/* {JSON.stringify(eventoSeleccionado?.detalles, null, 2)} */}
-                    {eventoSeleccionado?.detalles}
-                  </pre>
-                </div>
-              </div>
+        <ModalDetalleBase
+          isOpen={modalDetallesAbierto}
+          onClose={() => setModalDetallesAbierto(false)}
+          title="Detalle del Evento"
+          subtitle={`Referencia: ${eventoSeleccionado?.id}`}
+          icon={FileText}
+          colorScheme={{
+            iconBg: "bg-blue-50",
+            iconText: "text-blue-600",
+            border: "border-slate-100",
+            accent: "text-slate-400"
+          }}
+        >
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <DetailBox label="Usuario" value={eventoSeleccionado?.usuario} icon={User} />
+              <DetailBox label="Módulo" value={eventoSeleccionado?.modulo} icon={Activity}/>
             </div>
 
-            <DialogFooter className="p-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between sm:justify-between">
-              <div className="text-[10px] text-slate-400 px-2"> Generado automáticamente por el sistema SGEC </div>
-              <Button variant="ghost"onClick={() => setModalDetallesAbierto(false)}
-                className="text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-semibold text-sm"
-              >
-                Cerrar ventana
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Metadatos del Registro</Label>
+                <span className="text-[10px] text-slate-300 font-mono italic">application/json</span>
+              </div>
+              <pre className="bg-slate-50 text-slate-700 p-5 rounded-xl text-xs font-mono max-h-[280px] overflow-auto border border-slate-200 shadow-inner leading-relaxed">
+                {eventoSeleccionado?.detalles}
+              </pre>
+            </div>
+          </div>
+        </ModalDetalleBase>
       </main>
     </div>
   );
@@ -272,20 +250,6 @@ function FilterSelect({ label, value, onValueChange, options }) {
           {options.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
         </SelectContent>
       </Select>
-    </div>
-  );
-}
-
-function DetailBox({ label, value, icon: Icon }) {
-  return (
-    <div className="flex gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-      <div className="h-10 w-10 rounded-lg bg-white flex items-center justify-center border border-slate-200 text-slate-400">
-        <Icon className="h-5 w-5" />
-      </div>
-      <div>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{label}</p>
-        <p className="text-sm font-semibold text-slate-700">{value}</p>
-      </div>
     </div>
   );
 }

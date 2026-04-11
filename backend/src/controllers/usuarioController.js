@@ -21,7 +21,7 @@ crear = capturarAsync(async (req, res) => {
 
     obtenerTodos = capturarAsync(async (req, res) => {
         const usuarios = await this.usuarioService.obtenerTodos();
-        res.json({ success: true, data: usuarios });
+        res.json({ success: true, data: usuarios, currentUserId: req.usuario.id });
     });
 
     //obtener usuariopor id
@@ -126,7 +126,6 @@ crear = capturarAsync(async (req, res) => {
         const resultado = await this.usuarioService.enviarCredenciales(id);
         res.json(resultado);
     });
-
 
 }
 
