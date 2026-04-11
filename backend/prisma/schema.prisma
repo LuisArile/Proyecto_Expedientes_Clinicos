@@ -231,10 +231,10 @@ model Seguimiento {
 
 model Documento {
   id            Int       @id @default(autoincrement())
-  nombre        String    // Nombre interno (blobName en Azure)
-  originalName  String    // Nombre original del archivo
-  url           String    // URL del blob con SAS token
-  contentType   String    // Tipo MIME (application/pdf, image/png, etc)
+  nombre        String    
+  originalName  String    
+  url           String    
+  contentType   String    
   createdAt     DateTime  @default(now())
 
   // Relaciones (FK)
