@@ -134,6 +134,7 @@ model ConsultaMedica {
   medico        Usuario        @relation(fields: [medicoId], references: [id])
   recetas       RecetaMedica[]
   examenes      ConsultaExamen[]
+  documentos    Documento[]
 
   @@map("ConsultaMedica")
 }
@@ -226,4 +227,20 @@ model Seguimiento {
   usuario Usuario @relation(fields: [usuarioId], references: [id], onUpdate: NoAction, onDelete: NoAction)
 
   @@map("Seguimiento")
+}
+
+model Documento {
+  id            Int       @id @default(autoincrement())
+  nombre        String    // Nombre interno (blobName en Azure)
+  originalName  String    // Nombre original del archivo
+  url           String    // URL del blob con SAS token
+  contentType   String    // Tipo MIME (application/pdf, image/png, etc)
+  createdAt     DateTime  @default(now())
+
+  // Relaciones (FK)
+  consultaId    Int
+
+  consulta      ConsultaMedica @relation(fields: [consultaId], references: [id], onDelete: Cascade)
+
+  @@map("Documento")
 }
