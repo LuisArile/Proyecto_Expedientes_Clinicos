@@ -1,11 +1,18 @@
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Eye } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
 import { Alert, AlertDescription } from "@components/ui/alert";
+import { Button } from "@components/ui/button";
 import { TabsContent } from "@components/ui/tabs";
 import { Badge } from "@components/ui/badge";
 import { formatearFechaHora } from "@/utils/dateFormatter";
+import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
 
 export function Consultas({ data = [] }) {
+  const { go } = useSafeNavigation();
+
+  const handleVerConsulta = (consultaId) => {
+    go("ver-consulta", { consultaId });
+  };
 
   return (
     <CardContent className="pt-6">
@@ -44,16 +51,26 @@ export function Consultas({ data = [] }) {
                           </span>
                         </CardDescription>
                       </div>
-                      <Badge
-                        variant="outline"
-                        className={
-                          consulta.tipoDiagnostico === "definitivo"
-                            ? "bg-green-50 text-green-700 border-green-300"
-                            : "bg-yellow-50 text-yellow-700 border-yellow-300"
-                        }
-                      >
-                        {esDefinitivo ? "Definitivo" : "Presuntivo"}
-                      </Badge>
+                      <div className="flex items-center gap-3">
+                        <Badge
+                          variant="outline"
+                          className={
+                            consulta.tipoDiagnostico === "definitivo"
+                              ? "bg-green-50 text-green-700 border-green-300"
+                              : "bg-yellow-50 text-yellow-700 border-yellow-300"
+                          }
+                        >
+                          {esDefinitivo ? "Definitivo" : "Presuntivo"}
+                        </Badge>
+                        <Button
+                          size="sm"
+                          onClick={() => handleVerConsulta(consulta.id)}
+                          className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
+                        >
+                          <Eye className="h-4 w-4" />
+                          Ver
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-4 space-y-3">
