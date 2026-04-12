@@ -104,6 +104,7 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
                 
                 localStorage.removeItem(STORAGE_KEY);
                 toast.success("Consulta registrada exitosamente");
+                return response;
             } else {
                 setModal({
                     open: true,
@@ -112,8 +113,9 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
                         message: response.message || "No se pudo completar el registro." 
                     }
                 });
+                return response;
             }
-        } catch {
+        } catch (error) {
             setModal({
                 open: true,
                 result: { 
@@ -122,6 +124,7 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
                 }
             });
             toast.error("Error al procesar el registro médico");
+            throw error;
         } finally {
             setGuardando(false);
         }
