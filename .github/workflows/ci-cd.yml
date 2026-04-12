@@ -48,7 +48,7 @@ jobs:
 
       - run: npm install
       - run: npm run lint
-      - run: npm test
+      - run: npm run test:run
       - run: npm run build
 
   docker-build-deploy:
