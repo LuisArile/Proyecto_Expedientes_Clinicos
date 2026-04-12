@@ -4,7 +4,7 @@ import { Button } from "@components/ui/button";
 import { Badge } from "@components/ui/badge";
 import { getPrioridadConfig } from "@/features/trazabilidad/utils/prioridad";
 
-export function usePreclinicaColumns({ pacienteEnAtencion, iniciar }) {
+export function usePreclinicaColumns({ iniciar }) {
 
     return useMemo(() => [  
         {
@@ -64,5 +64,5 @@ export function usePreclinicaColumns({ pacienteEnAtencion, iniciar }) {
                 </Button>
             ),
         },
-    ], [pacienteEnAtencion, iniciar]);
+    ], [iniciar]);
 };

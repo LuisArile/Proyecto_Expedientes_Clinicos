@@ -66,11 +66,11 @@ export function FormularioCita({ viewConfig }) {
   };
 
   // Mapeo de prioridad , aqui se muestra
-  const prioridadDisplay = {
-    "NORMAL": "normal",
-    "URGENTE": "alta",
-    "EMERGENCIA": "urgente"
-  };
+  // const prioridadDisplay = {
+  //   "NORMAL": "normal",
+  //   "URGENTE": "alta",
+  //   "EMERGENCIA": "urgente"
+  // };
 
   
   const onSubmit = async (data) => {
