@@ -26,7 +26,7 @@ vi.mock("../features/dashboard/hooks/useTriajeState", () => ({
   useTriajeState: vi.fn(),
 }));
 
-vi.mock("../shared/components/layout/DashboardLayout", () => ({
+vi.mock("@components/layout/dashboardLayout", () => ({
   DashboardLayout: ({ children }) => <div data-testid="layout">{children}</div>,
 }));
 
