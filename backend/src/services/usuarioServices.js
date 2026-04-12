@@ -67,7 +67,7 @@ class usuarioService{
     async obtenerPorId(id) {
         const usuario = await this.usuarioRepository.obtenerPorId(id);
         if (!usuario) {
-            throw new ErrorValidacion('Usuario');
+            throw new ErrorNoEncontrado('Usuario');
         }
         return usuario;
     }
