@@ -256,28 +256,28 @@ export function SeccionDocumentos({
 
                   <div className="flex gap-2 ml-4">
                     {doc.url && (
-                      <>
-                        <a
-                          href={doc.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                          title="Visualizar documento"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </a>
+                      <a
+                        href={doc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                        title="Visualizar documento"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </a>
+                    )}
 
-                        <button
-                          type="button"
-                          onClick={() =>
-                            descargarDocumento(doc.id, doc.originalName || doc.nombre)
-                          }
-                          className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
-                          title="Descargar documento"
-                        >
-                          <Download className="h-4 w-4" />
-                        </button>
-                      </>
+                    {(doc.url || doc.id) && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          descargarDocumento(doc.id, doc.originalName || doc.nombre)
+                        }
+                        className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                        title="Descargar documento"
+                      >
+                        <Download className="h-4 w-4" />
+                      </button>
                     )}
 
                     <button
