@@ -28,9 +28,6 @@ app.get("/", (req, res) => {
     res.status(200).send("API funcionando correctamente");
 });
 
-// Utiliza form-data para manejar archivos adjuntos en solicitudes POST/PUT
-app.use("/api/documentos", documentoRouters); //gestión de documentos
-
 // Lista de orígenes permitidos
 const allowedOrigins = [
     process.env.FRONTEND_URL || '',
@@ -57,6 +54,9 @@ app.use(cors({
 // Middleware para parsear JSON
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+// Utiliza form-data para manejar archivos adjuntos en solicitudes POST/PUT
+app.use("/api/documentos", documentoRouters); //gestión de documentos
 
 app.use("/api/usuarios", usuarioRouters); //gestion de usuarios
 
