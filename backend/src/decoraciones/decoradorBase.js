@@ -30,6 +30,14 @@ class DecoradorBase {
     async cambiarPassword(userId, currentPassword, newPassword) {
         return this.service.cambiarPassword(userId, currentPassword, newPassword);
     }
+
+    async alternarEstado(id, usuarioActualId) {
+        return this.service.alternarEstado(id, usuarioActualId);
+    }
+
+    async enviarCredenciales(usuarioId, administradorId) {
+        return this.service.enviarCredenciales(usuarioId, administradorId);
+    }
 }
 
 module.exports = DecoradorBase;

@@ -4,7 +4,7 @@ const { ErrorValidacion } = require('../utils/errores');
 class decoracionValidacionesEntrada extends DecoradorBase {
     
     validarClave(clave) {
-        const expresionRegular = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
+        const expresionRegular = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{};:,.<>?/|\\])[A-Za-z\d!@#$%^&*()_\-+=[\]{};:,.<>?/|\\]{8,}$/;
         return expresionRegular.test(clave);
     }
     
@@ -64,12 +64,20 @@ class decoracionValidacionesEntrada extends DecoradorBase {
     async cambiarPassword(userId, currentPassword, newPassword) {
         if (!this.validarClave(newPassword)) {
             throw new ErrorValidacion(
-                'La nueva contraseña debe tener al menos 8 caracteres, una mayúscula, ' +
-                'una minúscula, un número y un carácter especial'
+                'La nueva contraseña debe tener al menos 8 caracteres, incluir mayúscula, minúscula, ' +
+                'número y al menos un carácter especial (!@#$%^&*()_-+=[]{};:,.<>?/|\\)'
             );
         }
         
         return this.service.cambiarPassword(userId, currentPassword, newPassword);
+    }
+
+    async alternarEstado(id, usuarioActualId) {
+        return this.service.alternarEstado(id, usuarioActualId);
+    }
+
+    async enviarCredenciales(usuarioId, administradorId) {
+        return this.service.enviarCredenciales(usuarioId, administradorId);
     }
 }
 

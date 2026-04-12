@@ -1,6 +1,7 @@
 /**
  * Valida la robustez de una contraseña y la coincidencia con su confirmación.
  * Retorna un string con el error o null si es válida.
+ * Validación coherente con backend: mayúscula, minúscula, número, carácter especial, mínimo 8.
  */
 export function validatePasswordSchema( currentPassword = null, newPassword, confirmPassword = null) {
     
@@ -12,8 +13,6 @@ export function validatePasswordSchema( currentPassword = null, newPassword, con
     if (!newPass) return "La contraseña es obligatoria";
     
     if (newPass.length < 8) return "La contraseña debe tener al menos 8 caracteres";
-    
-    if (newPass.length > 64) return "La contraseña no puede exceder los 64 caracteres";
 
     const hasUpperCase = /[A-Z]/.test(newPass); // Al menos una mayúscula
     const hasLowerCase = /[a-z]/.test(newPass); // Al menos una minúscula
@@ -25,7 +24,7 @@ export function validatePasswordSchema( currentPassword = null, newPassword, con
     }
 
     if (!hasSpecial) {
-        return "Debe incluir al menos un carácter especial";
+        return "Debe incluir al menos un carácter especial: !@#$%^&*()_-+=[]{};<>?/|:,.";
     }
 
     if (currentPassword && newPass === current) {

@@ -32,7 +32,7 @@ crear = capturarAsync(async (req, res) => {
             throw new ErrorValidacion('El ID del usuario es obligatorio');
         }
 
-        const usuario = await this.usuarioService.obtenerPorId(id);
+        const usuario = await this.usuarioService.obtenerPorId(Number(id));
 
         if (!usuario) {
             throw new ErrorNoEncontrado('Usuario');
@@ -57,7 +57,7 @@ crear = capturarAsync(async (req, res) => {
             throw new ErrorValidacion('El ID del usuario es obligatorio');
         }
 
-        const usuario = await this.usuarioService.actualizar(id, req.body, req.usuario.id);
+        const usuario = await this.usuarioService.actualizar(Number(id), req.body, req.usuario.id);
 
         res.json({
             success: true,
@@ -75,12 +75,13 @@ crear = capturarAsync(async (req, res) => {
             throw new ErrorValidacion('El ID del usuario es obligatorio');
         }
 
+        const idNumber = Number(id);
         // No permitir eliminar su mismo usuario
-        if (req.usuario.id === parseInt(id)) {
+        if (req.usuario.id === idNumber) {
             throw new ErrorValidacion('No puedes eliminar tu propio usuario');
         }
 
-        await this.usuarioService.eliminar(id, req.usuario.id);
+        await this.usuarioService.eliminar(idNumber, req.usuario.id);
 
         res.json({
             success: true,
@@ -117,7 +118,13 @@ crear = capturarAsync(async (req, res) => {
 
     alternarEstado = capturarAsync(async (req, res, next) => {
         const { id } = req.params;
-        const resultado = await this.usuarioService.alternarEstado(id);
+        const usuarioActualId = req.usuario?.id;
+
+        if (!usuarioActualId) {
+            throw new ErrorNoAutorizado('No se encontró información del usuario');
+        }
+
+        const resultado = await this.usuarioService.alternarEstado(Number(id), usuarioActualId);
         res.json(resultado);
     }); 
 
@@ -129,7 +136,7 @@ crear = capturarAsync(async (req, res) => {
             throw new ErrorNoAutorizado('No se encontró información del administrador');
         }
 
-        const resultado = await this.usuarioService.enviarCredenciales(id, administradorId);
+        const resultado = await this.usuarioService.enviarCredenciales(Number(id), administradorId);
         res.json(resultado);
     });
 

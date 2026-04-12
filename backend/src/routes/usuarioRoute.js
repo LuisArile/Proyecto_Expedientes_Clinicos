@@ -13,8 +13,7 @@ const validarToken = require("../middlewares/inicioSesionMiddleware");
 
 // decoradores 
 const camposUnicos = require('../decoraciones/camposUnicosDecorador');
-const validacionesEntrada = require('../decoraciones/validacionesEntradaDecorador');
-
+const ValidacionesEntrada = require('../decoraciones/validacionesEntradaDecorador');
 const router = express.Router();
 
 const auditoriaRepository = new AuditoriaRepository(prisma);
@@ -25,7 +24,7 @@ const usuarioRepository = new UsuarioRepository(prisma);
 let usuarioService = new UsuarioService(usuarioRepository, auditoriaService, emailService);
 
 // Aplicar decoradores
-usuarioService = new validacionesEntrada(usuarioService);
+usuarioService = new ValidacionesEntrada(usuarioService);
 usuarioService = new camposUnicos(usuarioService, usuarioRepository);
 
 const usuarioController = new UsuarioController(usuarioService);
@@ -44,5 +43,7 @@ router.get("/", (req, res, next) => usuarioController.obtenerTodos(req, res, nex
 router.get("/:id", (req, res, next) => usuarioController.obtenerPorId(req, res, next));
 router.put("/:id", (req, res, next) => usuarioController.actualizar(req, res, next));
 router.delete("/:id", (req, res, next) => usuarioController.eliminar(req, res, next));
+router.patch("/:id/status", (req, res, next) => usuarioController.alternarEstado(req, res, next));
+router.post("/:id/enviar-credenciales", (req, res, next) => usuarioController.enviarCredenciales(req, res, next));
 
 module.exports = router;

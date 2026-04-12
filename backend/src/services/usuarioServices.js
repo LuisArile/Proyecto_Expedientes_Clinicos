@@ -182,7 +182,7 @@ class usuarioService{
         return { mensaje: 'Contraseña actualizada correctamente' };
     }
 
-    async alternarEstado(id) {
+    async alternarEstado(id, usuarioActualId) {
         const usuario = await this.usuarioRepository.obtenerPorId(id);
         
         if (!usuario) {
@@ -195,10 +195,12 @@ class usuarioService{
             activo: nuevoEstado 
         });
 
-        await this.usuarioRepository.registrarAccionUsuario(
-            null,
+        // Registrar en auditoría
+        const detalles = `Usuario ${usuario.nombreUsuario} cambiado a ${nuevoEstado ? 'ACTIVO' : 'INACTIVO'}`;
+        await this.auditoriaService.registrar(
+            usuarioActualId,
             'ESTADO_USUARIO_CAMBIADO',
-            `Usuario ${usuario.nombreUsuario} cambiado a ${nuevoEstado ? 'ACTIVO' : 'INACTIVO'}`
+            detalles
         );
 
         return {
@@ -208,15 +210,15 @@ class usuarioService{
         };
     }
 
-    async enviarCredenciales(UsuarioId, administradorId) {
-        const usuario = await this.usuarioRepository.obtenerPorId(UsuarioId);
+    async enviarCredenciales(usuarioId, administradorId) {
+        const usuario = await this.usuarioRepository.obtenerPorId(usuarioId);
         if (!usuario) throw new Error("Usuario no encontrado");
 
         // Generar clave aleatoria
-        const tempPassword = Math.random().toString(36).slice(-10);
+        const tempPassword = Math.random().toString(36).slice(-10) + "A1!";
         const hashed = await bcrypt.hash(tempPassword, 10);
 
-        await this.usuarioRepository.actualizar(UsuarioId, { 
+        await this.usuarioRepository.actualizar(usuarioId, { 
             clave: hashed, 
             debeCambiarPassword: true 
         });
