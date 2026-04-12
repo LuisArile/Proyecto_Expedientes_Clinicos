@@ -1,4 +1,4 @@
-const EstadisticaService = require("../src/services/EstadisticaService");
+const EstadisticaService = require("../src/services/estadisticaService");
 
 describe("EstadisticaService", () => {
   let service;
