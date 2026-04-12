@@ -310,6 +310,7 @@ export function ConsultaMedica({ onSuccess, viewConfig }) {
                 control={control}
                 setValue={setValue}
                 disponibles={examenesDisponibles}
+                disabled={esVisualizacion}
               />
 
               {/* DOCUMENTOS ADJUNTOS */}
@@ -334,6 +335,7 @@ export function ConsultaMedica({ onSuccess, viewConfig }) {
                   setValue={setValue}
                   disponibles={medicamentosDisponibles}
                   errors={errors}
+                  disabled={esVisualizacion}
                 />
               )}
 

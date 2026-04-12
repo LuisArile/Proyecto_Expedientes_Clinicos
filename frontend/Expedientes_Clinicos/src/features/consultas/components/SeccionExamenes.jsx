@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@components/ui/select";
 
-export function SeccionExamenes({ control, disponibles }) {
+export function SeccionExamenes({ control, disponibles, disabled = false }) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: "examenes",
@@ -33,7 +33,8 @@ export function SeccionExamenes({ control, disponibles }) {
             onClick={() =>
               append({ examenId: "", prioridad: "MEDIA" })
             }
-            className="text-purple-600 border-purple-200 hover:bg-purple-50 cursor-pointer"
+            disabled={disabled}
+            className="text-purple-600 border-purple-200 hover:bg-purple-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="mr-1 h-4 w-4" /> Agregar Examen
           </Button>
@@ -62,6 +63,7 @@ export function SeccionExamenes({ control, disponibles }) {
                         onValueChange={(val) =>
                           field.onChange(Number(val))
                         }
+                        disabled={disabled}
                       >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Seleccionar" />
@@ -88,6 +90,7 @@ export function SeccionExamenes({ control, disponibles }) {
                       <Select
                         value={field.value || "MEDIA"}
                         onValueChange={field.onChange}
+                        disabled={disabled}
                       >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Prioridad" />
@@ -110,7 +113,8 @@ export function SeccionExamenes({ control, disponibles }) {
                     variant="ghost"
                     size="icon"
                     onClick={() => remove(index)}
-                    className="text-red-400 hover:text-red-600"
+                    disabled={disabled}
+                    className="text-red-400 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Trash2 className="size-5" />
                   </Button>
