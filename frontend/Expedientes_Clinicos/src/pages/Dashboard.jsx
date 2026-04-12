@@ -38,6 +38,7 @@ export function Dashboard() {
   const views = useMemo(() => viewRegistry.getAllViews(), []);
   const cleanPath = location.pathname.replace("/sistema", "") || "/";
   const currentView = views.find(v => v.path === cleanPath);
+  const pacienteActual = pacienteEnAtencion || selectedPaciente || location.state?.paciente;
   const consultaId = location.state?.consultaId;
 
   useEffect(() => {
@@ -49,16 +50,16 @@ export function Dashboard() {
   const modoActual = location.state?.modo || currentView?.metadata?.modo;
   
   const controller = {
-    onVerExpediente: (p) => { setSelectedPaciente(p); go("gestion-pacientes"); },
-    onConsultaMedica: (p) => { setSelectedPaciente(p); go("consulta-medica"); },
-    onPreclinica: (p) => { setSelectedPaciente(p); go("preclinica"); },
+    onVerExpediente: (p) => { setSelectedPaciente(p); go("gestion-pacientes", { paciente: p }); },
+    onConsultaMedica: (p) => { setSelectedPaciente(p); go("consulta-medica", { paciente: p }); },
+    onPreclinica: (p) => { setSelectedPaciente(p); go("preclinica", { paciente: p }); },
     checkPermission: (perm) => user?.permisos?.includes(perm),
     handleSeleccionarPaciente: (p) => {
-      if (modoActual === "preclinica") { setSelectedPaciente(p); go("preclinica");
-      } else if (modoActual === "consulta-medica") { setSelectedPaciente(p); go("consulta-medica");
-      } else if (modoActual === "agendar") { go("formulario-agendar-cita"); 
-      } else if (modoActual === "hoy") { go("formulario-registro-hoy");
-      } else { setSelectedPaciente(p); 
+      if (modoActual === "preclinica") { setSelectedPaciente(p); go("preclinica", { paciente: p });
+      } else if (modoActual === "consulta-medica") { setSelectedPaciente(p); go("consulta-medica", { paciente: p });
+      } else if (modoActual === "agendar") { go("formulario-agendar-cita", { paciente: p }); 
+      } else if (modoActual === "hoy") { go("formulario-registro-hoy", { paciente: p });
+      } else { setSelectedPaciente(p); go("gestion-pacientes", { paciente: p });
       }
     },
     modo: modoActual
@@ -72,21 +73,20 @@ export function Dashboard() {
     
     if (user?.debeCambiarPassword) return;
 
-    const tienePaciente = selectedPaciente || pacienteEnAtencion;
+    const tienePaciente = pacienteActual;
 
     if (currentView?.id === "consulta-medica" && !tienePaciente) { go("buscar-paciente-consulta");
     }
     else if (currentView?.id === "preclinica" && !tienePaciente) { go("buscar-paciente-preclinica");
     }
-    else if (currentView?.id === "gestion-pacientes" && !selectedPaciente) { go("buscar-paciente");
+    else if (currentView?.id === "gestion-pacientes" && !tienePaciente) { go("buscar-paciente");
     }
-  }, [currentView, selectedPaciente, pacienteEnAtencion, go, location.pathname, user?.debeCambiarPassword]);
+  }, [currentView, pacienteActual, go, location.pathname, user?.debeCambiarPassword]);
 
   if (!user || !currentView) return <LoaderModulo />;
 
   const renderElementWithWrapper = (view) => {
     const Component = view.component;
-    const pacienteActual = pacienteEnAtencion || selectedPaciente;
 
     if (user?.debeCambiarPassword && view.id !== "changepassword") {
       return <LoaderModulo />; 
@@ -97,7 +97,7 @@ export function Dashboard() {
     if (wrapperType === "expediente") {
       return (
         <ExpedienteProvider
-          paciente={selectedPaciente}
+          paciente={pacienteActual}
           onSuccess={() => go(view.id.includes("cita") ? "agenda-citas" : "crear-expediente")}
           onEditarExpediente={(exp) => {
             setSelectedPaciente(exp?.paciente || selectedPaciente);
@@ -173,7 +173,7 @@ export function Dashboard() {
       <Component
         viewConfig={view}
         controller={{...controller, modo: modoActual}}
-        paciente={selectedPaciente}
+        paciente={pacienteActual}
         onSeleccionarPaciente={setSelectedPaciente}
         onNavigate={go}
         pacienteEnAtencion={pacienteEnAtencion}

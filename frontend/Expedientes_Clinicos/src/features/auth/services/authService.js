@@ -17,16 +17,15 @@ export const authService = {
             debeCambiarPassword: result.data.debeCambiarPassword
             };
         }
-
         return {
             success: false,
             error: result.error,
         };
         } catch {
-        return {
-            success: false,
-            error: "No se pudo conectar con el servidor",
-        };
+            return {
+                success: false,
+                error: "No se pudo conectar con el servidor",
+            };
         }
     },
 

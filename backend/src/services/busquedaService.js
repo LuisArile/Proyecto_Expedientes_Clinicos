@@ -13,11 +13,11 @@ class BusquedaService {
 
         const skip = (pagina - 1) * limite;
 
-        if (usuarioId) {
+        if (usuarioId && this.auditoriaService) {
             try {
                 await this.auditoriaService.registrarBusqueda(usuarioId, termino);
             } catch (err) {
-                console.error("Error auditoría:", err);
+                console.error("Error auditoría:", err.message);
             }
         }
 
@@ -31,7 +31,7 @@ class BusquedaService {
             paginacion: {
                 total,
                 paginaActual: pagina,
-                totalPaginas: Math.ceil(total / limite)
+                totalPaginas: Math.ceil(total / limite) || 0
             }
         };
     }

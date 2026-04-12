@@ -5,9 +5,9 @@ import { buscarAPI } from "@/shared/services/api";
  * @param {string} termino - Término de búsqueda (nombre, DNI, Apellido)
  * @returns {Promise<Array>} Lista de resultados que coinciden con el término
  */
-export async function buscarPacientes(termino, criterio = "nombre", pagina = 1) {
+export async function buscarPacientes(termino, criterio = "nombre", pagina = 1, signal) {
   try {
-    const response = await buscarAPI.buscar({ termino, criterio, pagina });
+    const response = await buscarAPI.buscar({ termino, criterio, pagina }, signal);
     
     if (response.success) { 
         return {

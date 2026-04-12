@@ -2,14 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@comp
 import { Button } from "@components/ui/button";
 import { Badge } from "@components/ui/badge";
 import { Calendar as CalendarIcon, Plus, UserPlus, ClipboardList, Activity, Search, Icon } from "lucide-react";
-
-// import { useAuth } from "../../auth";
 import { PageHeader } from "@components/layout/PageHeader";
 import { CardCita } from "@/features/trazabilidad/components/CardCita"
 import { useSafeNavigation } from "../../dashboard/hooks/useSafeNavigation"
 
 export function AgendaCitas() {
-    // const { user } = useAuth();
     const { go, goBack } = useSafeNavigation();
 
     const steps = [

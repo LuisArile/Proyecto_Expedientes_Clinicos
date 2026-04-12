@@ -4,7 +4,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { validatePasswordSchema } from '@/utils/passwordValidator';
 
 export function useChangePassword() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -23,6 +23,7 @@ export function useChangePassword() {
     try {
       setLoading(true);
       await securityService.cambiarPassword(user.id, currentPassword, newPassword);
+      updateUser({ debeCambiarPassword: false });
       setSuccess("Contraseña actualizada correctamente");
       
       return true;

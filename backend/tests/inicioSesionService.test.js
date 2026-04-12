@@ -37,6 +37,7 @@ describe("InicioSesionService", () => {
                 correo: "admin@test.com",
                 nombreUsuario: "admin",
                 clave: "hash",
+                activo: true,
                 idRol: 1,
                 rolNombre: "ADMIN",
                 permisos: ["LEER", "ESCRIBIR"]

@@ -17,20 +17,25 @@ export function Login() {
   const [loading, setLoading] = useState(false);
   const [showClave, setShowClave] = useState(false);
 
+  const normalizePassword = (value) =>
+    value
+      .normalize("NFKC")
+      .replace(/[\u200B-\u200D\uFEFF\u00A0]/g, "")
+      .trim();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     const usuarioLimpio = nombreUsuario.trim();
-    const claveLimpia = clave.trim();
+    const claveLimpia = normalizePassword(clave);
 
     try {
       const result = await login(usuarioLimpio, claveLimpia);
       if(result && result.success){
         console.log("Login exitoso, redirigiendo...");
         localStorage.removeItem("sgec_view");
-        navigate("/dashboard");
         navigate("/sistema");
       } else {
         setError(result.error || "Credenciales incorrectas");

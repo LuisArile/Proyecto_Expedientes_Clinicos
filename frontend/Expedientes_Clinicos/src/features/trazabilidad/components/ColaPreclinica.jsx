@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { Badge } from "@components/ui/badge"; 
@@ -14,35 +14,50 @@ import { usePreclinicaColumns } from "../hooks/usePreclinicaColumns";
 import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
 import { usePacienteSelection } from "@/features/dashboard/hooks/usePacienteSelection";
 import { useTriajeState } from "@/features/dashboard/hooks/useTriajeState";
+import { obtenerPacientesPorEstado, iniciarPreclinica, finalizarPreclinica } from "../services/trazabilidadService";
 
-const pacientesSimulados = [
-  {
-    id: "PAC-002",
-    nombre: "Carlos Hernández",
-    identidad: "0801-1990-23456",
-    prioridad: "alta",
-    tipoIngreso: "primera-vez",
-    motivoConsulta: "Dolor abdominal agudo",
-    horaRegistro: "07:30",
-  },
-  {
-    id: "PAC-007",
-    nombre: "Laura Sánchez",
-    identidad: "0801-1993-78901",
-    prioridad: "media",
-    tipoIngreso: "primera-vez",
-    motivoConsulta: "Dolor de cabeza persistente",
-    horaRegistro: "08:45",
-  },
-];
+
 
 export function ColaPreclinica() {
     const { go } = useSafeNavigation();
     const { setSelectedPaciente } = usePacienteSelection();
     const { pacienteEnAtencion, setPacienteEnAtencion } = useTriajeState();
 
-    const [pacientes] = useState(pacientesSimulados);
-    
+    const [pacientes, setPacientes] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+const cargarPacientes = async () => {
+    try {
+        setLoading(true);
+        const data = await obtenerPacientesPorEstado('ESPERA_PRECLINICA');
+        console.log("🔍 Datos desde BD:", data); // ✅ Ver qué llega
+        
+        const pacientesTransformados = data.map(cita => ({
+            id: cita.idCita,
+            nombre: `${cita.paciente?.nombre || ''} ${cita.paciente?.apellido || ''}`.trim(),
+            identidad: cita.paciente?.dni || '',
+            prioridad: cita.prioridad === 'URGENTE' ? 'alta' : 
+                       cita.prioridad === 'EMERGENCIA' ? 'urgente' : 'normal',
+            tipoIngreso: cita.tipo === 'PROGRAMADA' ? 'Cita programada' : 'Registro del día',
+            motivoConsulta: cita.motivo,
+            horaRegistro: cita.horaCita,
+            citaId: cita.idCita
+        }));
+        
+        console.log("🔄 Pacientes transformados:", pacientesTransformados); // ✅ Ver transformación
+        
+        setPacientes(pacientesTransformados);
+    } catch (error) {
+        console.error('Error cargando pacientes:', error);
+    } finally {
+        setLoading(false);
+    }
+};
+
+    useEffect(() => {
+        cargarPacientes();
+    }, []);
+
     const {
         dialogo, setDialogo, procesando, pacienteSeleccionado, pacientesOrdenados, 
         abrirDialogoInicio, confirmarInicio, confirmarFinalizacion
@@ -50,21 +65,50 @@ export function ColaPreclinica() {
         pacientes, 
         onSeleccionarPaciente: setSelectedPaciente,
         onNavigate: go, 
-        setPacienteEnAtencion, 
-        tipoAtencion: "preclinica"
+        setPacienteEnAtencion,
+        pacienteEnAtencion, 
+        tipoAtencion: "preclinica",
+        mensajeExito: "Preclínica",
+        onIniciarReal: async (paciente) => {
+            await iniciarPreclinica(paciente.citaId);
+            await cargarPacientes();
+        },
+        onFinalizarReal: async (paciente) => {
+            await finalizarPreclinica(paciente.citaId);
+            await cargarPacientes();
+        }
     });
 
-    const columns = usePreclinicaColumns({pacienteEnAtencion, iniciar: abrirDialogoInicio});
+    const columns = usePreclinicaColumns({ pacienteEnAtencion, iniciar: abrirDialogoInicio });
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-gray-50 pb-10">
+                <PageHeader 
+                    title="Cola de Preclínica" 
+                    subtitle="Cargando pacientes..." 
+                    Icon={Activity} 
+                    onVolver={() => go("inicio")}
+                />
+                <div className="flex justify-center items-center h-64">
+                    <div className="text-gray-500">Cargando lista de espera...</div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-gray-50 pb-10">
             
-            {/* Header */}
             <PageHeader 
-                title="Cola de Preclínica" subtitle="Pacientes en espera de registro de signos vitales y preclínica" Icon={Activity} 
-                onVolver={() => go("inicio")}/>
+                title="Cola de Preclínica" 
+                subtitle="Pacientes en espera de registro de signos vitales y preclínica" 
+                Icon={Activity} 
+                onVolver={() => go("inicio")}
+            />
 
             <main className="min-h-screen bg-slate-50/50 p-6 space-y-6">
+                
                 {/* Paciente en Atención */}
                 {pacienteEnAtencion && (
                     <Card className="border-green-300 bg-green-50">
@@ -84,13 +128,13 @@ export function ColaPreclinica() {
                                         {getPrioridadConfig(pacienteEnAtencion.prioridad).label}
                                     </Badge>
                                 </div>
-                            <Button
-                                onClick={() => setDialogo("finalizar")}
-                                className="bg-green-600 hover:bg-green-700"
-                            >
-                                <CheckCircle2 className="h-4 w-4 mr-2" />
-                                Finalizar Preclínica
-                            </Button>
+                                <Button
+                                    onClick={() => setDialogo("finalizar")}
+                                    className="bg-green-600 hover:bg-green-700"
+                                >
+                                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                                    Finalizar Preclínica
+                                </Button>
                             </div>
                         </CardContent>
                     </Card>
@@ -100,10 +144,11 @@ export function ColaPreclinica() {
                 <Card className="bg-white shadow-sm border-slate-200 overflow-hidden">
                     <CardHeader className="border-b border-slate-50">
                         <CardTitle className="flex items-center gap-2 text-slate-800">
-                            <Clock className="h-5 w-5 text-blue-600" /> Pacientes en Espera
+                            <Clock className="h-5 w-5 text-blue-600" /> 
+                            Pacientes en Espera
                         </CardTitle>
                         <CardDescription>
-                            {pacientes.length} paciente{pacientes.length !== 1 ? "s" : ""} en cola
+                            {pacientes.length} paciente{pacientes.length !== 1 ? "s" : ""} en espera
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -139,7 +184,7 @@ export function ColaPreclinica() {
                 <ConfirmModal
                     isOpen={dialogo === "finalizar"}
                     onClose={() => setDialogo(false)}
-                    onConfirm={() => confirmarFinalizacion(pacienteEnAtencion)}
+                    onConfirm={confirmarFinalizacion}
                     loading={procesando}
                     title="¿Finalizar Preclínica?"
                     description={`La preclínica de ${pacienteEnAtencion?.nombre} será completada y enviada a consulta médica.`}

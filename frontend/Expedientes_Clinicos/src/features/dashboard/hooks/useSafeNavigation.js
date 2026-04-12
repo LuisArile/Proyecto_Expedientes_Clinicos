@@ -11,6 +11,12 @@ export function useSafeNavigation() {
     const go = (viewId, state = {}) => {
         const view = getView(viewId);
 
+        if (!view) {
+            console.warn(`La vista con ID "${viewId}" no está registrada. Navegando a inicio por defecto.`);
+            navigate("/sistema");
+            return;
+        }
+        
         if(view.permissions.length > 0){
             const tienePermiso = view.permissions.some(p => checkPermission(p.toUpperCase()));
             if(!tienePermiso){
@@ -20,6 +26,7 @@ export function useSafeNavigation() {
         }
 
         const navigationState = { ...state };
+        const effectivePaciente = navigationState?.paciente || navigationState?.selectedPaciente || selectedPaciente;
 
         if (viewId === "buscar-paciente-preclinica") {
             navigationState.modo = "preclinica";
@@ -27,7 +34,7 @@ export function useSafeNavigation() {
             navigationState.modo = "consulta-medica";
         }
 
-        if (view.requiresPaciente && !selectedPaciente) {
+        if (view.requiresPaciente && !effectivePaciente) {
             if (viewId === "consulta-medica") {
                 navigate("/sistema/buscar-paciente/consulta", { 
                     state: { ...navigationState, modo: "consulta-medica" } 

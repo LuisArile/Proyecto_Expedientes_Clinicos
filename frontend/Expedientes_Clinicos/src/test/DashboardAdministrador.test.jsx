@@ -1,17 +1,32 @@
 import { vi, describe, test, beforeEach, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { Dashboard } from "../features/pages/Dashboard";
+import { MemoryRouter } from "react-router-dom";
+import { Dashboard } from "../pages/Dashboard";
 
-// Mocks
+// --- MOCKS ---
 vi.mock("../features/auth/hooks/useAuth", () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock("../features/dashboard/utils/verRegistro", () => ({
-  getView: vi.fn(),
+vi.mock("../shared/services/ViewRegistry", () => ({
+  viewRegistry: {
+    getAllViews: vi.fn(),
+  },
 }));
 
-vi.mock("../shared/components/layout/DashboardLayout", () => ({
+vi.mock("../features/dashboard/hooks/useSafeNavigation", () => ({
+  useSafeNavigation: vi.fn(),
+}));
+
+vi.mock("../features/dashboard/hooks/usePacienteSelection", () => ({
+  usePacienteSelection: vi.fn(),
+}));
+
+vi.mock("../features/dashboard/hooks/useTriajeState", () => ({
+  useTriajeState: vi.fn(),
+}));
+
+vi.mock("@components/layout/dashboardLayout", () => ({
   DashboardLayout: ({ children }) => <div data-testid="layout">{children}</div>,
 }));
 
@@ -19,118 +34,150 @@ vi.mock("../shared/components/ui/loaderModulo", () => ({
   LoaderModulo: () => <div data-testid="loader">Loading...</div>,
 }));
 
+vi.mock("../features/expedientes/context/ExpedienteProvider", () => ({
+  ExpedienteProvider: ({ children }) => <div data-testid="expediente-provider">{children}</div>,
+}));
+
+vi.mock("../features/consultas/context/ConsultaProvider", () => ({
+  ConsultaProvider: ({ children }) => <div data-testid="consulta-provider">{children}</div>,
+}));
+
+vi.mock("../features/preclinica/context/PreclinicaProvider", () => ({
+  PreclinicaProvider: ({ children }) => <div data-testid="preclinica-provider">{children}</div>,
+}));
+
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useLocation: vi.fn(),
+  };
+});
+
 import { useAuth } from "../features/auth/hooks/useAuth";
-import { getView } from "../features/dashboard/utils/verRegistro";
+import { viewRegistry } from "../shared/services/ViewRegistry";
+import { useSafeNavigation } from "../features/dashboard/hooks/useSafeNavigation";
+import { usePacienteSelection } from "../features/dashboard/hooks/usePacienteSelection";
+import { useTriajeState } from "../features/dashboard/hooks/useTriajeState";
+import { useLocation } from "react-router-dom";
 
 describe("Dashboard Component", () => {
-  const mockComponent = vi.fn(() => <div>Vista mock</div>);
+  const mockGo = vi.fn();
+  const mockSetSelectedPaciente = vi.fn();
+  const mockSetPacienteEnAtencion = vi.fn();
+  const adminUser = { id: 1, nombre: "Admin", idRol: 1, rol: "administrador" };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
-
-    getView.mockReturnValue({
-      component: mockComponent,
+    
+    useSafeNavigation.mockReturnValue({ go: mockGo });
+    usePacienteSelection.mockReturnValue({
+      selectedPaciente: null,
+      setSelectedPaciente: mockSetSelectedPaciente,
     });
+    useTriajeState.mockReturnValue({
+      pacienteEnAtencion: null,
+      setPacienteEnAtencion: mockSetPacienteEnAtencion,
+    });
+    useLocation.mockReturnValue({
+      pathname: "/sistema/",
+      state: null,
+    });
+
+    viewRegistry.getAllViews.mockReturnValue([
+      { id: "inicio", path: "/", component: () => <div>Inicio</div> },
+      { id: "gestion-pacientes", path: "/gestion/paciente", component: () => <div>Gestion</div>, requiresPaciente: true },
+    ]);
   });
 
   test("muestra loader si no hay usuario", () => {
-    useAuth.mockReturnValue({ user: null });
+    useAuth.mockReturnValue({ user: null, loading: false });
 
-    render(<Dashboard />);
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
 
     expect(screen.getByTestId("loader")).toBeInTheDocument();
   });
 
   test("renderiza layout cuando hay usuario", () => {
-    useAuth.mockReturnValue({ user: { id: 1 } });
+    useAuth.mockReturnValue({ user: adminUser, loading: false });
 
-    render(<Dashboard />);
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
 
     expect(screen.getByTestId("layout")).toBeInTheDocument();
   });
 
-  test("usa vista por defecto 'inicio'", () => {
-    useAuth.mockReturnValue({ user: { id: 1 } });
+  test("llama getAllViews para obtener vistas disponibles", () => {
+    useAuth.mockReturnValue({ user: adminUser, loading: false });
 
-    render(<Dashboard />);
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
 
-    expect(getView).toHaveBeenCalledWith("inicio");
+    expect(viewRegistry.getAllViews).toHaveBeenCalled();
   });
 
-  test("usa vista desde localStorage", () => {
-    localStorage.setItem("sgec_view", "consulta-medica");
-
-    useAuth.mockReturnValue({ user: { id: 1 } });
-
-    render(<Dashboard />);
-
-    expect(getView).toHaveBeenCalledWith("consulta-medica");
-  });
-
-  test("guarda vista en localStorage", () => {
-    useAuth.mockReturnValue({ user: { id: 1 } });
-
-    render(<Dashboard />);
-
-    expect(localStorage.getItem("sgec_view")).toBe("inicio");
-  });
-
-  test("usa paciente simulado si no hay en localStorage", () => {
-    useAuth.mockReturnValue({ user: { id: 1 } });
-
-    render(<Dashboard />);
-
-    const stored = JSON.parse(localStorage.getItem("sgec_selected_paciente"));
-
-    expect(stored.codigo).toBe("PAC-001");
-  });
-
-  test("usa paciente desde localStorage", () => {
-    const paciente = { codigo: "X1" };
-    localStorage.setItem("sgec_selected_paciente", JSON.stringify(paciente));
-
-    useAuth.mockReturnValue({ user: { id: 1 } });
-
-    render(<Dashboard />);
-
-    const stored = JSON.parse(localStorage.getItem("sgec_selected_paciente"));
-
-    expect(stored.codigo).toBe("X1");
-  });
-
-  test("redirige a buscar-paciente si no hay paciente y vista protegida", () => {
-    localStorage.setItem("sgec_view", "consulta-medica");
-
-    useAuth.mockReturnValue({ user: { id: 1 } });
-
-    // CLAVE: forzar null real
-    vi.spyOn(Storage.prototype, "getItem").mockImplementation((key) => {
-      if (key === "sgec_selected_paciente") return "null";
-      if (key === "sgec_view") return "consulta-medica";
-      return null;
+  test("usa paciente de location.state si no hay selectedPaciente", () => {
+    const pacienteMock = { id: 1, nombre: "Juan" };
+    useAuth.mockReturnValue({ user: adminUser, loading: false });
+    useLocation.mockReturnValue({
+      pathname: "/sistema/gestion/paciente",
+      state: { paciente: pacienteMock },
     });
 
-    render(<Dashboard />);
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
 
-    expect(getView).toHaveBeenCalledWith("buscar-paciente");
+    expect(mockGo).not.toHaveBeenCalledWith("buscar-paciente");
   });
 
-  test("pasa props correctamente al componente dinámico", () => {
-    useAuth.mockReturnValue({ user: { id: 1 } });
+  test("redirige a buscar-paciente si no hay paciente para gestion-pacientes", () => {
+    useAuth.mockReturnValue({ user: adminUser, loading: false });
+    useLocation.mockReturnValue({
+      pathname: "/sistema/gestion/paciente",
+      state: null,
+    });
 
-    render(<Dashboard />);
-
-    const props = mockComponent.mock.calls[0][0];
-
-    expect(props).toEqual(
-      expect.objectContaining({
-        paciente: expect.any(Object),
-        onVolver: expect.any(Function),
-        onConsultaMedica: expect.any(Function),
-        onEditarExpediente: expect.any(Function),
-        onNavigate: expect.any(Function),
-      })
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
     );
+
+    expect(mockGo).toHaveBeenCalledWith("buscar-paciente");
+  });
+
+  test("renderiza layout cuando la ruta no requiere paciente", () => {
+    useAuth.mockReturnValue({ user: adminUser, loading: false });
+    useLocation.mockReturnValue({
+      pathname: "/sistema/",
+      state: null,
+    });
+    
+    usePacienteSelection.mockReturnValue({
+      selectedPaciente: { id: 1, nombre: "Juan" },
+      setSelectedPaciente: mockSetSelectedPaciente,
+    });
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByTestId("layout")).toBeInTheDocument();
+    expect(mockSetSelectedPaciente).not.toHaveBeenCalled();
   });
 });

@@ -1,57 +1,134 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { vi, describe, test, beforeEach, expect } from "vitest";
-import { Auditoria } from "../features/admin/components/Auditoria";
+import { Auditoria } from "../pages/Auditoria";
 
-// Mock hook
+
 vi.mock("../features/admin/hooks/useAuditoria", () => ({
   useAuditoria: vi.fn(),
 }));
 
-// Mock DataTable 
-vi.mock("../shared/components/common/DataTable", () => ({
-  DataTable: ({ data, columns, emptyMessage }) => {
-    if (!data || data.length === 0) return emptyMessage;
-
-    return (
-      <div>
-        {data.map((row, i) => (
-          <div key={i}>
-            {columns.map((col, j) => (
-              <div key={j}>
-                {col.render ? col.render(row) : row[col.accessorKey]}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    );
-  },
+vi.mock("@/features/auth/hooks/useAuth", () => ({
+  useAuth: vi.fn(() => ({
+    user: { id: 1, nombre: "Admin", rol: "administrador" },
+    checkPermission: vi.fn(() => true),
+  })),
 }));
 
-// Otros mocks UI
-vi.mock("../shared/components/layout/PageHeader", () => ({
-  PageHeader: ({ title }) => <div>{title}</div>,
+vi.mock("@/features/dashboard/hooks/useSafeNavigation", () => ({
+  useSafeNavigation: vi.fn(() => ({
+    go: vi.fn(),
+  })),
 }));
 
-vi.mock("../shared/components/common/ModalDetalleBase", () => ({
-  ModalDetalleBase: ({ isOpen, children }) =>
-    isOpen ? <div data-testid="modal">{children}</div> : null,
+vi.mock("@/features/dashboard/hooks/usePacienteSelection", () => ({
+  usePacienteSelection: vi.fn(() => ({
+    selectedPaciente: null,
+  })),
 }));
 
-vi.mock("../shared/components/common/DetailBox", () => ({
-  DetailBox: ({ label, value }) => (
+vi.mock("@components/layout/PageHeader", () => ({
+  PageHeader: ({ title, onVolver }) => (
     <div>
-      {label}: {value}
+      <h1>{title}</h1>
+      <button onClick={onVolver}>Volver</button>
     </div>
   ),
 }));
 
-vi.mock("../shared/components/ui/detalleAuditoria", () => ({
-  DetalleAuditoria: () => <div>Detalle Auditoria</div>,
+vi.mock("@components/common/StatCard", () => ({
+  StatCard: ({ title, value }) => (
+    <div data-testid="stat-card">
+      <span>{title}</span>: <span>{value}</span>
+    </div>
+  ),
 }));
 
-// Import después de mocks
+vi.mock("@components/common/FilterSearch", () => ({
+  FilterInput: ({ label, value, onChange, placeholder }) => (
+    <div>
+      <label>{label}</label>
+      <input 
+        placeholder={placeholder} 
+        value={value} 
+        onChange={(e) => onChange(e.target.value)} 
+      />
+    </div>
+  ),
+  FilterSelect: ({ label, value, onValueChange, options }) => (
+    <div>
+      <label>{label}</label>
+      <select value={value} onChange={(e) => onValueChange(e.target.value)}>
+        <option value="todos">Todos</option>
+        {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+      </select>
+    </div>
+  ),
+}));
+
+vi.mock("../features/admin/components/DialogoDetalleAuditoria", () => ({
+  DialogoDetalleAuditoria: ({ isOpen, evento, onClose }) => 
+    isOpen ? (
+      <div data-testid="modal-detalle">
+        <p>Detalle para: {evento?.usuario}</p>
+        <button onClick={onClose}>Cerrar</button>
+      </div>
+    ) : null
+}));
+
+vi.mock("@/shared/hooks/useTableFactory", () => ({
+  useTableFactory: vi.fn(({ columns, actions }) => {
+    return [
+      ...columns,
+      {
+        id: 'actions',
+        header: 'ACCIONES',
+        render: (row) => {
+          const action = Array.isArray(actions) ? actions[0] : null;
+          return action ? (
+            <button
+              type="button"
+              aria-label={action.key}
+              onClick={() => action.onClick(row)}
+            >
+              {action.title}
+            </button>
+          ) : null;
+        }
+      }
+    ];
+  })
+}));
+
+vi.mock("@components/common/DataTable", () => ({
+  DataTable: ({ data, columns, emptyMessage }) => {
+    if (!data || data.length === 0) return <div>{emptyMessage}</div>;
+    return (
+      <table>
+        <tbody>
+          {data.map((row, i) => (
+            <tr key={i}>
+              {columns.map((col, j) => (
+                <td key={j}>
+                  {col.render ? col.render(row) : row[col.accessorKey]}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  },
+}));
+
+vi.mock("@/features/admin/config/columns/auditoriaBaseColumns", () => ({
+  getAuditoriaBaseColumns: vi.fn(() => [
+    { header: "Usuario", accessorKey: "usuario" },
+    { header: "Acción", accessorKey: "accion" }
+  ])
+}));
+
 import { useAuditoria } from "../features/admin/hooks/useAuditoria";
 
 describe("Auditoria Component", () => {
@@ -59,19 +136,15 @@ describe("Auditoria Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-
     baseMock = {
       eventos: [
         {
           id: 1,
-          fecha: "2024-01-01",
-          hora: "10:00",
           usuario: "Juan",
-          rol: "ADMINISTRADOR",
-          modulo: "Usuarios",
-          accion: "CREAR",
-          detalles: "{}",
-        },
+          accion: "LOGIN",
+          modulo: "Seguridad",
+          fecha: "2024-04-12" 
+        }
       ],
       loading: false,
       busqueda: "",
@@ -82,138 +155,106 @@ describe("Auditoria Component", () => {
       setFiltroModulo: vi.fn(),
       filtroFecha: "",
       setFiltroFecha: vi.fn(),
-      totalEventos: 1,
-      eventosHoy: 1,
-      usuariosUnicos: ["Juan"],
-      modulosUnicos: ["Usuarios"],
+      totalEventos: 100,
+      eventosHoy: 5,
+      usuariosUnicos: ["Juan", "Maria"],
+      modulosUnicos: ["Seguridad", "Pacientes"],
     };
   });
 
-  // RENDER BÁSICO
-  test("renderiza correctamente", () => {
+  test("renderiza el componente y las estadísticas correctamente", () => {
     useAuditoria.mockReturnValue(baseMock);
-
-    render(<Auditoria onVolver={() => {}} />);
+    render(
+      <MemoryRouter>
+        <Auditoria />
+      </MemoryRouter>
+    );
 
     expect(screen.getByText("Auditoría del Sistema")).toBeInTheDocument();
-    expect(screen.getByText("Juan")).toBeInTheDocument();
+    
+    const stats = screen.getAllByTestId("stat-card");
+    expect(stats[0]).toHaveTextContent("Total Eventos: 100");
+    expect(stats[2]).toHaveTextContent("Usuarios Activos: 2");
   });
 
-  // LOADING
-  test("muestra loader cuando loading es true", () => {
-    useAuditoria.mockReturnValue({
-      ...baseMock,
-      loading: true,
-    });
-
-    render(<Auditoria onVolver={() => {}} />);
-
-    expect(
-      screen.getByText("Cargando bitácora de auditoría...")
-    ).toBeInTheDocument();
+  test("muestra loader durante la carga", () => {
+    useAuditoria.mockReturnValue({ ...baseMock, loading: true });
+    render(
+      <MemoryRouter>
+        <Auditoria />
+      </MemoryRouter>
+    );
+    expect(screen.getByText(/Cargando bitácora/i)).toBeInTheDocument();
   });
 
-  // DATA TABLE
-  test("muestra cantidad de eventos", () => {
+  test("actualiza el filtro de búsqueda general", () => {
     useAuditoria.mockReturnValue(baseMock);
-
-    render(<Auditoria onVolver={() => {}} />);
-
-    expect(screen.getByText("Juan")).toBeInTheDocument();
-  });
-
-  // EMPTY STATE
-  test("muestra mensaje cuando no hay registros", () => {
-    useAuditoria.mockReturnValue({
-      ...baseMock,
-      eventos: [],
-    });
-
-    render(<Auditoria onVolver={() => {}} />);
-
-    expect(
-      screen.getByText((text) =>
-        text.includes("No se encontraron registros")
-      )
-    ).toBeInTheDocument();
-  });
-
-  // FILTROS
-  test("actualiza búsqueda", () => {
-    useAuditoria.mockReturnValue(baseMock);
-
-    render(<Auditoria onVolver={() => {}} />);
-
+    render(
+      <MemoryRouter>
+        <Auditoria />
+      </MemoryRouter>
+    );
+    
     const input = screen.getByPlaceholderText("Buscar acción...");
-    fireEvent.change(input, { target: { value: "test" } });
-
-    expect(baseMock.setBusqueda).toHaveBeenCalledWith("test");
+    fireEvent.change(input, { target: { value: "crear" } });
+    
+    expect(baseMock.setBusqueda).toHaveBeenCalledWith("crear");
   });
 
-  test("limpia filtros correctamente", () => {
+  test("limpia todos los filtros al hacer click en el botón", () => {
     useAuditoria.mockReturnValue(baseMock);
-
-    render(<Auditoria onVolver={() => {}} />);
-
+    render(
+      <MemoryRouter>
+        <Auditoria />
+      </MemoryRouter>
+    );
+    
     fireEvent.click(screen.getByText("Limpiar Filtros"));
-
+    
     expect(baseMock.setBusqueda).toHaveBeenCalledWith("");
     expect(baseMock.setFiltroUsuario).toHaveBeenCalledWith("todos");
     expect(baseMock.setFiltroModulo).toHaveBeenCalledWith("todos");
     expect(baseMock.setFiltroFecha).toHaveBeenCalledWith("");
   });
 
-  // HEADER DINÁMICO
-  test("muestra contador filtrado cuando hay filtros activos", () => {
-    useAuditoria.mockReturnValue({
-      ...baseMock,
-      busqueda: "test",
-    });
-
-    render(<Auditoria onVolver={() => {}} />);
-
-    expect(
-      screen.getByText((t) => t.includes("Mostrando"))
-    ).toBeInTheDocument();
-  });
-
-  // MODAL
-  test("abre modal al hacer click en detalles", () => {
+  test("abre el diálogo de detalles al interactuar con la tabla", async () => {
     useAuditoria.mockReturnValue(baseMock);
+    render(
+      <MemoryRouter>
+        <Auditoria />
+      </MemoryRouter>
+    );
 
-    render(<Auditoria onVolver={() => {}} />);
+    const btnVer = await screen.findByLabelText("ver-detalles");
+    fireEvent.click(btnVer);
 
-    fireEvent.click(screen.getByLabelText("ver-detalles"));
-
-    expect(screen.getByTestId("modal")).toBeInTheDocument();
+    expect(screen.getByTestId("modal-detalle")).toBeInTheDocument();
+    expect(screen.getByText("Detalle para: Juan")).toBeInTheDocument();
   });
 
-  test("muestra información en el modal", () => {
-    useAuditoria.mockReturnValue(baseMock);
-
-    render(<Auditoria onVolver={() => {}} />);
-
-    fireEvent.click(screen.getByLabelText("ver-detalles"));
-
-    expect(screen.getByText("Usuario: Juan")).toBeInTheDocument();
-    expect(screen.getByText("Módulo: Usuarios")).toBeInTheDocument();
+  test("muestra mensaje de vacío cuando no hay eventos", () => {
+    useAuditoria.mockReturnValue({ ...baseMock, eventos: [] });
+    render(
+      <MemoryRouter>
+        <Auditoria />
+      </MemoryRouter>
+    );
+    
+    expect(screen.getByText("No se encontraron registros.")).toBeInTheDocument();
   });
 
-  // ROLE FALLBACK
-  test("maneja rol desconocido", () => {
-    useAuditoria.mockReturnValue({
-      ...baseMock,
-      eventos: [
-        {
-          ...baseMock.eventos[0],
-          rol: "DESCONOCIDO",
-        },
-      ],
+  test("el contador de registros muestra información filtrada cuando corresponde", () => {
+    useAuditoria.mockReturnValue({ 
+      ...baseMock, 
+      busqueda: "algo",
+      eventos: [baseMock.eventos[0]] 
     });
-
-    render(<Auditoria onVolver={() => {}} />);
-
-    // Validar que el contenido sigue renderizando
-    expect(screen.getByText("Juan")).toBeInTheDocument();
+    
+    render(
+      <MemoryRouter>
+        <Auditoria />
+      </MemoryRouter>
+    );
+    expect(screen.getByText(/Mostrando: 1 de 100/i)).toBeInTheDocument();
   });
 });

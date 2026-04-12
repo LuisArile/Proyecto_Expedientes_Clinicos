@@ -4,7 +4,7 @@ import { Button } from "@components/ui/button";
 import { Badge } from "@components/ui/badge";
 import { getPrioridadConfig } from "@/features/trazabilidad/utils/prioridad";
 
-export function usePreclinicaColumns({ pacienteEnAtencion, iniciar }) {
+export function usePreclinicaColumns({ iniciar }) {
 
     return useMemo(() => [  
         {
@@ -55,7 +55,7 @@ export function usePreclinicaColumns({ pacienteEnAtencion, iniciar }) {
             render: (row) => (
                 <Button
                     size="sm"
-                    disabled={!!pacienteEnAtencion}
+                    disabled={false}
                     onClick={() => iniciar(row)}
                     className="bg-green-600 hover:bg-green-700"
                 >
@@ -64,5 +64,5 @@ export function usePreclinicaColumns({ pacienteEnAtencion, iniciar }) {
                 </Button>
             ),
         },
-    ], [pacienteEnAtencion, iniciar]);
+    ], [iniciar]);
 };

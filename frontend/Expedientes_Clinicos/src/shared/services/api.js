@@ -24,6 +24,7 @@ export const apiCall = async (endpoint, options = {}) => {
       method: options.method || "GET",
       headers,
       body: options.body || null,
+      signal: options.signal,
     });
 
     const contentType = response.headers.get("content-type");
@@ -91,9 +92,10 @@ export const expedienteAPI = {
 };
 
 export const buscarAPI = {
-  buscar: ({ termino, criterio = "nombre", pagina = 1, limite = 10 }) =>
+  buscar: ({ termino, criterio = "nombre", pagina = 1, limite = 10 }, signal) =>
     apiCall(`/busqueda?q=${encodeURIComponent(termino)}&pagina=${pagina}&limite=${limite}&criterio=${criterio}`, {
       method: "GET",
+      signal,
     }),
 }
 /**
@@ -272,6 +274,28 @@ export const medicamentoAPI = {
   },
 };
 
+
+// api de cita y trazabilidad
+export const citaAPI = {
+  // Tablero
+  obtenerTablero: () => apiCall("/citas/tablero", { method: "GET" }),
+  obtenerPorEstado: (estado) => apiCall(`/citas/estado/${estado}`, { method: "GET" }),
+  obtenerSeguimiento: (idCita) => apiCall(`/citas/seguimiento/${idCita}`, { method: "GET" }),
+  
+  // Recepcionista
+  agendar: (data) => apiCall("/citas/agendar", { method: "POST", body: JSON.stringify(data) }),
+  registrarHoy: (data) => apiCall("/citas/registrar-hoy", { method: "POST", body: JSON.stringify(data) }),
+  enviarPreclinica: (idCita) => apiCall(`/citas/${idCita}/enviar-preclinica`, { method: "PUT" }),
+  
+  // Enfermero
+  iniciarPreclinica: (idCita) => apiCall(`/citas/${idCita}/iniciar-preclinica`, { method: "PUT" }),
+  finalizarPreclinica: (idCita) => apiCall(`/citas/${idCita}/finalizar-preclinica`, { method: "PUT" }),
+  
+  // Doctor
+  iniciarConsulta: (idCita) => apiCall(`/citas/${idCita}/iniciar-consulta`, { method: "PUT" }),
+  finalizarConsulta: (idCita) => apiCall(`/citas/${idCita}/finalizar-consulta`, { method: "PUT" }),
+};
+
 /**
  * Métodos para consumir endpoints de documentos
  */
@@ -356,3 +380,4 @@ export const documentoAPI = {
     return res;
   },
 };
+

@@ -60,8 +60,10 @@ describe('UsuarioService', () => {
 
             usuarioRepositoryMock.obtenerPorCorreo.mockResolvedValue(null);
             usuarioRepositoryMock.filtrarNombreUsuario.mockResolvedValue(false);
-            Encriptador.encriptar.mockResolvedValue("hash123");
             usuarioRepositoryMock.crear.mockResolvedValue({ usuario: usuarioMock });
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuarioMock);
+            Encriptador.encriptar.mockResolvedValue("hash123");
+            bcrypt.hash.mockResolvedValue("hashedTempPassword");
             emailServiceMock.enviarCredenciales.mockResolvedValue(true);
 
             const result = await usuarioService.crear(data, 99);
@@ -120,7 +122,7 @@ describe('UsuarioService', () => {
             usuarioRepositoryMock.obtenerPorId.mockResolvedValue(null);
 
             await expect(usuarioService.obtenerPorId(99))
-                .rejects.toThrow(ErrorValidacion);
+                .rejects.toThrow(ErrorNoEncontrado);
         });
     });
 
@@ -148,7 +150,7 @@ describe('UsuarioService', () => {
 
             await usuarioService.actualizar(1, data, 99);
 
-            expect(auditoriaServiceMock.registrar).toHaveBeenCalled();
+            expect(auditoriaServiceMock.registrarUsuario).toHaveBeenCalled();
         });
 
         test('no debe permitir auto-inactivación', async () => {
@@ -213,12 +215,12 @@ describe('UsuarioService', () => {
             usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuario);
             bcrypt.compare.mockResolvedValue(true);
             Encriptador.encriptar.mockResolvedValue("hashNew");
-            usuarioRepositoryMock.actualizarPassword.mockResolvedValue(true);
+            usuarioRepositoryMock.actualizar.mockResolvedValue(true);
 
             const result = await usuarioService.cambiarPassword(
                 1,
-                "1234",
-                "5678"
+                "1234567aB",
+                "NuevaPass.123"
             );
 
             expect(usuarioRepositoryMock.actualizar)
@@ -251,33 +253,38 @@ describe('UsuarioService', () => {
     });
 
     describe('alternarEstado', () => {
-        test('debe cambiar estado correctamente', async () => {
-            const usuario = { id: 1, activo: true, nombreUsuario: "test" };
+    test('debe cambiar estado correctamente', async () => {
+        const usuario = { id: 1, activo: true, nombreUsuario: "test" };
 
-            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuario);
-            usuarioRepositoryMock.actualizar.mockResolvedValue({
-                ...usuario,
-                activo: false
-            });
-
-            const result = await usuarioService.alternarEstado(1);
-
-            expect(usuarioRepositoryMock.actualizar)
-                .toHaveBeenCalledWith(1, { activo: false });
-
-            expect(usuarioRepositoryMock.registrarAccionUsuario)
-                .toHaveBeenCalled();
-
-            expect(result.success).toBe(true);
+        usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuario);
+        usuarioRepositoryMock.actualizar.mockResolvedValue({
+            ...usuario,
+            activo: false
         });
 
-        test('debe fallar si no existe usuario', async () => {
-            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(null);
+        const result = await usuarioService.alternarEstado(1, 1);
 
-            await expect(usuarioService.alternarEstado(1))
-                .rejects.toThrow(ErrorNoEncontrado);
-        });
+        expect(usuarioRepositoryMock.actualizar)
+            .toHaveBeenCalledWith(1, { activo: false });
+
+        expect(auditoriaServiceMock.registrar)
+            .toHaveBeenCalledWith(
+                1,
+                'ESTADO_USUARIO_CAMBIADO',
+                expect.stringContaining('Usuario test cambiado a INACTIVO')
+            );
+
+        expect(result.success).toBe(true);
     });
+
+    test('debe fallar si no existe usuario', async () => {
+        usuarioRepositoryMock.obtenerPorId.mockResolvedValue(null);
+
+    
+        await expect(usuarioService.alternarEstado(1, 1))
+            .rejects.toThrow(ErrorNoEncontrado);
+    });
+});
 
     describe('enviarCredenciales', () => {
         test('debe generar password y enviar email', async () => {

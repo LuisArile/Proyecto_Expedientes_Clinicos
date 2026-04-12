@@ -39,13 +39,30 @@ export const pacienteActions = ({
     }
 
     
-    if (modo && modo !== "gestion" && modo !== "consulta" && modo !== "preclinica") {
+    if (modo && modo !== "gestion-pacientes" && modo !== "consulta" && modo !== "preclinica") {
         return [
             {
                 key: "seleccionar",
                 label: "Seleccionar Paciente",
                 onClick: (p) => handleSeleccionarPaciente(p),
                 className: "bg-blue-600 hover:bg-blue-700 text-white w-full",
+                size: "sm"
+            }
+        ];
+    }
+
+    if(modo === "gestion-pacientes"){
+        return [
+            {
+                key: "ver-expediente",
+                label: "Ver expediente",
+                icon: Eye,
+                onClick: (p) => {
+                    console.log("Datos del paciente seleccionado:", p);
+                    onVerExpediente(p);
+                },
+                className: "text-blue-600 hover:bg-blue-50 border-blue-300",
+                variant: "outline",
                 size: "sm"
             }
         ];

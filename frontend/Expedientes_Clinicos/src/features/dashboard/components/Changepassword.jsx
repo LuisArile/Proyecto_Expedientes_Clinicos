@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation";
 
 import { Lock, User, Eye, EyeOff, Search, ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
@@ -26,6 +26,16 @@ export function Changepassword() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  const timeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleSubmit = async (e) => {
 
     e.preventDefault();
@@ -34,7 +44,7 @@ export function Changepassword() {
 
     const isOk = await changePassword(currentPassword, newPassword, confirmPassword);
       if (isOk) {
-        setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
           go("inicio");
         }, 2000);
       }    

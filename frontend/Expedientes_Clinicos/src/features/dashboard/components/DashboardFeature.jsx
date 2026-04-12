@@ -5,7 +5,7 @@ import { useDashboardData } from "../hooks/useDashboardData";
 import { DASHBOARD_CONFIG } from "@/constants/dashboardStrategies";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
 import { Badge } from "@components/ui/badge";
-import { Button } from "@components/ui/Button";
+import { Button } from "@components/ui/button";
 import { obtenerFechaActual } from "@/utils/dateFormatter";
 import { StatCard } from "@components/common/StatCard"
 

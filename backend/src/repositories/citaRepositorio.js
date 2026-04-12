@@ -75,18 +75,35 @@ async actualizarEstado(idCita, estadoNuevo, usuarioId, accion, observaciones = n
 }
 
 
-    async obtenerTodasPorFecha(fecha = null) {
-        const fechaActual = fecha || new Date();
-        fechaActual.setHours(0, 0, 0, 0);
-        const fechaFin = new Date(fechaActual);
-        fechaFin.setHours(23, 59, 59, 999);
-
+async obtenerTodasPorFecha(fecha = null) {
+    // Si no se proporciona fecha, devolver todas las citas sin filtrar
+    if (!fecha) {
         return await prisma.cita.findMany({
-            where: { fechaCita: { gte: fechaActual, lte: fechaFin } },
-            include: { paciente: true },
+            include: { 
+                paciente: {
+                    include: { expedientes: true } 
+                }
+            },
             orderBy: { horaCita: 'asc' }
         });
     }
+
+    // Si hay fecha, filtrar por esa fecha
+    const fechaActual = new Date(fecha);
+    fechaActual.setHours(0, 0, 0, 0);
+    const fechaFin = new Date(fechaActual);
+    fechaFin.setHours(23, 59, 59, 999);
+
+    return await prisma.cita.findMany({
+        where: { fechaCita: { gte: fechaActual, lte: fechaFin } },
+        include: { 
+            paciente: {
+                include: { expedientes: true } 
+            }
+        },
+        orderBy: { horaCita: 'asc' }
+    });
+}
 
     async obtenerSeguimiento(idCita) {
         return await prisma.seguimiento.findMany({

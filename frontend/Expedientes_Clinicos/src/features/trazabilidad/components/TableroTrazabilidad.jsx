@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
+import { obtenerTablero } from "../services/trazabilidadService";
 import { Card, CardContent } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { Badge } from "@components/ui/badge";
@@ -8,87 +9,64 @@ import { PageHeader } from "@components/layout/PageHeader";
 import { StatCard } from "@components/common/StatCard";
 import { FilterInput } from "@components/common/FilterSearch"
 import { useSafeNavigation } from "../../dashboard/hooks/useSafeNavigation"
-// Datos simulados
-const pacientesSimulados = [
-    {
-        id: "PAC-001",
-        nombre: "María González",
-        identidad: "0801-1985-12345",
-        estado: "programado",
-        prioridad: "normal",
-        tipoIngreso: "control",
-        motivoConsulta: "Control de presión arterial",
-        horaRegistro: "08:00",
-        fechaCita: "22/03/2026",
-    },
-    {
-        id: "PAC-002",
-        nombre: "Carlos Hernández",
-        identidad: "0801-1990-23456",
-        estado: "espera-preclinica",
-        prioridad: "alta",
-        tipoIngreso: "primera-vez",
-        motivoConsulta: "Dolor abdominal agudo",
-        horaRegistro: "07:30",
-    },
-    {
-        id: "PAC-003",
-        nombre: "Ana Martínez",
-        identidad: "0801-1995-34567",
-        estado: "en-preclinica",
-        prioridad: "urgente",
-        tipoIngreso: "emergencia",
-        motivoConsulta: "Dificultad respiratoria",
-        horaRegistro: "07:45",
-        responsableActual: "Juan Pérez (Enfermero)",
-    },
-    {
-        id: "PAC-004",
-        nombre: "Luis Rodríguez",
-        identidad: "0801-1988-45678",
-        estado: "espera-consulta",
-        prioridad: "media",
-        tipoIngreso: "subsecuente",
-        motivoConsulta: "Seguimiento post-operatorio",
-        horaRegistro: "08:15",
-    },
-    {
-        id: "PAC-005",
-        nombre: "Sofia López",
-        identidad: "0801-1992-56789",
-        estado: "en-consulta",
-        prioridad: "normal",
-        tipoIngreso: "control",
-        motivoConsulta: "Control de diabetes",
-        horaRegistro: "08:30",
-        responsableActual: "Dr. Carlos Rodríguez",
-    },
-    {
-        id: "PAC-006",
-        nombre: "Pedro García",
-        identidad: "0801-1987-67890",
-        estado: "finalizado",
-        prioridad: "normal",
-        tipoIngreso: "primera-vez",
-        motivoConsulta: "Consulta general",
-        horaRegistro: "07:00",
-    },
-    {
-        id: "PAC-007",
-        nombre: "Laura Sánchez",
-        identidad: "0801-1993-78901",
-        estado: "registrado-hoy",
-        prioridad: "media",
-        tipoIngreso: "primera-vez",
-        motivoConsulta: "Dolor de cabeza persistente",
-        horaRegistro: "08:45",
-    },
-];
 
+
+
+//datos reales
 export function TableroTrazabilidad() {
-    const [pacientes] = useState(pacientesSimulados);
+    const [pacientes, setPacientes] = useState([]);
+    const [loading, setLoading] = useState(true);
     const { go } = useSafeNavigation();
     const [busqueda, setBusqueda] = useState("");
+
+    const cargarTablero = async () => {
+        try {
+            setLoading(true);
+            const data = await obtenerTablero();
+            
+            const pacientesTransformados = [];
+            const estadosMap = {
+                'PROGRAMADO': 'programado',
+                'REGISTRADO_HOY': 'registrado-hoy',
+                'ESPERA_PRECLINICA': 'espera-preclinica',
+                'EN_PRECLINICA': 'en-preclinica',
+                'ESPERA_CONSULTA': 'espera-consulta',
+                'EN_CONSULTA': 'en-consulta',
+                'FINALIZADO': 'finalizado'
+            };
+            
+            for (const [estadoBackend, citas] of Object.entries(data)) {
+                const estadoFrontend = estadosMap[estadoBackend];
+                if (!estadoFrontend) continue;
+                
+                for (const cita of citas) {
+                    pacientesTransformados.push({
+                        id: cita.idCita,
+                        nombre: `${cita.paciente?.nombre || ''} ${cita.paciente?.apellido || ''}`.trim(),
+                        identidad: cita.paciente?.dni || '',
+                        estado: estadoFrontend,
+                        prioridad: cita.prioridad === 'URGENTE' ? 'alta' : 
+                                   cita.prioridad === 'EMERGENCIA' ? 'urgente' : 'normal',
+                        tipoIngreso: cita.tipo === 'PROGRAMADA' ? 'control' : 'primera-vez',
+                        motivoConsulta: cita.motivo || '',
+                        horaRegistro: cita.horaCita || '',
+                        fechaCita: cita.fechaCita ? new Date(cita.fechaCita).toLocaleDateString() : '',
+                        responsableActual: cita.enfermero?.nombre || cita.medico?.nombre || ''
+                    });
+                }
+            }
+            
+            setPacientes(pacientesTransformados);
+        } catch (error) {
+            console.error('Error cargando tablero:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        cargarTablero();
+    }, []);
 
     const getEstadoConfig = (estado) => {
         const configs = {
@@ -213,12 +191,7 @@ export function TableroTrazabilidad() {
         );
     };
 
-    const renderColumna = (
-        estado,
-        titulo,
-        icon,
-        descripcion
-    ) => {
+    const renderColumna = (estado, titulo, icon, descripcion) => {
         const estadoConfig = getEstadoConfig(estado);
         const pacientesColumna = pacientesPorEstado(estado);
 
@@ -240,7 +213,12 @@ export function TableroTrazabilidad() {
                 </div>
 
                 <ScrollArea className="h-[600px] pr-2">
-                    {pacientesColumna.length === 0 ? (
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center h-32 text-center p-4 bg-white rounded-lg border border-dashed border-gray-300">
+                            <Activity className="h-8 w-8 text-gray-400 mb-2 animate-spin" />
+                            <p className="text-xs text-gray-500">Cargando...</p>
+                        </div>
+                    ) : pacientesColumna.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-32 text-center p-4 bg-white rounded-lg border border-dashed border-gray-300">
                             <AlertCircle className="h-8 w-8 text-gray-400 mb-2" />
                             <p className="text-xs text-gray-500">No hay pacientes</p>
@@ -253,11 +231,25 @@ export function TableroTrazabilidad() {
         );
     };
 
+    if (loading && pacientes.length === 0) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-gray-50 pb-10">
+                <PageHeader title="Tablero de Trazabilidad" subtitle="Cargando datos..." Icon={Activity} onVolver={() => go("inicio")} />
+                <div className="flex justify-center items-center h-64">
+                    <div className="text-gray-500">Cargando tablero...</div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-gray-50 pb-10">
             {/* Header */}
-            <PageHeader title="Tablero de Trazabilidad" subtitle="Seguimiento en tiempo real del flujo asistencial de pacientes"
-                    Icon={Activity} onVolver={() => go("inicio")}
+            <PageHeader 
+                title="Tablero de Trazabilidad" 
+                subtitle="Seguimiento en tiempo real del flujo asistencial de pacientes"
+                Icon={Activity} 
+                onVolver={() => go("inicio")}
             />
 
             <main className="min-h-screen bg-slate-50/50 p-6 space-y-6">
@@ -281,16 +273,20 @@ export function TableroTrazabilidad() {
                     <CardContent className="pt-4">
                         <div className="flex flex-col md:flex-row gap-3">
                             <div className="flex-1 relative">
-                                <FilterInput icon={Search} value={busqueda} onChange={setBusqueda} placeholder="Buscar paciente por nombre o identidad..." />
+                                <FilterInput 
+                                    icon={Search} 
+                                    value={busqueda} 
+                                    onChange={setBusqueda} 
+                                    placeholder="Buscar paciente por nombre o identidad..." 
+                                />
                             </div>
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={() => setBusqueda("")}>
                                 <Filter className="h-4 w-4 mr-2" /> Filtros
                             </Button>
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={cargarTablero}>
                                 <RefreshCw className="h-4 w-4 mr-2" /> Actualizar
                             </Button>
                         </div>
-                        
                     </CardContent>
                 </Card>
 

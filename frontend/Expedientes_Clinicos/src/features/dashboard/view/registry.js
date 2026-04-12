@@ -8,25 +8,26 @@ import { FormularioExpediente } from "@/features/expedientes/components/formular
 import { ConsultaMedica } from "@/features/consultas/components/ConsultaMedica";
 import { FormularioRegistroPreclinico } from "../../preclinica/components/FormularioRegistroPreclinico";
 const ListaRegistrosPreclinicos = lazy(() => import("@/features/preclinica/components/ListaRegistrosPreclinicos").then(module => ({ default: module.ListaRegistrosPreclinicos })));
-import { GestionUsuarios } from "@/pages/GestionUsuarios";
+const GestionUsuarios = lazy(() => import("@/pages/GestionUsuarios").then(module => ({ default: module.GestionUsuarios })));
 import { FormularioCreacionUsuario } from "@/features/admin/components/FormularioCreacionUsuario";
 import { VerExpediente } from "@/pages/GestionPacientes";
 import { BuscarPacienteAgendar } from "@/features/expedientes/components/busqueda/BuscarPacienteAgendar";
 import { BuscarPacienteHoy } from "@/features/expedientes/components/busqueda/BuscarPacienteHoy";
 import { AgendaCitas } from "../../trazabilidad/components/AgendaCitas";
 import { FormularioCita } from "../../trazabilidad/components/FormularioCita";
-import { ColaConsulta } from "../../trazabilidad/components/ColaConsultaMedica";
+const ColaConsulta = lazy(() => import("../../trazabilidad/components/ColaConsultaMedica").then(m => ({ default: m.ColaConsulta })));
 import { BuscarPacienteConsulta } from "@/features/expedientes/components/busqueda/BuscarPacienteConsulta";
 import { BuscarPacienteGestion } from "@/features/expedientes/components/busqueda/BuscarPacienteGestion";
 import { BuscarPacientePreclinica } from "@/features/expedientes/components/busqueda/BuscarPacientePreclinica";
-import { ColaPreclinica } from "../../trazabilidad/components/ColaPreclinica";
-import { TableroTrazabilidad } from "../../trazabilidad/components/TableroTrazabilidad";
+const ColaPreclinica = lazy(() => import("../../trazabilidad/components/ColaPreclinica").then(m => ({ default: m.ColaPreclinica })));
+const TableroTrazabilidad = lazy(() => import("../../trazabilidad/components/TableroTrazabilidad").then(m => ({ default: m.TableroTrazabilidad })));
 const Auditoria = lazy(() => import("@/pages/Auditoria").then(m => ({ default: m.Auditoria })));
 const GestionRoles = lazy(() => import("@/pages/GestionRoles").then(m => ({ default: m.GestionRoles })));
-import { CatalogoExamenes } from "@/features/consultas/components/CatalogoExamenes";
-import { CatalogoMedicamentos } from "@/features/consultas/components/CatalogoMedicamentos";
+const CatalogoExamenes = lazy(() => import("@/features/consultas/components/CatalogoExamenes").then(m => ({ default: m.CatalogoExamenes })));
+const CatalogoMedicamentos = lazy(() => import("@/features/consultas/components/CatalogoMedicamentos").then(m => ({ default: m.CatalogoMedicamentos })));
 import { FormularioCrearExamen } from "@/features/consultas/components/FormulacioCrearExamen";
 import { FormularioCrearMedicamento } from "@/features/consultas/components/FormularioCrearMedicamento";
+import EnviarPreclinica from "@/features/trazabilidad/components/EnviarPreclinica";
 
 export function registerDashboardViews() {
     viewRegistry.register("inicio", {
@@ -35,6 +36,14 @@ export function registerDashboardViews() {
         permissions: [],
         requiresPaciente: false,
         metadata: { title: "Inicio", icon: "home" }
+    });
+
+        viewRegistry.register("enviar-preclinica", {
+        path: "/enviar-preclinica",
+        component: EnviarPreclinica,
+        permissions: ["PRECLINICA"],
+        requiresPaciente: false,
+        metadata: { title: "Enviar a Preclínica"}
     });
 
     viewRegistry.register("crear-expediente", {
