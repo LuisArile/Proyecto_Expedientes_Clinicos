@@ -11,6 +11,12 @@ export function useSafeNavigation() {
     const go = (viewId, state = {}) => {
         const view = getView(viewId);
 
+        if (!view) {
+            console.warn(`La vista con ID "${viewId}" no está registrada. Navegando a inicio por defecto.`);
+            navigate("/sistema");
+            return;
+        }
+        
         if(view.permissions.length > 0){
             const tienePermiso = view.permissions.some(p => checkPermission(p.toUpperCase()));
             if(!tienePermiso){
