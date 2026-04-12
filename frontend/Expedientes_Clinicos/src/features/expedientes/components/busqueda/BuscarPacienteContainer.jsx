@@ -23,19 +23,19 @@ export function BuscarPacienteContainer({
         modo,
         onVerExpediente: (p) => {
             onSeleccionarPaciente(p);
-            go("gestion");
+            go("gestion-pacientes", { paciente: p });
         },
         onConsultaMedica: (p) => {
             onSeleccionarPaciente(p);
-            go("consulta-medica");
+            go("consulta-medica", { paciente: p });
         },
         onPreclinica: (p) => {
             onSeleccionarPaciente(p);
-            go("preclinica");
+            go("preclinica", { paciente: p });
         },
         onSeleccionar: (p, destino) => {
             onSeleccionarPaciente(p);
-            go(destino);
+            go(destino, { paciente: p });
         },
         ...dashboardController 
     };

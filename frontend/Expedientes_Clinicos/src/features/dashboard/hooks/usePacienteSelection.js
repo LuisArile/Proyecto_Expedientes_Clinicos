@@ -7,6 +7,7 @@ export function usePacienteSelection() {
             return saved ? JSON.parse(saved) : null;
         } catch (error) {
             console.error("Error al leer el paciente seleccionado: ", error);
+            localStorage.removeItem("sgec_selected_paciente");
             return null;
         }
     });

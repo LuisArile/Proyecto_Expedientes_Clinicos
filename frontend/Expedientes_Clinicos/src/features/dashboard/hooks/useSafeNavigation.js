@@ -26,6 +26,7 @@ export function useSafeNavigation() {
         }
 
         const navigationState = { ...state };
+        const effectivePaciente = navigationState?.paciente || navigationState?.selectedPaciente || selectedPaciente;
 
         if (viewId === "buscar-paciente-preclinica") {
             navigationState.modo = "preclinica";
@@ -33,7 +34,7 @@ export function useSafeNavigation() {
             navigationState.modo = "consulta-medica";
         }
 
-        if (view.requiresPaciente && !selectedPaciente) {
+        if (view.requiresPaciente && !effectivePaciente) {
             if (viewId === "consulta-medica") {
                 navigate("/sistema/buscar-paciente/consulta", { 
                     state: { ...navigationState, modo: "consulta-medica" } 

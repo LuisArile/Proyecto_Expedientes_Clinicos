@@ -31,7 +31,7 @@ export function useBuscarPacienteController({
             return;
         }
 
-        if (modo === "gestion") {
+        if (modo === "gestion-pacientes") {
             onVerExpediente(p);
             return;
         }
