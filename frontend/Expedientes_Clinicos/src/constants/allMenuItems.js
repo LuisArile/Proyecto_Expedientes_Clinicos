@@ -62,12 +62,6 @@ export const ALL_MENU_ITEMS = [
         permission: "CONSULTA_MEDICA" 
     },
     { 
-        id: "solicitud-examen", 
-        label: "Solicitud de Examen", 
-        icon: TestTube, 
-        permission: "SOLICITUD_EXAMEN"
-    },
-    { 
         id: "adjuntar-documentos", 
         label: "Adjuntar Documentos", 
         icon: ClipboardList, 

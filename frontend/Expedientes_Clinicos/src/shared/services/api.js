@@ -24,6 +24,7 @@ export const apiCall = async (endpoint, options = {}) => {
       method: options.method || "GET",
       headers,
       body: options.body || null,
+      signal: options.signal,
     });
 
     const contentType = response.headers.get("content-type");
@@ -91,9 +92,10 @@ export const expedienteAPI = {
 };
 
 export const buscarAPI = {
-  buscar: ({ termino, criterio = "nombre", pagina = 1, limite = 10 }) =>
+  buscar: ({ termino, criterio = "nombre", pagina = 1, limite = 10 }, signal) =>
     apiCall(`/busqueda?q=${encodeURIComponent(termino)}&pagina=${pagina}&limite=${limite}&criterio=${criterio}`, {
       method: "GET",
+      signal,
     }),
 }
 /**
@@ -158,4 +160,138 @@ export const consultaMedicaAPI = {
 export const auditoriaAPI = {
   obtenerTodos: () => apiCall("/auditoria", { method: "GET" }),
   obtenerEstadisticas: () => apiCall("/auditoria/estadisticas", { method: "GET" }),
+};
+
+/**
+ * Métodos para consumir endpoints de exámenes
+ */
+export const examenAPI = {
+
+  // Buscar (nombre, especialidad)
+  buscar: async (params = {}) => {
+    const cleanParams = Object.fromEntries(
+      Object.entries(params).filter(([, v]) => v !== "" && v !== undefined)
+    );
+
+    const query = new URLSearchParams(cleanParams).toString();
+
+    const res = await apiCall(`/examenes${query ? `?${query}` : ""}`, {
+      method: "GET",
+    });
+
+    return res.data;
+  },
+
+  // Obtener solo activos
+  obtenerActivos: async () => {
+    const res = await apiCall("/examenes/activos", { method: "GET" });
+    return res;
+  },
+
+  obtenerPorId: async (id) => {
+    const res = await apiCall(`/examenes/${id}`, { method: "GET" });
+    return res.data;
+  },
+
+  crear: async (data) => {
+    const res = await apiCall("/examenes", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    return res.data;
+  },
+
+  actualizar: async (id, data) => {
+    const res = await apiCall(`/examenes/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+    return res.data;
+  },
+
+  alternarEstado: async (id) => {
+    const res = await apiCall(`/examenes/${id}/estado`, {
+      method: "PATCH",
+    });
+    return res.data;
+  },
+};
+
+
+
+/**
+ * Métodos para consumir endpoints de medicamentos
+ */
+export const medicamentoAPI = {
+
+  // Buscar (nombre, categoría)
+  buscar: async (params = {}) => {
+    const cleanParams = Object.fromEntries(
+      Object.entries(params).filter(([, v]) => v !== "" && v !== undefined)
+    );
+
+    const query = new URLSearchParams(cleanParams).toString();
+
+    const res = await apiCall(`/medicamentos${query ? `?${query}` : ""}`, {
+      method: "GET",
+    });
+
+    return res.data;
+  },
+
+  // Obtener solo activos
+  obtenerActivos: async () => {
+    const res = await apiCall("/medicamentos/activos", { method: "GET" });
+    return res;
+  },
+
+  obtenerPorId: async (id) => {
+    const res = await apiCall(`/medicamentos/${id}`, { method: "GET" });
+    return res.data;
+  },
+
+  crear: async (data) => {
+    const res = await apiCall("/medicamentos", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    return res.data;
+  },
+
+  actualizar: async (id, data) => {
+    const res = await apiCall(`/medicamentos/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+    return res.data;
+  },
+
+  alternarEstado: async (id) => {
+    const res = await apiCall(`/medicamentos/${id}/estado`, {
+      method: "PATCH",
+    });
+    return res.data;
+  },
+};
+
+
+// api de cita y trazabilidad
+export const citaAPI = {
+  // Tablero
+  obtenerTablero: () => apiCall("/citas/tablero", { method: "GET" }),
+  obtenerPorEstado: (estado) => apiCall(`/citas/estado/${estado}`, { method: "GET" }),
+  obtenerSeguimiento: (idCita) => apiCall(`/citas/seguimiento/${idCita}`, { method: "GET" }),
+  
+  // Recepcionista
+  agendar: (data) => apiCall("/citas/agendar", { method: "POST", body: JSON.stringify(data) }),
+  registrarHoy: (data) => apiCall("/citas/registrar-hoy", { method: "POST", body: JSON.stringify(data) }),
+  enviarPreclinica: (idCita) => apiCall(`/citas/${idCita}/enviar-preclinica`, { method: "PUT" }),
+  
+  // Enfermero
+  iniciarPreclinica: (idCita) => apiCall(`/citas/${idCita}/iniciar-preclinica`, { method: "PUT" }),
+  finalizarPreclinica: (idCita) => apiCall(`/citas/${idCita}/finalizar-preclinica`, { method: "PUT" }),
+  
+  // Doctor
+  iniciarConsulta: (idCita) => apiCall(`/citas/${idCita}/iniciar-consulta`, { method: "PUT" }),
+  finalizarConsulta: (idCita) => apiCall(`/citas/${idCita}/finalizar-consulta`, { method: "PUT" }),
 };

@@ -1,4 +1,4 @@
-const emailService = require("../src/services/emailService");
+const EmailService = require("../src/services/emailService");
 const transporter = require("../src/config/mailer");
 
 jest.mock("../src/config/mailer", () => ({
@@ -6,6 +6,12 @@ jest.mock("../src/config/mailer", () => ({
 }));
 
 describe("emailService", () => {
+    let emailService;
+
+    beforeEach(() => {
+        emailService = new EmailService();
+    });
+
     it("debe enviar correo con credenciales", async () => {
         const usuario = {
             correo: "test@test.com",

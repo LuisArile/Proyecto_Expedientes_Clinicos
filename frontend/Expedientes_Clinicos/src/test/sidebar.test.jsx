@@ -3,6 +3,7 @@ import { describe, test, expect, vi, beforeEach } from "vitest";
 
 const mockLogout = vi.fn();
 const mockCheckPermission = vi.fn();
+const mockNavigate = vi.fn();
 
 vi.mock("@/features/auth/hooks/useAuth", () => ({
   useAuth: () => ({
@@ -17,10 +18,9 @@ vi.mock("@/features/auth/hooks/useAuth", () => ({
   }),
 }));
 
-vi.mock("@/features/auth/hooks/useRoleConfig", () => ({
-  useRoleConfig: () => ({ 
-    label: "Administrador", 
-    color: "bg-blue-100 text-blue-800" 
+vi.mock("@/features/dashboard/hooks/useSafeNavigation", () => ({
+  useSafeNavigation: () => ({
+    go: mockNavigate,
   }),
 }));
 
@@ -34,15 +34,13 @@ vi.mock("@/constants/allMenuItems", () => ({
 import { Sidebar } from "@components/layout/sidebar";
 
 describe("Sidebar", () => {
-  const mockNavigate = vi.fn();
-
   beforeEach(() => {
     vi.clearAllMocks();
     mockCheckPermission.mockImplementation(() => true);
   });
 
   test("renderiza información del usuario e iniciales en el avatar", () => {
-    render(<Sidebar currentView="dashboard" onNavigate={mockNavigate} />);
+    render(<Sidebar currentView="dashboard" />);
     
     expect(screen.getByText("Carlos Perez")).toBeInTheDocument();
     expect(screen.getByText("@cperez")).toBeInTheDocument();
@@ -52,21 +50,21 @@ describe("Sidebar", () => {
   test("renderiza menú filtrado según checkPermission", () => {
     mockCheckPermission.mockImplementation((perm) => perm === "default");
 
-    render(<Sidebar currentView="dashboard" onNavigate={mockNavigate} />);
+    render(<Sidebar currentView="dashboard" />);
     
     expect(screen.getByText("Inicio")).toBeInTheDocument();
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
   });
 
   test("aplica estilos de activo al item actual", () => {
-    render(<Sidebar currentView="dashboard" onNavigate={mockNavigate} />);
+    render(<Sidebar currentView="dashboard" />);
     
     const button = screen.getByText("Inicio").closest("button");
     expect(button).toHaveClass("bg-blue-600");
   });
 
   test("navega al hacer click en los botones de acción inferior", () => {
-    render(<Sidebar currentView="dashboard" onNavigate={mockNavigate} />);
+    render(<Sidebar currentView="dashboard" />);
     
     const btnPass = screen.getByText(/Cambiar contraseña/i);
     fireEvent.click(btnPass);

@@ -35,16 +35,20 @@ export function useUsuarioForm(id) {
     }, [id]);
 
     const construirPayload = (data) => {
+        const payload = {
+            nombre: data.nombre?.trim(),
+            apellido: data.apellido?.trim(),
+            correo: data.correo?.trim(),
+            nombreUsuario: data.nombreUsuario?.trim(),
+            idRol: Number(data.idRol),
+            especialidad: Number(data.idRol) === 2 ? data.especialidad : null
+        };
+
         if (isEdit) {
-            return {
-                nombre: data.nombre,
-                correo: data.correo,
-                idRol: Number(data.idRol),
-                activo: String(data.activo) === "true",
-                especialidad: data.especialidad
-            };
+            payload.activo = String(data.activo) === "true";
         }
-        return data;
+
+        return payload;
     };
 
     const enviarFormulario = async (data) => {
@@ -52,9 +56,7 @@ export function useUsuarioForm(id) {
         try {
             let payload = construirPayload(data);
 
-            if (!id) payload.clave = "temp12345"
-
-           if (isEdit) {
+            if (isEdit) {
                 await usuarioService.update(id, payload);
             } else {
                 await usuarioService.create(payload);

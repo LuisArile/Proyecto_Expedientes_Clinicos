@@ -1,11 +1,18 @@
 import { useState, useEffect, useRef } from "react";
-import { registrarConsultaMedica } from "../services/consultaService";
+import { 
+    registrarConsultaMedica, 
+    obtenerExamenesActivos,
+    obtenerMedicamentosActivos
+} from "../services/consultaService";
 import { toast } from "sonner";
 
 export const useConsultaMedica = (pacienteId, formMethods) => {
 
     const [guardando, setGuardando] = useState(false);
     const [modal, setModal] = useState({ open: false, result: { success: false, message: "" } });
+
+    const [examenesDisponibles, setExamenesDisponibles] = useState([]);
+    const [medicamentosDisponibles, setMedicamentosDisponibles] = useState([]); 
 
     const { reset, watch } = formMethods;
     const formValues = watch();
@@ -14,6 +21,28 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
     const isRestoring = useRef(false);
     const hasLoaded = useRef(false);
 
+    //  CARGAR EXÁMENES Y MEDICAMENTOS
+    useEffect(() => {
+        const cargarDatos = async () => {
+            try {
+                const [examenes, medicamentos] = await Promise.all([
+                    obtenerExamenesActivos(),
+                    obtenerMedicamentosActivos() 
+                ]);
+
+                setExamenesDisponibles(examenes);
+                setMedicamentosDisponibles(medicamentos); 
+
+            } catch (error) {
+                console.error("Error cargando datos", error);
+                toast.error("No se pudieron cargar los datos");
+            }
+        };
+
+        cargarDatos();
+    }, []);
+
+    //  RESTORE LOCAL STORAGE
     useEffect(() => {
         if (!STORAGE_KEY || hasLoaded.current) return;
 
@@ -34,12 +63,19 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
         }
     }, [STORAGE_KEY, reset]);
 
+    //  AUTOSAVE
     useEffect(() => {
         if (!STORAGE_KEY || isRestoring.current) return;
 
-        const tieneContenido = formValues?.diagnostico?.trim() || 
-                               (formValues?.medicamentos && formValues.medicamentos.length > 0);
-                      
+        const tieneMedicamentosValidos = formValues?.medicamentos?.some(med =>
+            med.nombre?.trim() && med.dosis?.trim()
+        );
+
+        const tieneContenido =
+            formValues?.diagnostico?.trim() ||
+            tieneMedicamentosValidos || 
+            (formValues?.examenes && formValues.examenes.length > 0); 
+
         if (!tieneContenido) return;
 
         const timeoutId = setTimeout(() => {
@@ -50,7 +86,8 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
 
         return () => clearTimeout(timeoutId);
     }, [formValues, STORAGE_KEY]);
-    
+   
+    //  GUARDAR CONSULTA
     const guardarConsulta = async (expedienteId, data) => {
         setGuardando(true);
         try {
@@ -90,5 +127,26 @@ export const useConsultaMedica = (pacienteId, formMethods) => {
         }
     };
 
-    return { guardarConsulta, guardando, modal, setModal };
+    const limpiarBorrador = () => {
+        if (STORAGE_KEY) {
+            localStorage.removeItem(STORAGE_KEY);
+        }
+        reset({
+            diagnostico: "",
+            tipoDiagnostico: "",
+            observacionesClinicas: "",
+            medicamentos: [],
+            examenes: []
+        });
+    };
+
+    return { 
+        guardarConsulta, 
+        guardando, 
+        modal, 
+        setModal,
+        examenesDisponibles,
+        medicamentosDisponibles, 
+        limpiarBorrador
+    };
 };

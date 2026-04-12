@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, test, expect, vi } from "vitest";
-import { Login } from "@/features/pages/Login";
+import { Login } from "../pages/Login";
 import { MemoryRouter } from "react-router-dom";
 
 // Mock navigate
@@ -79,7 +79,7 @@ describe("Login component", () => {
 
     await waitFor(() => {
       expect(mockLogin).toHaveBeenCalledWith("admin", "123456");
-      expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
+      expect(mockNavigate).toHaveBeenCalledWith("/sistema");
     });
 
   });

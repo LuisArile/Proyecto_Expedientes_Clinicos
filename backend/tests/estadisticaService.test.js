@@ -1,148 +1,160 @@
 const EstadisticaService = require("../src/services/estadisticaService");
 
 describe("EstadisticaService", () => {
-    let service;
+  let service;
+  let mocks;
 
-    let prisma;
-    let usuarioRepository;
-    let auditoriaRepository;
-    let pacienteRepository;
-    let expedienteRepository;
-    let consultaMedicaRepository;
-    let registroPreclinicoRepository;
-    let recetaMedicaRepository;
+  beforeEach(() => {
+    mocks = {
+      prisma: {},
+      usuarioRepository: { obtenerTodos: jest.fn() },
+      auditoriaRepository: {
+        obtenerLogsDeHoy: jest.fn(),
+        obtenerRecientes: jest.fn(),
+        buscarActividad: jest.fn(),
+      },
+      pacienteRepository: {},
+      expedienteRepository: {
+        contarCreadosHoy: jest.fn(),
+      },
+      consultaMedicaRepository: {
+        contarConsultasHoy: jest.fn(),
+        obtenerRecientesPorMedico: jest.fn(),
+      },
+      registroPreclinicoRepository: {
+        contarTodos: jest.fn(),
+        contarEvaluadosHoy: jest.fn(),
+        obtenerRecientes: jest.fn(),
+      },
+      recetaMedicaRepository: {
+        contarRecetasHoy: jest.fn(),
+      },
+      examenRepository: {
+        obtenerActivos: jest.fn(),
+      },
+      medicamentoRepository: {
+        obtenerActivos: jest.fn(),
+      },
+    };
 
-    beforeEach(() => {
+    service = new EstadisticaService(
+      mocks.prisma,
+      mocks.usuarioRepository,
+      mocks.auditoriaRepository,
+      mocks.pacienteRepository,
+      mocks.expedienteRepository,
+      mocks.consultaMedicaRepository,
+      mocks.registroPreclinicoRepository,
+      mocks.recetaMedicaRepository,
+      mocks.examenRepository,
+      mocks.medicamentoRepository
+    );
+  });
 
-        prisma = {};
-        usuarioRepository = { obtenerTodos: jest.fn() };
-        auditoriaRepository = {
-            obtenerLogsDeHoy: jest.fn(),
-            obtenerRecientes: jest.fn(),
-            buscarActividad: jest.fn()
-        };
-        pacienteRepository = {};
-        expedienteRepository = {
-            contarCreadosHoy: jest.fn()
-        };
-        consultaMedicaRepository = {
-            contarConsultasHoy: jest.fn(),
-            obtenerRecientesPorMedico: jest.fn()
-        };
-        registroPreclinicoRepository = {
-            contarTodos: jest.fn(),
-            contarEvaluadosHoy: jest.fn(),
-            obtenerRecientes: jest.fn()
-        };
-        recetaMedicaRepository = {
-            contarRecetasHoy: jest.fn()
-        };
+  // ADMINISTRADOR
+  test("debe retornar resumen para ADMINISTRADOR", async () => {
+    mocks.usuarioRepository.obtenerTodos.mockResolvedValue([{}, {}]);
+    mocks.auditoriaRepository.obtenerLogsDeHoy.mockResolvedValue([{}]);
+    mocks.auditoriaRepository.obtenerRecientes.mockResolvedValue([
+      { id: 1, accion: "TEST", fecha: new Date(), usuario: { nombre: "A", apellido: "B" } },
+    ]);
+    mocks.examenRepository.obtenerActivos.mockResolvedValue([{}, {}]);
+    mocks.medicamentoRepository.obtenerActivos.mockResolvedValue([{}]);
 
-        service = new EstadisticaService(
-            prisma,
-            usuarioRepository,
-            auditoriaRepository,
-            pacienteRepository,
-            expedienteRepository,
-            consultaMedicaRepository,
-            registroPreclinicoRepository,
-            recetaMedicaRepository
-        );
+    const res = await service.obtenerResumenGeneral({
+      rol: "ADMINISTRADOR",
     });
 
-    describe("obtenerResumenGeneral", () => {
+    expect(res.tarjetas.length).toBe(4);
+    expect(res.actividad.length).toBe(1);
+  });
 
-        test("debe ejecutar estrategia ADMINISTRADOR", async () => {
+  // RECEPCIONISTA
+  test("debe retornar resumen para RECEPCIONISTA", async () => {
+    mocks.expedienteRepository.contarCreadosHoy.mockResolvedValue(5);
+    mocks.auditoriaRepository.buscarActividad.mockResolvedValue([
+      { id: 1, accion: "CREACIÓN DE EXPEDIENTE", fecha: new Date() },
+    ]);
 
-            usuarioRepository.obtenerTodos.mockResolvedValue([1, 2]);
-            auditoriaRepository.obtenerLogsDeHoy.mockResolvedValue([1]);
-            auditoriaRepository.obtenerRecientes.mockResolvedValue([]);
-
-            const resultado = await service.obtenerResumenGeneral({
-                idRol: 1
-            });
-
-            expect(resultado.tarjetas.length).toBeGreaterThan(0);
-        });
-
-        test("debe devolver vacío si rol no existe", async () => {
-
-            const resultado = await service.obtenerResumenGeneral({
-                idRol: 999
-            });
-
-            expect(resultado).toEqual({
-                tarjetas: [],
-                actividad: []
-            });
-        });
+    const res = await service.obtenerResumenGeneral({
+      rol: "RECEPCIONISTA",
+      id: 10,
     });
 
-    describe("RECEPCIONISTA", () => {
+    expect(res.tarjetas[1].valor).toBe(5);
+    expect(res.actividad.length).toBe(1);
+  });
 
-        test("debe retornar dashboard recepcionista", async () => {
+  // MEDICO
+  test("debe retornar resumen para MEDICO", async () => {
+    mocks.consultaMedicaRepository.contarConsultasHoy.mockResolvedValue(3);
+    mocks.consultaMedicaRepository.obtenerRecientesPorMedico.mockResolvedValue([
+      {
+        id: 1,
+        tipoConsulta: "General",
+        fechaConsulta: new Date(),
+        expediente: {
+          paciente: { nombre: "Juan", apellido: "Perez" },
+        },
+      },
+    ]);
+    mocks.recetaMedicaRepository.contarRecetasHoy.mockResolvedValue(2);
 
-            expedienteRepository.contarCreadosHoy.mockResolvedValue(5);
-            auditoriaRepository.buscarActividad.mockResolvedValue([
-                {
-                    id: 1,
-                    accion: "CREACIÓN DE EXPEDIENTE",
-                    fecha: new Date(),
-                    usuario: { nombre: "Ana", apellido: "Lopez" }
-                }
-            ]);
-
-            const resultado = await service.obtenerRecepcionistaData({ id: 1 }, 1);
-
-            expect(resultado.tarjetas).toHaveLength(3);
-            expect(resultado.tarjetas[1].valor).toBe(5);
-        });
+    const res = await service.obtenerResumenGeneral({
+      rol: "MEDICO",
+      id: 5,
     });
 
-    describe("MEDICO", () => {
+    expect(res.tarjetas[0].valor).toBe(3);
+    expect(res.tarjetas[3].valor).toBe(2);
+    expect(res.actividad.length).toBe(1);
+  });
 
-        test("debe retornar dashboard médico", async () => {
+  // ENFERMERO
+  test("debe retornar resumen para ENFERMERO", async () => {
+    mocks.registroPreclinicoRepository.contarTodos.mockResolvedValue(10);
+    mocks.registroPreclinicoRepository.contarEvaluadosHoy.mockResolvedValue(4);
+    mocks.registroPreclinicoRepository.obtenerRecientes.mockResolvedValue([
+      {
+        id: 1,
+        fechaRegistro: new Date(),
+        expediente: {
+          paciente: { nombre: "Ana", apellido: "Lopez" },
+        },
+      },
+    ]);
 
-            consultaMedicaRepository.contarConsultasHoy.mockResolvedValue(10);
-            consultaMedicaRepository.obtenerRecientesPorMedico.mockResolvedValue([
-                {
-                    id: 1,
-                    tipoConsulta: "GENERAL",
-                    fechaConsulta: new Date(),
-                    expediente: {
-                        paciente: { nombre: "Juan", apellido: "Perez" }
-                    }
-                }
-            ]);
-            recetaMedicaRepository.contarRecetasHoy.mockResolvedValue(3);
-
-            const resultado = await service.obtenerMedicoData({ id: 1 }, 1);
-
-            expect(resultado.tarjetas[0].valor).toBe(10);
-            expect(resultado.tarjetas[3].valor).toBe(3);
-        });
+    const res = await service.obtenerResumenGeneral({
+      rol: "ENFERMERO",
+      id: 7,
     });
 
-    describe("ENFERMERO", () => {
+    expect(res.tarjetas[0].valor).toBe(10);
+    expect(res.actividad.length).toBe(1);
+  });
 
-        test("debe retornar dashboard enfermero", async () => {
-
-            registroPreclinicoRepository.contarTodos.mockResolvedValue(20);
-            registroPreclinicoRepository.contarEvaluadosHoy.mockResolvedValue(5);
-            registroPreclinicoRepository.obtenerRecientes.mockResolvedValue([
-                {
-                    id: 1,
-                    fechaRegistro: new Date(),
-                    expediente: {
-                        paciente: { nombre: "Luis", apellido: "Ramirez" }
-                    }
-                }
-            ]);
-
-            const resultado = await service.obtenerEnfermeroData({ id: 1 }, 1);
-
-            expect(resultado.tarjetas[0].valor).toBe(20);
-            expect(resultado.actividad.length).toBe(1);
-        });
+  // ROL DESCONOCIDO
+  test("debe retornar vacío si el rol no existe", async () => {
+    const res = await service.obtenerResumenGeneral({
+      rol: "OTRO",
+      idRol: 99,
     });
+
+    expect(res).toEqual({ tarjetas: [], actividad: [] });
+  });
+
+  // MAPEO POR ID DE ROL
+  test("debe usar idRol si no viene rol", async () => {
+    mocks.usuarioRepository.obtenerTodos.mockResolvedValue([]);
+    mocks.auditoriaRepository.obtenerLogsDeHoy.mockResolvedValue([]);
+    mocks.auditoriaRepository.obtenerRecientes.mockResolvedValue([]);
+    mocks.examenRepository.obtenerActivos.mockResolvedValue([]);
+    mocks.medicamentoRepository.obtenerActivos.mockResolvedValue([]);
+
+    const res = await service.obtenerResumenGeneral({
+      idRol: 1, // ADMINISTRADOR
+    });
+
+    expect(res.tarjetas).toBeDefined();
+  });
 });

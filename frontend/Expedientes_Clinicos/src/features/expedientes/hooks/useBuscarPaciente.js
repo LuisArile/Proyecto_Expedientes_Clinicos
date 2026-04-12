@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { buscarPacientes } from "../services/buscarPacienteService";
 import { toast } from "sonner";
 
@@ -10,6 +10,7 @@ export function useBuscarPacientes() {
     const [buscando, setBuscando] = useState(false);
     const [resultados, setResultados] = useState([]);
     const [busquedaRealizada, setBusquedaRealizada] = useState(false);
+    const abortControllerRef = useRef(null);
 
     const ejecutarBusqueda = useCallback(async (numPagina = 1) => {
         const terminoLimpio = termino.trim();
@@ -23,11 +24,18 @@ export function useBuscarPacientes() {
             return;
         }
 
+        // Cancelar búsqueda anterior si existe
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+
+        // Crear nuevo AbortController
+        abortControllerRef.current = new AbortController();
+
         setBuscando(true);
 
         try {
-
-            const response = await buscarPacientes(terminoLimpio, criterio, numPagina);
+            const response = await buscarPacientes(terminoLimpio, criterio, numPagina, abortControllerRef.current.signal);
 
             setResultados(response.resultados);
             setPaginacion(response.paginacion);
@@ -38,6 +46,9 @@ export function useBuscarPacientes() {
                 toast.info("No se encontraron coincidencias");
             }
         } catch (error) {
+            if (error.name === 'AbortError') {
+                return;
+            }
             setResultados([]);
             toast.error(error.message || "Error al conectar con el servidor");
         } finally {

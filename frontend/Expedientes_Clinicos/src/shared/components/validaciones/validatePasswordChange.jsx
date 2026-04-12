@@ -17,13 +17,9 @@ export function validatePasswordChange({ currentPassword, newPassword, confirmPa
     return "Debe confirmar la nueva contraseña";
   }
 
-  // Longitud mínima y máxima
+  // Longitud mínima
   if (newPass.length < 8) {
-    return "La nueva contraseña debe tener al menos 8 caracteres";
-  }
-
-  if (newPass.length > 64) {
-    return "La contraseña no puede exceder los 64 caracteres";
+    return "La contraseña debe tener al menos 8 caracteres";
   }
 
   // Evitar que sea igual a la contraseña actual
@@ -31,14 +27,10 @@ export function validatePasswordChange({ currentPassword, newPassword, confirmPa
     return "La nueva contraseña no puede ser igual a la actual";
   }
 
-  // Al menos una mayúscula un numero y una minúscula
-  if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).+$/.test(newPass)) {
-    return "La contraseña debe contener al menos una mayúscula, una minúscula y un número";
-}
-
-  // Al menos un carácter especial
-  if (!/[!@#$%^&*()_\-+=[\]{};:,.<>?/|\\]/.test(newPass)) {
-    return "La contraseña debe contener al menos un carácter especial";
+  // Validar formato completo: mayúscula, minúscula, número y carácter especial
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{};:,.<>?/|\\])[\w!@#$%^&*()_\-+=[\]{};:,.<>?/|\\]+$/;
+  if (!passwordRegex.test(newPass)) {
+    return "La contraseña debe contener mayúscula, minúscula, número y carácter especial (!@#$%^&*()_-+=[]{};<>?/|:,.)";
   }
 
   // Confirmación

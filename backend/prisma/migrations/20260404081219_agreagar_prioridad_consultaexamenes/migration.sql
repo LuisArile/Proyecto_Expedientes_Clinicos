@@ -1,0 +1,19 @@
+BEGIN TRY
+
+BEGIN TRAN;
+
+-- AlterTable
+ALTER TABLE [dbo].[ConsultaExamen] ADD [prioridad] NVARCHAR(1000) NOT NULL CONSTRAINT [ConsultaExamen_prioridad_df] DEFAULT 'MEDIA';
+
+COMMIT TRAN;
+
+END TRY
+BEGIN CATCH
+
+IF @@TRANCOUNT > 0
+BEGIN
+    ROLLBACK TRAN;
+END;
+THROW
+
+END CATCH

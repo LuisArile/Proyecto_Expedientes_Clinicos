@@ -160,33 +160,47 @@ describe("AuditoriaService", () => {
                 {
                     usuarioId: 1,
                     accion: "Actualizacion de Paciente",
-                    detalles: "actualizacion de paciente 15"
+                    detalles: "Actualizacion de paciente 15"
                 },
                 null
             );
         });
 
         test("registrarAccionMedica debe incluir tx cuando se envía", async () => {
-            await service.registrarAccionMedica(1, "CONSULTA", 30, "tx-999");
+            await service.registrarAccionMedica(1, "CONSULTA", { idExpediente: 30 }, "tx-999");
 
             expect(mockRepository.crear).toHaveBeenCalledWith(
                 {
                     usuarioId: 1,
                     accion: "CONSULTA",
-                    detalles: "Registro de consulta para expediente 30"
+                    detalles: {
+                        tipo: "CONSULTA_MEDICA",
+                        accion: "CONSULTA",
+                        idExpediente: 30,
+                        idConsulta: undefined,
+                        examenes: false,
+                        medicamentos: false
+                    }
                 },
                 "tx-999"
             );
         });
 
         test("registrarAccionMedica debe usar null como tx por defecto", async () => {
-            await service.registrarAccionMedica(1, "RECETA", 40);
+            await service.registrarAccionMedica(1, "RECETA", { idExpediente: 40 });
 
             expect(mockRepository.crear).toHaveBeenCalledWith(
                 {
                     usuarioId: 1,
                     accion: "RECETA",
-                    detalles: "Registro de receta para expediente 40"
+                    detalles: {
+                        tipo: "CONSULTA_MEDICA",
+                        accion: "RECETA",
+                        idExpediente: 40,
+                        idConsulta: undefined,
+                        examenes: false,
+                        medicamentos: false
+                    }
                 },
                 null
             );

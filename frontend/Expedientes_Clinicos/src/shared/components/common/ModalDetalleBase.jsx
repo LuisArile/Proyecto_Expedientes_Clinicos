@@ -23,8 +23,9 @@ export function ModalDetalleBase({
 }) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-2xl gap-0 p-0 border-slate-200 shadow-xl overflow-hidden bg-white"> 
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col gap-0 p-0 border-slate-200 shadow-xl bg-white">
             
+            {/* HEADER */}
             <DialogHeader className={`p-6 border-b ${colorScheme.border} bg-white`}>
                 <div className="flex items-center gap-3">
                     <div className={`p-2 ${colorScheme.iconBg} rounded-lg border ${colorScheme.border}`}>
@@ -41,11 +42,13 @@ export function ModalDetalleBase({
                 </div>
             </DialogHeader>
 
-            <div className="p-6">
+            {/* BODY (SCROLLABLE) */}
+            <div className="p-6 overflow-y-auto flex-1">
                 {children}
             </div>
 
-            <DialogFooter className={`p-4 bg-slate-50/50 border-t ${colorScheme.border} flex items-center justify-between sm:justify-between`}>
+            {/* FOOTER */}
+            <DialogFooter className={`p-4 bg-slate-50/50 border-t ${colorScheme.border} flex items-center justify-between`}>
                 <div className="text-[10px] text-slate-400 px-2 italic">
                     {footerText || "Generado por el sistema SGEC"}
                 </div>
@@ -60,21 +63,22 @@ export function ModalDetalleBase({
                     </Button>
 
                     {primaryAction && (
-                    <Button 
-                        onClick={primaryAction.onClick}
-                        disabled={primaryAction.loading}
-                        className={`${primaryAction.className} font-semibold text-sm shadow-sm`}
-                    >
-                        {primaryAction.loading ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        ) : (
-                            primaryAction.icon && <primaryAction.icon className="h-4 w-4 mr-2" />
-                        )}
-                        {primaryAction.label}
-                    </Button>
+                        <Button 
+                            onClick={primaryAction.onClick}
+                            disabled={primaryAction.loading}
+                            className={`${primaryAction.className} font-semibold text-sm shadow-sm`}
+                        >
+                            {primaryAction.loading ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                                primaryAction.icon && <primaryAction.icon className="h-4 w-4 mr-2" />
+                            )}
+                            {primaryAction.label}
+                        </Button>
                     )}
                 </div>
             </DialogFooter>
+
         </DialogContent>
     </Dialog>
   );

@@ -21,9 +21,6 @@ class usuarioService{
         if (!data.nombreUsuario) {
             throw new ErrorValidacion('El nombre de usuario es obligatorio');
         }
-        if (!data.clave) {
-            throw new ErrorValidacion('La contraseña es obligatoria');
-        }
         if (!data.idRol) {
             throw new ErrorValidacion('El rol es obligatorio');
         }
@@ -40,31 +37,26 @@ class usuarioService{
         const existeNombre = await this.usuarioRepository.filtrarNombreUsuario(data.nombreUsuario);
         if(existeNombre) throw new ErrorConflicto('El nombre de usuario ya esta registrado');
 
-        if (data.clave.length < 8) {
-            throw new ErrorValidacion('La contraseña debe tener al menos 8 caracteres');
-        }
-        
-        //encriptamos clave
-        data.clave= await Encriptador.encriptar(data.clave);
+        const tempPassword = Math.random().toString(36).slice(-10) + "A1!";
+        data.clave = await Encriptador.encriptar(tempPassword);
+        data.debeCambiarPassword = true;
 
-        //creamos usuario
         const result = await this.usuarioRepository.crear(data);
         const usuario = result.usuario;
 
         if(usuario && usuario.id){
             await this.auditoriaService.registrarUsuario(
-            usuarioCreadorId,
-            'USUARIO_CREADO',
-            usuario.id
-        );
+                usuarioCreadorId,
+                'USUARIO_CREADO',
+                usuario.id
+            );
 
-            // Enviar credenciales automáticamente después de crear el usuario
             try {
-                await this.enviarCredenciales(usuario.id, usuarioCreadorId);
+                await this.emailService.enviarCredenciales(usuario, tempPassword);
             } catch (error) {
             }
         }
-            return usuario;
+        return usuario;
     }
 
     async obtenerTodos() {    
@@ -75,7 +67,7 @@ class usuarioService{
     async obtenerPorId(id) {
         const usuario = await this.usuarioRepository.obtenerPorId(id);
         if (!usuario) {
-            throw new ErrorValidacion('Usuario');
+            throw new ErrorNoEncontrado('Usuario');
         }
         return usuario;
     }
@@ -94,7 +86,6 @@ class usuarioService{
             }
         }
 
-        // Si se actualiza el nombre de usuario, verificar que no esté en uso
         if (data.nombreUsuario && data.nombreUsuario !== usuarioExistente.nombreUsuario) {
             const existeNombre = await this.usuarioRepository.filtrarNombreUsuario(data.nombreUsuario);
             if (existeNombre) {
@@ -128,24 +119,23 @@ class usuarioService{
             }
         });
 
-        const usuarioActualizado = await this.usuarioRepository.actualizar(id, data);
+        const usuario = await this.usuarioRepository.actualizar(id, data);
 
         if (camposCambiados.length > 0) {
             const detalles = `Usuario modificado: ${usuarioExistente.nombreUsuario}. ` +
                             `Campos: ${camposCambiados.join(', ')}. ` +
                             `Responsable ID: ${usuarioActualId}`;
             
-            await this.auditoriaService.registrar(
-                usuarioActualId, 
-                'ACTUALIZACION_USUARIO', 
+            await this.auditoriaService.registrarUsuario(
+                usuarioActualId,
+                'ACTUALIZACION',
                 detalles
             );
         }
 
-        return usuarioActualizado;
+        return usuario;
     }
 
-    //eliminar Usuario
     async eliminar(id, usuarioActualId) {
         
         const usuario = await this.usuarioRepository.obtenerPorId(id);
@@ -153,11 +143,9 @@ class usuarioService{
             throw new ErrorNoEncontrado('Usuario');
         }
 
-            //eliminamos
             await this.usuarioRepository.eliminar(id);
             
 
-            // Registrar auditoría
             await this.auditoriaService.registrarUsuario(
                 usuarioActualId,
                 'ELIMINACION',
@@ -175,14 +163,12 @@ class usuarioService{
             throw new Error("Usuario no encontrado");
         }
 
-        // Verificar contraseña actual
         const passwordCorrecta = await bcrypt.compare(currentPassword, usuario.clave);
 
         if (!passwordCorrecta) {
             throw new Error("La contraseña actual es incorrecta");
         }
 
-        // Generar hash de la nueva contraseña
         const hashedPassword = await Encriptador.encriptar(newPassword);
 
         // Actualizar contraseña y limpiar flag en la base de datos 
@@ -193,10 +179,10 @@ class usuarioService{
         
         await this.auditoriaService.registrar(userId, 'CAMBIO_PASSWORD', 'El usuario actualizó su contraseña');
 
-        return { mensaje: "Contraseña actualizada correctamente" };
+        return { mensaje: 'Contraseña actualizada correctamente' };
     }
 
-    async alternarEstado(id) {
+    async alternarEstado(id, usuarioActualId) {
         const usuario = await this.usuarioRepository.obtenerPorId(id);
         
         if (!usuario) {
@@ -209,10 +195,12 @@ class usuarioService{
             activo: nuevoEstado 
         });
 
-        await this.usuarioRepository.registrarAccionUsuario(
-            null,
+        // Registrar en auditoría
+        const detalles = `Usuario ${usuario.nombreUsuario} cambiado a ${nuevoEstado ? 'ACTIVO' : 'INACTIVO'}`;
+        await this.auditoriaService.registrar(
+            usuarioActualId,
             'ESTADO_USUARIO_CAMBIADO',
-            `Usuario ${usuario.nombreUsuario} cambiado a ${nuevoEstado ? 'ACTIVO' : 'INACTIVO'}`
+            detalles
         );
 
         return {
@@ -222,15 +210,15 @@ class usuarioService{
         };
     }
 
-    async enviarCredenciales(UsuarioId, administradorId) {
-        const usuario = await this.usuarioRepository.obtenerPorId(UsuarioId);
+    async enviarCredenciales(usuarioId, administradorId) {
+        const usuario = await this.usuarioRepository.obtenerPorId(usuarioId);
         if (!usuario) throw new Error("Usuario no encontrado");
 
         // Generar clave aleatoria
-        const tempPassword = Math.random().toString(36).slice(-10);
+        const tempPassword = Math.random().toString(36).slice(-10) + "A1!";
         const hashed = await bcrypt.hash(tempPassword, 10);
 
-        await this.usuarioRepository.actualizar(UsuarioId, { 
+        await this.usuarioRepository.actualizar(usuarioId, { 
             clave: hashed, 
             debeCambiarPassword: true 
         });
@@ -250,6 +238,5 @@ class usuarioService{
         return { message: "Credenciales enviadas con éxito" };
     }
 }
-    
-module.exports=usuarioService;
 
+module.exports = usuarioService;
