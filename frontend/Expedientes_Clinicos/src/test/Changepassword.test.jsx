@@ -1,28 +1,27 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, test, expect, vi, beforeEach } from "vitest";
-import { Changepassword } from "@/features/dashboard/components/Changepassword";
-import { MemoryRouter } from "react-router-dom";
-import { AuthContext } from "@/features/auth/components/AuthContext";
-import { securityService } from "@/features/dashboard/services/securityService";
 
 /* ---------------- MOCKS ---------------- */
 
 // mock navigate
 const mockNavigate = vi.fn();
 
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate
-  };
-});
+vi.mock("@/features/dashboard/hooks/useSafeNavigation", () => ({
+  useSafeNavigation: () => ({
+    go: mockNavigate,
+  }),
+}));
 
 vi.mock("@/features/dashboard/services/securityService", () => ({
   securityService: {
     cambiarPassword: vi.fn()
   }
 }));
+
+import { Changepassword } from "@/features/dashboard/components/Changepassword";
+import { MemoryRouter } from "react-router-dom";
+import { AuthContext } from "@/features/auth/components/AuthContext";
+import { securityService } from "@/features/dashboard/services/securityService";
 
 function renderWithAuth(ui) {
   return render(
@@ -109,11 +108,10 @@ describe("Changepassword", () => {
 
   });
 
-  test("muestra mensaje de éxito y ejecuta onVolver", async () => {
-    const onVolver = vi.fn();
+  test("muestra mensaje de éxito y ejecuta navegación", async () => {
     securityService.cambiarPassword.mockResolvedValue({ success: true });
 
-    renderWithAuth(<Changepassword onVolver={onVolver} />);
+    renderWithAuth(<Changepassword />);
 
     fireEvent.change(screen.getByPlaceholderText("Ingrese su contraseña actual"), {
       target: { value: "Actual123!" }
@@ -130,13 +128,16 @@ describe("Changepassword", () => {
     fireEvent.click(screen.getByText("Guardar cambios"));
 
     await waitFor(() => {
-      expect(screen.getByText("Contraseña actualizada correctamente")).toBeInTheDocument();
+      expect(securityService.cambiarPassword).toHaveBeenCalledWith(1, "Actual123!", "Nueva123!");
     });
 
     await waitFor(() => {
-      expect(onVolver).toHaveBeenCalled();
+      expect(screen.getByText("Contraseña actualizada correctamente")).toBeInTheDocument();
     }, { timeout: 3000 });
 
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("inicio");
+    }, { timeout: 3000 });
   });
 
 });
