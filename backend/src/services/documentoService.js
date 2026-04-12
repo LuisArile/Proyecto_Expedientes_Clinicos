@@ -2,9 +2,10 @@ const { BlobSASPermissions, generateBlobSASQueryParameters, StorageSharedKeyCred
 const { containerClient } = require("../config/storage");
 
 class DocumentoService {
-    constructor(documentoRepository, consultaMedicaRepository) {
+    constructor(documentoRepository, consultaMedicaRepository, auditoriaService) {
         this.documentoRepository = documentoRepository;
         this.consultaMedicaRepository = consultaMedicaRepository;
+        this.auditoriaService = auditoriaService;
     }
 
     //Directorio virtual: numeroExpediente/consultaId/documento 
@@ -39,7 +40,7 @@ class DocumentoService {
         return sasUrl;
     }
 
-    async subirDocumento(archivo, consultaId) {
+    async subirDocumento(archivo, consultaId, usuarioId) {
         try {
             if (!archivo) {
                 throw new Error("No se envió un archivo");
@@ -83,6 +84,11 @@ class DocumentoService {
 
             const documento = await this.documentoRepository.crear(datosDocumento);
 
+            // Registrar en auditoría
+            if (usuarioId && this.auditoriaService) {
+                await this.auditoriaService.registrarEntidad(usuarioId, "DOCUMENTO", "CARGA", documento.id);
+            }
+
             return {
                 success: true,
                 documento: {
@@ -113,7 +119,7 @@ class DocumentoService {
         }
     }
 
-    async descargarDocumento(blobName) {
+    async descargarDocumento(blobName, usuarioId, documentoId) {
         try {
             const blockBlobClient = containerClient.getBlockBlobClient(blobName);
             
@@ -124,13 +130,18 @@ class DocumentoService {
             // Descargar el blob al buffer
             await blockBlobClient.downloadToBuffer(buffer);
             
+            // Registrar en auditoría
+            if (usuarioId && this.auditoriaService) {
+                await this.auditoriaService.registrarEntidad(usuarioId, "Documento", "Descarga", documentoId);
+            }
+            
             return buffer;
         } catch (error) {
             throw new Error(`Error al descargar documento: ${error.message}`);
         }
     }
 
-    async eliminarDocumento(documentoId, blobName) {
+    async eliminarDocumento(documentoId, blobName, usuarioId) {
         try {
             // Eliminar de Azure Blob Storage
             const blockBlobClient = containerClient.getBlockBlobClient(blobName);
@@ -138,6 +149,11 @@ class DocumentoService {
 
             // Eliminar registro de base de datos
             await this.documentoRepository.eliminar(documentoId);
+
+            // Registrar en auditoría
+            if (usuarioId && this.auditoriaService) {
+                await this.auditoriaService.registrarEntidad(usuarioId, "DOCUMENTO", "ELIMINACION", documentoId);
+            }
 
             return { success: true, message: "Documento eliminado correctamente" };
         } catch (error) {

@@ -9,6 +9,7 @@ class DocumentoController {
     subirDocumento = capturarAsync(async (req, res, next) => {
         const { consultaId } = req.body;
         const archivo = req.file;
+        const usuarioId = req.usuario?.id;
 
         if (!archivo) {
             return res.status(400).json({
@@ -24,7 +25,8 @@ class DocumentoController {
 
         const resultado = await this.documentoService.subirDocumento(
             archivo,
-            consultaId
+            consultaId,
+            usuarioId
         );
 
         res.status(201).json(resultado);
@@ -58,6 +60,7 @@ class DocumentoController {
 
     eliminarDocumento = capturarAsync(async (req, res, next) => {
         const { id } = req.params;
+        const usuarioId = req.usuario?.id;
 
         const documento = await this.documentoService.obtenerDocumento(id);
 
@@ -65,13 +68,14 @@ class DocumentoController {
             throw new ErrorNoEncontrado('Documento');
         }
 
-        const resultado = await this.documentoService.eliminarDocumento(id, documento.nombre);
+        const resultado = await this.documentoService.eliminarDocumento(id, documento.nombre, usuarioId);
 
         res.json(resultado);
     });
 
     descargarDocumento = capturarAsync(async (req, res, next) => {
         const { id } = req.params;
+        const usuarioId = req.usuario?.id;
 
         const documento = await this.documentoService.obtenerDocumento(id);
 
@@ -80,7 +84,7 @@ class DocumentoController {
         }
 
         // Obtener el archivo de Azure
-        const buffer = await this.documentoService.descargarDocumento(documento.nombre);
+        const buffer = await this.documentoService.descargarDocumento(documento.nombre, usuarioId, documento.id);
 
         // Configurar headers para la descarga
         res.setHeader('Content-Type', documento.contentType || 'application/octet-stream');

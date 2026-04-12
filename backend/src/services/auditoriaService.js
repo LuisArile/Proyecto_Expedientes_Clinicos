@@ -46,8 +46,8 @@ class AuditoriaService {
     }
 
     async registrarEntidad(usuarioId, entidad, tipoAccion, idEntidad) {
-        const accion = `${tipoAccion} de ${entidad}`;
-        const detalles = `${tipoAccion.charAt(0).toUpperCase() + tipoAccion.slice(1)} de ${entidad.toLowerCase()} ${idEntidad}`;
+        const accion = `${tipoAccion.toUpperCase()} DE ${entidad.toUpperCase()}`;
+        const detalles = `${tipoAccion.toUpperCase()} DE ${entidad.toUpperCase()} ${idEntidad}`;
         return this.registrar(usuarioId, accion, detalles);
     }
 
@@ -79,6 +79,7 @@ class AuditoriaService {
         if (a.includes('RECETA')) return 'Receta';
         if (a.includes('EXAMEN')) return 'Exámenes';
         if (a.includes('MEDICAMENTO')) return 'Medicamentos';
+        if (a.includes('DOCUMENTO')) return 'Documentos';
         return 'General';
     }
 

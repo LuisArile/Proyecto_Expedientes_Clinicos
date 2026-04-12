@@ -7,7 +7,9 @@ const prisma = require('../config/prisma');
 
 const DocumentoRepository = require('../repositories/documentoRepository');
 const ConsultaMedicaRepository = require('../repositories/consultaMedicaRepositorio');
+const AuditoriaRepositorio = require('../repositories/auditoriaRepositorio');
 const DocumentoService = require('../services/documentoService');
+const AuditoriaService = require('../services/auditoriaService');
 const DocumentoController = require('../controllers/documentoController');
 
 const router = express.Router();
@@ -21,7 +23,9 @@ const upload = multer({
 // INSTANCIAS
 const documentoRepository = new DocumentoRepository(prisma);
 const consultaMedicaRepository = new ConsultaMedicaRepository(prisma);
-const documentoService = new DocumentoService(documentoRepository, consultaMedicaRepository);
+const auditoriaRepositorio = new AuditoriaRepositorio(prisma);
+const auditoriaService = new AuditoriaService(auditoriaRepositorio);
+const documentoService = new DocumentoService(documentoRepository, consultaMedicaRepository, auditoriaService);
 const documentoController = new DocumentoController(documentoService);
 
 router.use(validarToken);
