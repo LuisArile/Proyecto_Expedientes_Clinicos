@@ -2,74 +2,144 @@ const prisma = require('../config/prisma');
 
 class ExamenRepository {
 
-    async buscar(filtros) {
-        let { busqueda } = filtros;
+  // Normaliza el texto para evitar duplicados por acentos o mayúsculas
+  normalizar(texto) {
+    return texto
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
+  }
 
-        // Función para normalizar texto (quita acentos y pasa a minúsculas)
-        const normalizar = (texto) =>
-            texto
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .toLowerCase();
+  // Busca o crea la especialidad
+  async obtenerOCrearEspecialidad(nombreEspecialidad) {
+    const nombreNormalizado = this.normalizar(nombreEspecialidad);
 
-        // Si NO hay búsqueda solo se traen 15 registros
-        if (!busqueda || busqueda.trim() === "") {
-            return await prisma.examen.findMany({
-                take: 15,
-                orderBy: { fechaCreacion: "desc" }
-            });
-        }
+    // Buscar todas las especialidades para comparar de forma normalizada
+    const especialidades = await prisma.especialidad.findMany({
+      select: { id: true, nombre: true }
+    });
 
-        // Separar palabras: "hemo cardio" → ["hemo", "cardio"]
-        const palabras = normalizar(busqueda).split(" ").filter(p => p.length > 0);
+    const existente = especialidades.find(
+      (e) => this.normalizar(e.nombre) === nombreNormalizado
+    );
 
-        // Obtener todos (para luego filtrar manualmente)
-        const examenes = await prisma.examen.findMany({
-            orderBy: { fechaCreacion: "desc" }
-        });
-
-        // Filtrado en memoria 
-        const resultados = examenes.filter(examen => {
-            const nombre = normalizar(examen.nombre);
-            const especialidad = normalizar(examen.especialidad);
-
-            return palabras.every(palabra =>
-                nombre.includes(palabra) || especialidad.includes(palabra)
-            );
-        });
-
-        return resultados;
+    if (existente) {
+      return existente;
     }
 
+    // Si no existe, crearla
+    return await prisma.especialidad.create({
+      data: {
+        nombre: nombreEspecialidad.trim()
+      }
+    });
+  }
+
+  async existePorNombre(nombre, idExcluir = null) {
+    const examenes = await prisma.examen.findMany({
+      select: { id: true, nombre: true }
+    });
+
+    const nombreNormalizado = this.normalizar(nombre);
+
+    return examenes.some(examen => {
+      if (idExcluir && examen.id === Number(idExcluir)) return false;
+      return this.normalizar(examen.nombre) === nombreNormalizado;
+    });
+  }
+
+  async buscar(filtros) {
+    let { busqueda } = filtros;
+
+    if (!busqueda || busqueda.trim() === "") {
+      return await prisma.examen.findMany({
+        take: 15,
+        orderBy: { fechaCreacion: "desc" },
+        include: {
+          especialidad: true
+        }
+      });
+    }
+
+    const palabras = this.normalizar(busqueda)
+      .split(" ")
+      .filter(p => p.length > 0);
+
+    const examenes = await prisma.examen.findMany({
+      orderBy: { fechaCreacion: "desc" },
+      include: {
+        especialidad: true
+      }
+    });
+
+    return examenes.filter(examen => {
+      const nombre = this.normalizar(examen.nombre);
+      const especialidad = this.normalizar(examen.especialidad.nombre);
+
+      return palabras.every(palabra =>
+        nombre.includes(palabra) || especialidad.includes(palabra)
+      );
+    });
+  }
+
   async obtenerActivos() {
-    return await prisma.examen.findMany({
+    return prisma.examen.findMany({
       where: { estado: true },
-      orderBy: { nombre: "asc" }
+      orderBy: { nombre: "asc" },
+      include: {
+        especialidad: true
+      }
     });
   }
 
   async obtenerPorId(id) {
-    return await prisma.examen.findUnique({
-      where: { id: Number(id) }
+    return prisma.examen.findUnique({
+      where: { id: Number(id) },
+      include: {
+        especialidad: true
+      }
     });
   }
 
   async crear(data) {
-    return await prisma.examen.create({
+    const especialidad = await this.obtenerOCrearEspecialidad(data.especialidad);
+
+    return prisma.examen.create({
       data: {
-        nombre: data.nombre,
-        especialidad: data.especialidad,
+        nombre: data.nombre.trim(),
+        especialidad: {
+          connect: { id: especialidad.id }
+        },
         estado: true
+      },
+      include: {
+        especialidad: true
       }
     });
   }
 
   async actualizar(id, data) {
-    return await prisma.examen.update({
+    let especialidadConnect = undefined;
+
+    if (data.especialidad) {
+      const especialidad = await this.obtenerOCrearEspecialidad(data.especialidad);
+      especialidadConnect = {
+        especialidad: {
+          connect: { id: especialidad.id }
+        }
+      };
+    }
+
+    return prisma.examen.update({
       where: { id: Number(id) },
       data: {
-        nombre: data.nombre,
-        especialidad: data.especialidad
+        ...(data.nombre && { nombre: data.nombre.trim() }),
+        ...especialidadConnect
+      },
+      include: {
+        especialidad: true
       }
     });
   }
@@ -77,10 +147,11 @@ class ExamenRepository {
   async alternarEstado(id) {
     const examen = await this.obtenerPorId(id);
 
-    return await prisma.examen.update({
+    return prisma.examen.update({
       where: { id: Number(id) },
-      data: {
-        estado: !examen.estado
+      data: { estado: !examen.estado },
+      include: {
+        especialidad: true
       }
     });
   }

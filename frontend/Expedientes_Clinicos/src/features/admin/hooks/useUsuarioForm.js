@@ -1,105 +1,133 @@
-import { useState, useEffect } from 'react';
-import { usuarioService } from '../services/usuarioService';
-import { rolAPI } from '@/shared/services/api';
+// src/features/admin/hooks/useUsuarioForm.js
+import { useEffect, useState } from "react";
+import { usuarioService } from "../services/usuarioService";
+import { rolAPI } from "@/shared/services/api";
 
-export function useUsuarioForm(id) {
-    const [roles, setRoles] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [datosIniciales, setDatosIniciales] = useState(null);
-    const [modal, setModal] = useState({ 
-        open: false, 
-        result: { success: false, title: "", message: "" } 
-    });
+export const useUsuarioForm = (id) => {
+  const isEdit = Boolean(id);
 
-    const isEdit = Boolean(id);
+  const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [datosIniciales, setDatosIniciales] = useState(null);
+  const [modal, setModal] = useState({
+    open: false,
+    result: { success: false, message: "" },
+  });
 
-    useEffect(() => {
-        const cargarDataNecesaria = async () => {
-            setLoading(true);
-            try {
-                const [resRoles, resUsuario] = await Promise.all([
-                    rolAPI.obtenerTodos(),
-                    id ? usuarioService.getById(id) : Promise.resolve(null)
-                ]);
+  /**
+   * Convierte una cadena de especialidades en un arreglo.
+   */
+  const parseEspecialidades = (especialidades) => {
+    if (!especialidades) return [];
+    if (Array.isArray(especialidades)) return especialidades;
 
-                setRoles(resRoles.data);
-                if (resUsuario) setDatosIniciales(resUsuario);
-                
-            } catch {
-                console.error("Error cargando dependencias del formulario");
-            } finally {
-                setLoading(false);
-            }
-        };
-        cargarDataNecesaria();
-    }, [id]);
+    return especialidades
+      .split(",")
+      .map((e) => e.trim())
+      .filter(Boolean);
+  };
 
-    const construirPayload = (data) => {
-        if (isEdit) {
-            return {
-                nombre: data.nombre,
-                correo: data.correo,
-                idRol: Number(data.idRol),
-                activo: String(data.activo) === "true",
-                especialidad: data.especialidad
-            };
-        }
-        return data;
-    };
+  /**
+   * Cargar roles del sistema
+   */
+  const cargarRoles = async () => {
+    try {
+      const res = await rolAPI.obtenerTodos();
+      setRoles(res.data || []);
+    } catch (error) {
+      console.error("Error al cargar roles:", error);
+    }
+  };
 
-    const enviarFormulario = async (data) => {
-        setLoading(true);
-        try {
-            let payload = construirPayload(data);
+  /**
+   * Cargar datos del usuario en modo edición
+   */
+  const cargarUsuario = async () => {
+    if (!isEdit) return;
 
-            if (!id) payload.clave = "temp12345"
+    try {
+      setLoading(true);
+      const usuario = await usuarioService.getById(id);
 
-           if (isEdit) {
-                await usuarioService.update(id, payload);
-            } else {
-                const response = await usuarioService.create(payload);
-                const nuevoUsuarioId = response.data?.idUsuario || response.data?.id;
+      setDatosIniciales({
+        ...usuario,
+        idRol: usuario.idRol,
+        especialidades: usuario.especialidades || [],
+      });
+    } catch (error) {
+      console.error("Error al cargar usuario:", error);
+      setModal({
+        open: true,
+        result: {
+          success: false,
+          message: "No se pudo cargar la información del usuario.",
+        },
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                if (nuevoUsuarioId) {
-                    try {
-                        await usuarioService.sendCredentials(nuevoUsuarioId);
-                    } catch (emailError) {
-                        console.error("Usuario creado pero falló el envío de correo:", emailError);
-                    }
-                }
-            }
+  useEffect(() => {
+    cargarRoles();
+    cargarUsuario();
+  }, [id]);
 
-            setModal({
-                open: true,
-                result: {
-                    success: true,
-                    title: isEdit ? "Actualización Exitosa" : "Registro Exitoso",
-                    message: isEdit 
-                        ? "Los datos han sido actualizados."
-                        : "Usuario creado. Se enviaron credenciales al correo."
-                }
-            });
-        } catch (error) {
-            setModal({
-                open: true,
-                result: {
-                    success: false,
-                    title: "Error",
-                    message: error.message || "Error al procesar solicitud"
-                }
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+  /**
+   * Enviar formulario (crear o actualizar)
+   */
+  const enviarFormulario = async (data) => {
+    setLoading(true);
 
-    return { 
-        roles, 
-        loading, 
-        modal, 
-        setModal, 
-        enviarFormulario,
-        datosIniciales,
-        setLoading
-    };
-}
+    try {
+      const payload = {
+        nombre: data.nombre,
+        apellido: data.apellido,
+        correo: data.correo,
+        nombreUsuario: data.nombreUsuario,
+        idRol: Number(data.idRol),
+        activo: data.activo ?? true,
+        especialidades: parseEspecialidades(data.especialidades),
+      };
+
+      if (isEdit) {
+        await usuarioService.update(id, payload);
+      } else {
+        // Contraseña temporal por defecto (el backend puede reemplazarla)
+        payload.clave = data.clave || "Temp1234";
+        await usuarioService.create(payload);
+      }
+
+      setModal({
+        open: true,
+        result: {
+          success: true,
+          message: isEdit
+            ? "Usuario actualizado correctamente"
+            : "Usuario creado correctamente",
+        },
+      });
+    } catch (error) {
+      setModal({
+        open: true,
+        result: {
+          success: false,
+          message:
+            error.message ||
+            "Ocurrió un error al procesar la solicitud.",
+        },
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    roles,
+    loading,
+    modal,
+    setModal,
+    enviarFormulario,
+    datosIniciales,
+  };
+};

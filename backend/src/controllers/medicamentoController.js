@@ -3,6 +3,7 @@ class MedicamentoController {
     this.service = service;
   }
 
+  // Buscar medicamentos (por nombre o categoría)
   buscar = async (req, res, next) => {
     try {
       const data = await this.service.buscar(req.query);
@@ -12,6 +13,7 @@ class MedicamentoController {
     }
   };
 
+  // Obtener medicamentos activos
   obtenerActivos = async (req, res, next) => {
     try {
       const data = await this.service.obtenerActivos();
@@ -21,6 +23,7 @@ class MedicamentoController {
     }
   };
 
+  // Obtener un medicamento por ID
   obtenerPorId = async (req, res, next) => {
     try {
       const data = await this.service.obtenerPorId(req.params.id);
@@ -30,24 +33,25 @@ class MedicamentoController {
     }
   };
 
+  // Crear un nuevo medicamento
   crear = async (req, res, next) => {
     try {
-      const data = await this.service.crear(
-        req.body,
-        req.usuario.id
-      );
+      const usuarioId = req.usuario?.id;
+      const data = await this.service.crear(req.body, usuarioId);
       res.status(201).json({ success: true, data });
     } catch (e) {
       next(e);
     }
   };
 
+  // Actualizar un medicamento existente
   actualizar = async (req, res, next) => {
     try {
+      const usuarioId = req.usuario?.id;
       const data = await this.service.actualizar(
         req.params.id,
         req.body,
-        req.usuario.id
+        usuarioId
       );
       res.json({ success: true, data });
     } catch (e) {
@@ -55,11 +59,13 @@ class MedicamentoController {
     }
   };
 
+  // Alternar el estado (activo/inactivo) del medicamento
   alternarEstado = async (req, res, next) => {
     try {
+      const usuarioId = req.usuario?.id;
       const data = await this.service.alternarEstado(
         req.params.id,
-        req.usuario.id
+        usuarioId
       );
       res.json({ success: true, data });
     } catch (e) {

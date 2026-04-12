@@ -2,6 +2,7 @@ import React, { useEffect} from "react";
 
 import { useForm, useWatch, Controller } from "react-hook-form";
 
+import { ValidatedInput } from "@components/validaciones/validarInput"; 
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Textarea } from "@components/ui/textarea";
@@ -86,40 +87,43 @@ export function FormularioExpediente({ viewConfig }) {
             {/* Sección de Información Básica */}
             <FormSection title="Información Básica">
               {/* Nombres */}
-              <FormField label="Nombres" icon={User} required error={errors.nombre?.message}>
-                <Input id="nombre" placeholder="Ej: Juan Carlos"{...register("nombre", {
-                    required: "El nombre es obligatorio",
-                    minLength: { value: 2, message: "Mínimo 2 caracteres" }
-                  })}
-                  className={inputClass("nombre")}
+              <FormField  icon={User} >
+                <ValidatedInput
+                  name="nombre"
+                  label="Nombres"
+                  placeholder="Ej: Juan Carlos"
+                  register={register}
+                  error={errors.nombre?.message}
+                  type="nombre"
+                  minLength={2}
                 />
               </FormField>
               {/* Apellidos */}
-              <FormField label="Apellidos" icon={User} required error={errors.apellido?.message}>
-                <Input id="apellido" placeholder="Ej: Pérez Gómez" {...register("apellido", {
-                    required: "El apellido es obligatorio",
-                    minLength: { value: 2, message: "Mínimo 2 caracteres" }
-                  })}
-                  className={inputClass("apellido")}
+              <FormField icon={User}>
+                <ValidatedInput
+                  name="apellido"
+                  label="Apellidos"
+                  placeholder="Ej: Pérez Gómez"
+                  register={register}
+                  error={errors.apellido?.message}
+                  type="apellido"
+                  minLength={2}
                 />
               </FormField>
               {/* Número de Identidad con validación de duplicados */}
-              <FormField  label="Número de Identidad" icon={IdCard} required className="md:col-span-2"
-                error={errors.numeroIdentidad?.message || (idDuplicado && "Esta identidad ya existe")}
-              >
-                <Input 
-                  id="numeroIdentidad" placeholder="0000-0000-00000"
-                  {...register("numeroIdentidad", { 
-                    required: "La identidad es obligatoria",
-                    pattern: {
-                      value: /^[0-9]{4}-[0-9]{4}-[0-9]{5}$/,
-                      message: "Formato requerido: 0000-0000-00000"
-                  }})}
+              <FormField  icon={IdCard} className="md:col-span-2" >
+                <ValidatedInput
+                  name="numeroIdentidad"
+                  label="Número de Identidad"
+                  placeholder="0000-0000-00000"
+                  register={register}
+                  error={errors.numeroIdentidad?.message}
+                  type="identidad"
+                  duplicateError={idDuplicado && "Esta identidad ya existe"}
                   onBlur={(e) => {
                     const p = paciente?.paciente || paciente;
-                    validarId(e.target.value, p?.dni); 
+                    validarId(e.target.value, p?.dni);
                   }}
-                  className={inputClass("numeroIdentidad")}
                 />
               </FormField>
             </FormSection>
@@ -155,20 +159,29 @@ export function FormularioExpediente({ viewConfig }) {
                 />
               </FormField>
               {/* Correo Electrónico */}
-              <FormField label="Correo Electrónico" icon={Mail} error={errors.correo?.message}>
-                <Input type="email" placeholder="correo@ejemplo.com"
-                  {...register("correo", {
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Correo inválido"
-                    }
-                  })} 
-                  className={inputClass("correo")}
+              <FormField icon={Mail}>
+                <ValidatedInput
+                  name="correo"
+                  label="Correo Electrónico"
+                  placeholder="correo@ejemplo.com"
+                  register={register}
+                  error={errors.correo?.message}
+                  type="correo"
+                  required={false}
+                  minLength={5}
                 />
               </FormField>
               {/* Teléfono */}
-              <FormField label="Teléfono" icon={Phone} required error={errors.telefono?.message}>
-                <Input placeholder="Ej: +504 9999-9999" {...register("telefono", { required: "Teléfono requerido" })} className={inputClass("telefono")}/>
+              <FormField icon={Phone} >
+                <ValidatedInput
+                  name="telefono"
+                  label="Teléfono"
+                  placeholder="Ej: +504 9999-9999"
+                  register={register}
+                  error={errors.telefono?.message}
+                  type="telefono"
+                  minLength={8}
+                />
               </FormField>
               {/* Dirección Completa */}
               <FormField label="Dirección Completa" icon={MapPin} required error={errors.direccion?.message} className="md:col-span-2">

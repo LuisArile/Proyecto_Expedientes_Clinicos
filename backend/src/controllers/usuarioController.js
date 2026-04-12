@@ -1,25 +1,56 @@
-const { ErrorValidacion, ErrorNoAutorizado,ErrorNoEncontrado } = require("../utils/errores");
+const {
+    ErrorValidacion,
+    ErrorNoAutorizado
+} = require("../utils/errores");
 const capturarAsync = require("../utils/capturarAsync");
 
-class usuarioController {
+class UsuarioController {
     constructor(usuarioService) {
         this.usuarioService = usuarioService;
     }
 
-    crear = capturarAsync(async (req, res) => {
-        const { nombre, apellido, correo, nombreUsuario, clave, idRol, especialidad } = req.body;
-        
-        if (!nombre || !apellido) throw new ErrorValidacion('nombre y apellido son obligatorio');
-        if (!correo) throw new ErrorValidacion('El correo es obligatorio');
-        if (!nombreUsuario) throw new ErrorValidacion('El nombre de usuario es obligatorio');
-        if (!clave) throw new ErrorValidacion('La contraseña es obligatoria');
-        if(!idRol) throw new ErrorValidacion('El rol es obligatorio');
-
-        if (req.usuario.idRol !== 1) {
-            throw new ErrorNoAutorizado('Solo los administradores pueden crear usuarios');
+    /**
+     * Validar que el ID sea numérico
+     */
+    validarId(id) {
+        const idNumerico = Number(id);
+        if (!id || isNaN(idNumerico)) {
+            throw new ErrorValidacion('El ID del usuario debe ser un número válido');
         }
-        const usuario = await this.usuarioService.crear(req.body, req.usuario.id);
-        
+        return idNumerico;
+    }
+
+    /**
+     * Verificar que el usuario sea administrador
+     */
+    verificarAdministrador(req) {
+        if (req.usuario?.idRol !== 1) {
+            throw new ErrorNoAutorizado(
+                'Solo los administradores pueden realizar esta acción'
+            );
+        }
+    }
+
+    /**
+     * Crear un nuevo usuario
+     */
+    crear = capturarAsync(async (req, res) => {
+        this.verificarAdministrador(req);
+
+        const usuario = await this.usuarioService.crear(
+            {
+                nombre: req.body.nombre,
+                apellido: req.body.apellido,
+                correo: req.body.correo,
+                nombreUsuario: req.body.nombreUsuario,
+                clave: req.body.clave,
+                idRol: req.body.idRol,
+                activo: req.body.activo ?? true,
+                especialidades: req.body.especialidades || []
+            },
+            req.usuario.id
+        );
+
         res.status(201).json({
             success: true,
             mensaje: 'Usuario creado exitosamente',
@@ -27,87 +58,101 @@ class usuarioController {
         });
     });
 
+    /**
+     * Obtener todos los usuarios
+     */
     obtenerTodos = capturarAsync(async (req, res) => {
         const usuarios = await this.usuarioService.obtenerTodos();
-        res.json({ success: true, data: usuarios, currentUserId: req.usuario.id });
+
+        res.status(200).json({
+            success: true,
+            data: usuarios,
+            currentUserId: req.usuario?.id
+        });
     });
 
-    //obtener usuariopor id
+    /**
+     * Obtener usuario por ID
+     */
     obtenerPorId = capturarAsync(async (req, res) => {
-        const { id } = req.params;
-
-        if (!id) {
-            throw new ErrorValidacion('El ID del usuario es obligatorio');
-        }
+        const id = this.validarId(req.params.id);
 
         const usuario = await this.usuarioService.obtenerPorId(id);
 
-        if (!usuario) {
-            throw new ErrorNoEncontrado('Usuario');
-        }
-
-        res.json({
+        res.status(200).json({
             success: true,
             data: usuario
         });
     });
 
-    //actualizar un usuario
+    /**
+     * Actualizar usuario
+     */
     actualizar = capturarAsync(async (req, res) => {
-        const { id } = req.params;
+        this.verificarAdministrador(req);
+        const id = this.validarId(req.params.id);
 
-        //solo admin pueden tener acceso
-        if(req.usuario.idRol !==1){
-            throw new ErrorNoAutorizado('Solo administradores pueden acceder');
-        }
+        const usuario = await this.usuarioService.actualizar(
+            id,
+            {
+                nombre: req.body.nombre,
+                apellido: req.body.apellido,
+                correo: req.body.correo,
+                nombreUsuario: req.body.nombreUsuario,
+                idRol: req.body.idRol,
+                activo: req.body.activo,
+                clave: req.body.clave,
+                especialidades: req.body.especialidades
+            },
+            req.usuario.id
+        );
 
-        if (!id) {
-            throw new ErrorValidacion('El ID del usuario es obligatorio');
-        }
-
-        const usuario = await this.usuarioService.actualizar(id, req.body, req.usuario.id);
-
-        res.json({
+        res.status(200).json({
             success: true,
             mensaje: 'Usuario actualizado correctamente',
             data: usuario
         });
     });
 
-    //eliminar usuario
+    /**
+     * Eliminar usuario
+     */
+    eliminar = capturarAsync(async (req, res) => {
+        this.verificarAdministrador(req);
+        const id = this.validarId(req.params.id);
 
-     eliminar = capturarAsync(async (req, res) => {
-        const { id } = req.params;
-
-        if (!id) {
-            throw new ErrorValidacion('El ID del usuario es obligatorio');
-        }
-
-        // No permitir eliminar su mismo usuario
-        if (req.usuario.id === parseInt(id)) {
-            throw new ErrorValidacion('No puedes eliminar tu propio usuario');
+        // No permitir eliminar su propio usuario
+        if (req.usuario.id === id) {
+            throw new ErrorValidacion(
+                'No puedes eliminar tu propio usuario'
+            );
         }
 
         await this.usuarioService.eliminar(id, req.usuario.id);
 
-        res.json({
+        res.status(200).json({
             success: true,
             mensaje: 'Usuario eliminado correctamente'
         });
     });
 
-
-    //cambio de clave
+    /**
+     * Cambiar contraseña del usuario autenticado
+     */
     cambiarPassword = capturarAsync(async (req, res) => {
         const { currentPassword, newPassword } = req.body;
         const userId = req.usuario?.id;
 
         if (!userId) {
-            throw new ErrorNoAutorizado('No se encontró información del usuario');
+            throw new ErrorNoAutorizado(
+                'No se encontró información del usuario'
+            );
         }
 
         if (!currentPassword || !newPassword) {
-            throw new ErrorValidacion('Todos los campos son obligatorios');
+            throw new ErrorValidacion(
+                'Todos los campos son obligatorios'
+            );
         }
 
         const resultado = await this.usuarioService.cambiarPassword(
@@ -116,31 +161,43 @@ class usuarioController {
             newPassword
         );
 
-        res.json({ 
-            success: true, 
+        res.status(200).json({
+            success: true,
             mensaje: 'Contraseña actualizada correctamente',
-            data: resultado 
+            data: resultado
         });
     });
 
-    alternarEstado = capturarAsync(async (req, res, next) => {
-        const { id } = req.params;
+    /**
+     * Alternar estado (activar/inactivar) de un usuario
+     */
+    alternarEstado = capturarAsync(async (req, res) => {
+        this.verificarAdministrador(req);
+        const id = this.validarId(req.params.id);
+
         const resultado = await this.usuarioService.alternarEstado(id);
-        res.json(resultado);
-    }); 
 
-    enviarCredenciales = capturarAsync(async (req, res, next) => {
-        const { id } = req.params;
-        const administradorId = req.usuario?.id;
-
-        if (!administradorId) {
-            throw new ErrorNoAutorizado('No se encontró información del administrador');
-        }
-
-        const resultado = await this.usuarioService.enviarCredenciales(id, administradorId);
-        res.json(resultado);
+        res.status(200).json(resultado);
     });
 
+    /**
+     * Enviar credenciales a un usuario
+     */
+    enviarCredenciales = capturarAsync(async (req, res) => {
+        this.verificarAdministrador(req);
+        const id = this.validarId(req.params.id);
+
+        const resultado = await this.usuarioService.enviarCredenciales(
+            id,
+            req.usuario.id
+        );
+
+        res.status(200).json({
+            success: true,
+            mensaje: 'Credenciales enviadas correctamente',
+            data: resultado
+        });
+    });
 }
 
-module.exports = usuarioController;
+module.exports = UsuarioController;

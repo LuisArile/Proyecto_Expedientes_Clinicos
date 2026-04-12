@@ -7,53 +7,72 @@ import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation"
 
 import { Button } from "@components/ui/button";
 import { Card, CardContent, CardHeader } from "@components/ui/card";
-
 import { PageHeader } from "@components/layout/PageHeader";
 import { FormHeader } from "@components/common/FormHeader";
 import { ValidatedInput } from "@components/validaciones/validarInput";
 import { FormSection } from "@components/common/FormSection";
+import { StatusModal } from "@components/common/StatusModal";
 
 export function FormularioCrearMedicamento() {
-
   const { go } = useSafeNavigation();
 
-  const { handleCrear, handleActualizar } = useMedicamentos();
+  // Se asume que el hook maneja el modal igual que useExamenes
+  const { handleCrear, handleActualizar, modal, setModal } = useMedicamentos();
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      nombre: "",
+      categoria: "",
+    },
+  });
 
   const isEdit = !!sessionStorage.getItem("edit_medicamento");
 
+  // Cargar datos en modo edición
   useEffect(() => {
     const data = sessionStorage.getItem("edit_medicamento");
-
     if (data) {
       const medicamento = JSON.parse(data);
+
       setValue("id", medicamento.id);
       setValue("nombre", medicamento.nombre);
-      setValue("categoria", medicamento.categoria);
+
+      // Normalización para evitar mostrar [object Object]
+      setValue(
+        "categoria",
+        typeof medicamento.categoria === "object"
+          ? medicamento.categoria?.nombre
+          : medicamento.categoria
+      );
     }
   }, [setValue]);
 
   const onSubmit = async (data) => {
-    try {
-      if (data.id) {
-        await handleActualizar(data.id, data);
-      } else {
-        await handleCrear(data);
-      }
+    if (data.id) {
+      await handleActualizar(data.id, data);
+    } else {
+      await handleCrear(data);
+    }
+  };
 
+  // Manejo del cierre del modal y navegación
+  const handleCloseModal = () => {
+    const success = modal?.result?.success;
+    setModal({ ...modal, open: false });
+
+    if (success) {
       sessionStorage.removeItem("edit_medicamento");
-     
       go("catalogo-medicamentos");
-
-    } catch (error) {
-      console.error("Error:", error);
     }
   };
 
   return (
     <div>
-
       <PageHeader
         title="Registro de Medicamento"
         subtitle="Gestión de medicamentos del sistema"
@@ -62,9 +81,7 @@ export function FormularioCrearMedicamento() {
       />
 
       <main className="max-w-3xl mx-auto p-4 sm:p-6">
-
         <Card className="shadow-xl border-none overflow-hidden bg-white/80 backdrop-blur-md">
-
           <CardHeader className="bg-gradient-to-r from-white to-indigo-200 p-0 border-b border-blue-100 text-white">
             <FormHeader
               title={isEdit ? "Editar Medicamento" : "Nuevo Medicamento"}
@@ -79,13 +96,9 @@ export function FormularioCrearMedicamento() {
           </CardHeader>
 
           <CardContent className="p-8">
-
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-
               <FormSection title="Información del Medicamento">
-
                 <div className="flex flex-col gap-6">
-
                   <ValidatedInput
                     name="nombre"
                     label="Nombre del Medicamento"
@@ -94,6 +107,7 @@ export function FormularioCrearMedicamento() {
                     placeholder="Ej: Paracetamol"
                     minLength={3}
                     onlyLetters={true}
+                    required
                   />
 
                   <ValidatedInput
@@ -104,14 +118,12 @@ export function FormularioCrearMedicamento() {
                     placeholder="Ej: Analgésico"
                     minLength={3}
                     onlyLetters={true}
+                    required
                   />
-
                 </div>
-
               </FormSection>
 
               <div className="flex flex-col sm:flex-row justify-end items-center gap-3 pt-6 border-t">
-
                 <Button
                   type="button"
                   variant="outline"
@@ -129,14 +141,20 @@ export function FormularioCrearMedicamento() {
                   <Save className="mr-2 size-5" />
                   {isEdit ? "Actualizar Medicamento" : "Guardar Medicamento"}
                 </Button>
-
               </div>
-
             </form>
-
           </CardContent>
         </Card>
       </main>
+
+      {/* Modal de resultado */}
+      {modal?.open && (
+        <StatusModal
+          isOpen={modal.open}
+          result={modal.result}
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   );
 }

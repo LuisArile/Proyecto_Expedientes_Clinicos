@@ -17,6 +17,7 @@ async function main() {
   }
   console.log('Roles procesados');
 
+  // DEFINICIÓN DE PERMISOS
   const permisosADefinir = [
     'CREAR_EXPEDIENTE',
     'VER_EXPEDIENTE',
@@ -32,9 +33,7 @@ async function main() {
     'CONSULTA_MEDICA',
     'SOLICITUD_EXAMEN',
     'ADJUNTAR_DOCUMENTOS',
-
     'CITAS',
-    // --- PERMISOS DE VISUALIZACIÓN ---
     'VER_DATOS_BASICOS',
     'VER_HISTORIAL_CLINICO',
     'VER_PRECLINICAS',
@@ -59,12 +58,9 @@ async function main() {
 
   // ASIGNACIÓN DE PERMISOS POR ROL
   const matrizAsignacion = [
-    { 
-      rol: 'ADMINISTRADOR', 
-      permisos: permisosADefinir // Acceso completo
-    },
-    { 
-      rol: 'RECEPCIONISTA', 
+    { rol: 'ADMINISTRADOR', permisos: permisosADefinir },
+    {
+      rol: 'RECEPCIONISTA',
       permisos: [
         'CREAR_EXPEDIENTE',
         'VER_EXPEDIENTE',
@@ -76,61 +72,163 @@ async function main() {
         'VER_CONSULTAS',
         'VER_PRECLINICAS',
         'CITAS',
-      ] 
+      ]
     },
-    { 
-      rol: 'ENFERMERO', 
+    {
+      rol: 'ENFERMERO',
       permisos: [
         'BUSCAR_PACIENTE',
         'VER_EXPEDIENTE',
         'PRECLINICA',
         'VER_PRECLINICAS',
         'VER_DATOS_BASICOS'
-      ] 
+      ]
     },
-    { 
-      rol: 'MEDICO', 
+    {
+      rol: 'MEDICO',
       permisos: [
-        'BUSCAR_PACIENTE', 'VER_EXPEDIENTE', 'CONSULTA_MEDICA', 'SOLICITUD_EXAMEN', 'ADJUNTAR_DOCUMENTOS',
-        'VER_DATOS_BASICOS', 'VER_HISTORIAL_CLINICO', 'VER_PRECLINICAS', 'VER_CONSULTAS', 'VER_RECETAS', 'VER_EXAMENES', 'VER_DOCUMENTOS', 'VER_DIAGNOSTICOS'
-      ] 
+        'BUSCAR_PACIENTE',
+        'VER_EXPEDIENTE',
+        'CONSULTA_MEDICA',
+        'SOLICITUD_EXAMEN',
+        'ADJUNTAR_DOCUMENTOS',
+        'VER_DATOS_BASICOS',
+        'VER_HISTORIAL_CLINICO',
+        'VER_PRECLINICAS',
+        'VER_CONSULTAS',
+        'VER_RECETAS',
+        'VER_EXAMENES',
+        'VER_DOCUMENTOS',
+        'VER_DIAGNOSTICOS'
+      ]
     }
   ];
 
   for (const asignacion of matrizAsignacion) {
     const rol = rolesDB[asignacion.rol];
-    
+
     for (const nombrePermiso of asignacion.permisos) {
       const permiso = permisosDB[nombrePermiso];
-      
+
       await prisma.permisosPorRol.upsert({
-        where: { 
-          idRol_idPermiso: { 
-            idRol: rol.idRol, 
-            idPermiso: permiso.idPermiso 
-          } 
+        where: {
+          idRol_idPermiso: {
+            idRol: rol.idRol,
+            idPermiso: permiso.idPermiso
+          }
         },
         update: {},
-        create: { 
-          idRol: rol.idRol, 
-          idPermiso: permiso.idPermiso 
+        create: {
+          idRol: rol.idRol,
+          idPermiso: permiso.idPermiso
         },
       });
     }
   }
   console.log('Matriz de permisos asignada correctamente');
-  
-  const usuariosSinRol = await prisma.usuario.findMany({
-    where: { idRol: 0 }
-  });
 
-  if (usuariosSinRol.length > 0) {
-    await prisma.usuario.updateMany({
-      where: { idRol: { equals: null } },
-      data: { idRol: rolesDB['ADMINISTRADOR'].idRol },
+  // CREACIÓN DE USUARIO ADMIN
+  await prisma.usuario.upsert({
+    where: { nombreUsuario: 'admin' },
+    update: {},
+    create: {
+      nombreUsuario: 'admin',
+      correo: 'admin@clinica.com',
+      clave: '$2b$10$JJnP4/7I3Bv.RZJKhNmn1uS5oRQ2VFAy8p0cZug2DNmfmQdqKHCy6',
+      nombre: 'Administrador',
+      apellido: 'General',
+      idRol: rolesDB['ADMINISTRADOR'].idRol,
+      activo: true,
+      debeCambiarPassword: false
+    }
+  });
+  console.log('Usuario administrador creado');
+
+  // CREACIÓN DE ESPECIALIDADES
+  const especialidadesNombres = [
+    'Cardiología',
+    'Ginecología',
+    'Dermatología',
+    'Neumología',
+    'Urología'
+  ];
+
+  const especialidadesDB = {};
+
+  for (const nombre of especialidadesNombres) {
+    const especialidad = await prisma.especialidad.upsert({
+      where: { nombre },
+      update: {},
+      create: { nombre },
     });
-    console.log(`Se asignó el rol ADMINISTRADOR a ${usuariosSinRol.length} usuarios.`);
+    especialidadesDB[nombre] = especialidad;
   }
+  console.log('Especialidades creadas');
+
+  // CREACIÓN DE EXÁMENES
+  const examenes = [
+    { nombre: 'Electrocardiograma', especialidad: 'Cardiología' },
+    { nombre: 'Ultrasonido Pélvico', especialidad: 'Ginecología' },
+    { nombre: 'Biopsia de Piel', especialidad: 'Dermatología' },
+    { nombre: 'Espirometría', especialidad: 'Neumología' },
+    { nombre: 'Ultrasonido Renal', especialidad: 'Urología' },
+  ];
+
+  for (const examen of examenes) {
+    await prisma.examen.upsert({
+      where: { nombre: examen.nombre },
+      update: {},
+      create: {
+        nombre: examen.nombre,
+        especialidadId: especialidadesDB[examen.especialidad].id,
+        estado: true,
+      },
+    });
+  }
+  console.log('Exámenes creados');
+
+  // CREACIÓN DE CATEGORÍAS DE MEDICAMENTOS
+  const categoriasNombres = [
+    'Antibióticos',
+    'Analgésicos',
+    'Antiinflamatorios',
+    'Antihipertensivos',
+    'Antialérgicos'
+  ];
+
+  const categoriasDB = {};
+
+  for (const nombre of categoriasNombres) {
+    const categoria = await prisma.categoriaMedicamento.upsert({
+      where: { nombre },
+      update: {},
+      create: { nombre },
+    });
+    categoriasDB[nombre] = categoria;
+  }
+  console.log('Categorías de medicamentos creadas');
+
+  // CREACIÓN DE MEDICAMENTOS
+  const medicamentos = [
+    { nombre: 'Amoxicilina', categoria: 'Antibióticos' },
+    { nombre: 'Paracetamol', categoria: 'Analgésicos' },
+    { nombre: 'Ibuprofeno', categoria: 'Antiinflamatorios' },
+    { nombre: 'Losartán', categoria: 'Antihipertensivos' },
+    { nombre: 'Loratadina', categoria: 'Antialérgicos' },
+  ];
+
+  for (const medicamento of medicamentos) {
+    await prisma.medicamento.upsert({
+      where: { nombre: medicamento.nombre },
+      update: {},
+      create: {
+        nombre: medicamento.nombre,
+        categoriaId: categoriasDB[medicamento.categoria].id,
+        estado: true,
+      },
+    });
+  }
+  console.log('Medicamentos creados');
 }
 
 main()
