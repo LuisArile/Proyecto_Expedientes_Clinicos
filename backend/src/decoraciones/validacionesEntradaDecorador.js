@@ -19,9 +19,6 @@ class decoracionValidacionesEntrada extends DecoradorBase {
         if (!data.nombreUsuario) {
             throw new ErrorValidacion('El nombre de usuario es obligatorio');
         }
-        if (!data.clave) {
-            throw new ErrorValidacion('La contraseña es obligatoria');
-        }
         if (!data.idRol) {
             throw new ErrorValidacion('El rol es obligatorio');
         }

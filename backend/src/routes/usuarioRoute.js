@@ -1,3 +1,5 @@
+const EmailService = require("../services/emailService");
+const emailService = new EmailService();
 const express = require("express");
 const prisma = require("../config/prisma");
 
@@ -20,7 +22,7 @@ const auditoriaService = new AuditoriaService(auditoriaRepository);
 const usuarioRepository = new UsuarioRepository(prisma);
 
 // Crear servicio base
-let usuarioService = new UsuarioService(usuarioRepository, auditoriaService);
+let usuarioService = new UsuarioService(usuarioRepository, auditoriaService, emailService);
 
 // Aplicar decoradores
 usuarioService = new validacionesEntrada(usuarioService);

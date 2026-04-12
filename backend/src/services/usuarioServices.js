@@ -1,88 +1,172 @@
-const bcrypt = require('bcrypt');
-const Encriptador = require('../utils/encritador');
-const { ErrorValidacion, ErrorNoEncontrado } = require('../utils/errores');
+const bcrypt=require('bcrypt');
+const Encriptador= require('../utils/encritador');
+const { ErrorConflicto,ErrorValidacion, ErrorNoEncontrado } = require('../utils/errores');
 
-class usuarioService {
-    constructor(usuarioRepository, auditoriaService,emailService) {
-        this.usuarioRepository = usuarioRepository;
+
+class usuarioService{
+    constructor(usuarioRepository, auditoriaService, emailService){
+        this.usuarioRepository=usuarioRepository;
         this.auditoriaService = auditoriaService;
         this.emailService = emailService;
     }
 
     async crear(data, usuarioCreadorId) {
-        data.clave = await Encriptador.encriptar(data.clave);
-        
-        //creamos usuario
+
+        if (!data.nombre || !data.apellido) {
+            throw new ErrorValidacion('Nombre y apellido son obligatorios');
+        }
+        if (!data.correo) {
+            throw new ErrorValidacion('El correo es obligatorio');
+        }
+        if (!data.nombreUsuario) {
+            throw new ErrorValidacion('El nombre de usuario es obligatorio');
+        }
+        if (!data.idRol) {
+            throw new ErrorValidacion('El rol es obligatorio');
+        }
+
+        if (data.idRol === 2 && !data.especialidad) {
+            throw new ErrorValidacion('La especialidad es obligatoria para médicos');
+        }
+
+        const correoExistente = await this.usuarioRepository.obtenerPorCorreo(data.correo);
+        if (correoExistente) {
+            throw new ErrorConflicto('El correo ya está registrado');
+        }
+
+        const existeNombre = await this.usuarioRepository.filtrarNombreUsuario(data.nombreUsuario);
+        if(existeNombre) throw new ErrorConflicto('El nombre de usuario ya esta registrado');
+
+        const tempPassword = Math.random().toString(36).slice(-10) + "A1!";
+        data.clave = await Encriptador.encriptar(tempPassword);
+        data.debeCambiarPassword = true;
+
         const result = await this.usuarioRepository.crear(data);
         const usuario = result.usuario;
 
         if(usuario && usuario.id){
             await this.auditoriaService.registrarUsuario(
-            usuarioCreadorId,
-            'USUARIO_CREADO',
-            usuario.id
-        );
+                usuarioCreadorId,
+                'USUARIO_CREADO',
+                usuario.id
+            );
 
-            // Enviar credenciales automáticamente después de crear el usuario
             try {
-                await this.enviarCredenciales(usuario.id, usuarioCreadorId);
+                await this.emailService.enviarCredenciales(usuario, tempPassword);
             } catch (error) {
             }
         }
-            return usuario;
+        return usuario;
     }
 
-    async obtenerTodos() {
-        return await this.usuarioRepository.obtenerTodos();
+    async obtenerTodos() {    
+        const usuarios = await this.usuarioRepository.obtenerTodos();
+        return usuarios;
     }
 
     async obtenerPorId(id) {
         const usuario = await this.usuarioRepository.obtenerPorId(id);
         if (!usuario) {
-            throw new ErrorNoEncontrado('Usuario');
+            throw new ErrorValidacion('Usuario');
         }
         return usuario;
     }
 
     async actualizar(id, data, usuarioActualId) {
-        if (data.clave) {
-            data.clave = await Encriptador.encriptar(data.clave);
-        }
         
+        const usuarioExistente = await this.usuarioRepository.obtenerPorId(id);
+        if (!usuarioExistente) {
+            throw new ErrorNoEncontrado('usuario');
+        }
+
+        if (data.correo && data.correo !== usuarioExistente.correo) {
+            const correoExistente = await this.usuarioRepository.obtenerPorCorreo(data.correo);
+            if (correoExistente) {
+                throw new ErrorConflicto('El correo ya está registrado por otro usuario');
+            }
+        }
+
+        if (data.nombreUsuario && data.nombreUsuario !== usuarioExistente.nombreUsuario) {
+            const existeNombre = await this.usuarioRepository.filtrarNombreUsuario(data.nombreUsuario);
+            if (existeNombre) {
+                throw new ErrorConflicto('El nombre de usuario ya está registrado');
+            }
+        }
+
+        if (id === usuarioActualId && data.activo === false) {
+            throw new ErrorValidacion('No puedes inactivar tu propia cuenta');
+        }
+
+        const nuevoRol = data.idRol ? Number(data.idRol) : usuarioExistente.idRol;
+        const especialidad = data.especialidad || usuarioExistente.especialidad;
+        if (Number(nuevoRol) === 2 && !especialidad) {
+            throw new ErrorValidacion('La especialidad es obligatoria para médicos');
+        }
+
+        const camposCambiados = [];
+        const camposMapeo = {
+            nombre: 'Nombre',
+            apellido: 'Apellido',
+            correo: 'Correo',
+            idRol: 'Rol',
+            activo: 'Estado',
+            especialidad: 'Especialidad'
+        };
+
+        Object.keys(camposMapeo).forEach(key => {
+            if (data[key] !== undefined && String(data[key]) !== String(usuarioExistente[key])) {
+                camposCambiados.push(camposMapeo[key]);
+            }
+        });
+
         const usuario = await this.usuarioRepository.actualizar(id, data);
 
-        await this.auditoriaService.registrarUsuario(
-            usuarioActualId,
-            'ACTUALIZACION',
-            id
-        );
+        if (camposCambiados.length > 0) {
+            const detalles = `Usuario modificado: ${usuarioExistente.nombreUsuario}. ` +
+                            `Campos: ${camposCambiados.join(', ')}. ` +
+                            `Responsable ID: ${usuarioActualId}`;
+            
+            await this.auditoriaService.registrarUsuario(
+                usuarioActualId,
+                'ACTUALIZACION',
+                detalles
+            );
+        }
 
         return usuario;
     }
 
     async eliminar(id, usuarioActualId) {
-        await this.usuarioRepository.eliminar(id);
+        
+        const usuario = await this.usuarioRepository.obtenerPorId(id);
+        if (!usuario) {
+            throw new ErrorNoEncontrado('Usuario');
+        }
 
-        await this.auditoriaService.registrarUsuario(
-            usuarioActualId,
-            'ELIMINACION',
-            id
-        );
+            await this.usuarioRepository.eliminar(id);
+            
+
+            await this.auditoriaService.registrarUsuario(
+                usuarioActualId,
+                'ELIMINACION',
+                id
+            );
 
         return true;
     }
 
     async cambiarPassword(userId, currentPassword, newPassword) {
+
         const usuario = await this.usuarioRepository.obtenerPorId(userId);
 
         if (!usuario) {
-            throw new ErrorNoEncontrado('Usuario');
+            throw new Error("Usuario no encontrado");
         }
 
         const passwordCorrecta = await bcrypt.compare(currentPassword, usuario.clave);
 
         if (!passwordCorrecta) {
-            throw new ErrorValidacion('La contraseña actual es incorrecta');
+            throw new Error("La contraseña actual es incorrecta");
         }
 
         const hashedPassword = await Encriptador.encriptar(newPassword);
@@ -128,16 +212,10 @@ class usuarioService {
         const usuario = await this.usuarioRepository.obtenerPorId(UsuarioId);
         if (!usuario) throw new Error("Usuario no encontrado");
 
-        // Generar clave aleatoria: caracteres seguros (a-z, 0-9)
-        // Método más confiable que evita longitudes inconsistentes
-        const caracteres = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        let tempPassword = '';
-        for (let i = 0; i < 16; i++) {
-            tempPassword += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
-        }
-        
+        // Generar clave aleatoria
+        const tempPassword = Math.random().toString(36).slice(-10);
         const hashed = await bcrypt.hash(tempPassword, 10);
-         
+
         await this.usuarioRepository.actualizar(UsuarioId, { 
             clave: hashed, 
             debeCambiarPassword: true 

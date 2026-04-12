@@ -1,7 +1,7 @@
 const transporter = require("../config/mailer");
 
-const emailService = {
-    enviarCredenciales: async (usuario, passwordTemporal) => {
+class EmailService {
+    async enviarCredenciales(usuario, passwordTemporal) {
         const fecha = new Date().toLocaleString('es-ES', { 
             dateStyle: 'long', 
             timeStyle: 'short' 
@@ -106,11 +106,8 @@ const emailService = {
                 </div>
             `,
         };
-        
-        const resultado = await transporter.sendMail(mailOptions);
-        console.log(`[EMAIL_SERVICE] Correo enviado exitosamente a ${usuario.correo}`);
-        return resultado;
+        return await transporter.sendMail(mailOptions);
     }
 };
 
-module.exports = emailService;
+module.exports = EmailService;

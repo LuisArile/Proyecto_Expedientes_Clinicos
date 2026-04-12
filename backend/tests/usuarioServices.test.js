@@ -60,8 +60,10 @@ describe('UsuarioService', () => {
 
             usuarioRepositoryMock.obtenerPorCorreo.mockResolvedValue(null);
             usuarioRepositoryMock.filtrarNombreUsuario.mockResolvedValue(false);
-            Encriptador.encriptar.mockResolvedValue("hash123");
             usuarioRepositoryMock.crear.mockResolvedValue({ usuario: usuarioMock });
+            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuarioMock);
+            Encriptador.encriptar.mockResolvedValue("hash123");
+            bcrypt.hash.mockResolvedValue("hashedTempPassword");
             emailServiceMock.enviarCredenciales.mockResolvedValue(true);
 
             const result = await usuarioService.crear(data, 99);
@@ -120,7 +122,7 @@ describe('UsuarioService', () => {
             usuarioRepositoryMock.obtenerPorId.mockResolvedValue(null);
 
             await expect(usuarioService.obtenerPorId(99))
-                .rejects.toThrow(ErrorValidacion);
+                .rejects.toThrow(ErrorNoEncontrado);
         });
     });
 
@@ -148,7 +150,7 @@ describe('UsuarioService', () => {
 
             await usuarioService.actualizar(1, data, 99);
 
-            expect(auditoriaServiceMock.registrar).toHaveBeenCalled();
+            expect(auditoriaServiceMock.registrarUsuario).toHaveBeenCalled();
         });
 
         test('no debe permitir auto-inactivación', async () => {
@@ -213,12 +215,12 @@ describe('UsuarioService', () => {
             usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuario);
             bcrypt.compare.mockResolvedValue(true);
             Encriptador.encriptar.mockResolvedValue("hashNew");
-            usuarioRepositoryMock.actualizarPassword.mockResolvedValue(true);
+            usuarioRepositoryMock.actualizar.mockResolvedValue(true);
 
             const result = await usuarioService.cambiarPassword(
                 1,
-                "1234",
-                "5678"
+                "1234567aB",
+                "NuevaPass.123"
             );
 
             expect(usuarioRepositoryMock.actualizar)
