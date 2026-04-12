@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useConsultaMedica } from "../hooks/useConsultaMedica";
-import { Stethoscope, Save, Clock, Loader2, Search } from "lucide-react";
+import { useDocumentos } from "../hooks/useDocumentos";
+import { useConsultaContext } from "../hooks/useConsultaContext";
+import { obtenerConsultaPorId } from "../services/consultaService";
+import { Stethoscope, Save, Clock, Loader2, Search, Eye, ArrowLeft } from "lucide-react";
 
 import { Button } from "@components/ui/button";
 import { Textarea } from "@components/ui/textarea";
@@ -16,6 +19,7 @@ import { Alert, AlertDescription } from "@components/ui/alert";
 import { SeccionExamenes } from "./SeccionExamenes";
 import { SeccionTratamiento } from "./SeccionTratamiento";
 import { SeccionDiagnostico } from "./SeccionDiagnostico";
+import { SeccionDocumentos } from "./SeccionDocumentos";
 
 import { StatusModal } from "@components/common/StatusModal";
 
@@ -23,12 +27,18 @@ import { useSafeNavigation } from "@/features/dashboard/hooks/useSafeNavigation"
 import { usePacienteSelection } from "@/features/dashboard/hooks/usePacienteSelection";
 import { useTriajeState } from "@/features/dashboard/hooks/useTriajeState";
 
-export function ConsultaMedica({ onSuccess }) {
+export function ConsultaMedica({ onSuccess, viewConfig }) {
   const { user } = useAuth();
   const { go } = useSafeNavigation();
   const { selectedPaciente, setSelectedPaciente } = usePacienteSelection();
   const { pacienteEnAtencion } = useTriajeState();
+  const { consultaId: contextConsultaId } = useConsultaContext();
   const [errorValidacion, setErrorValidacion] = useState("");
+  const [cargandoConsulta, setCargandoConsulta] = useState(false);
+  const [nuevoConsultaId, setNuevoConsultaId] = useState(null);
+
+  const esVisualizacion = viewConfig?.id === "ver-consulta";
+  const consultaIdActual = esVisualizacion ? contextConsultaId : null;
 
   const paciente = pacienteEnAtencion || selectedPaciente;
 
@@ -48,10 +58,66 @@ export function ConsultaMedica({ onSuccess }) {
     handleSubmit,
     control,
     setValue,
+    reset,
     formState: { errors },
   } = methods;
 
   const tipoDiag = useWatch({ control, name: "tipoDiagnostico" });
+
+  // Hook para documentos - usar consultaIdActual si es visualización, sino null
+  const {
+    documentos,
+    documentosPendientes,
+    cargando: cargandoDocumentos,
+    subiendo,
+    subiendoCount,
+    error: errorDocumentos,
+    agregarDocumento,
+    removerDocumentoPendiente,
+    subirDocumentosPendientes,
+    eliminarDoc,
+  } = useDocumentos(consultaIdActual);
+
+  // Cargar datos de la consulta si es visualización
+  useEffect(() => {
+    if (esVisualizacion && consultaIdActual) {
+      const cargarConsulta = async () => {
+        setCargandoConsulta(true);
+        try {
+          const consulta = await obtenerConsultaPorId(consultaIdActual);
+          if (consulta) {
+            // Parse diagnóstico si es string JSON
+            let diagnosticoObj = { descripcion: "", tipo: "PRESUNTIVO" };
+            if (typeof consulta.diagnostico === 'string') {
+              try {
+                diagnosticoObj = JSON.parse(consulta.diagnostico);
+              } catch {
+                diagnosticoObj.descripcion = consulta.diagnostico;
+              }
+            } else {
+              diagnosticoObj = consulta.diagnostico;
+            }
+
+            // Pre-rellenar el formulario
+            reset({
+              diagnostico: diagnosticoObj.descripcion || "",
+              tipoDiagnostico: diagnosticoObj.tipo || "PRESUNTIVO",
+              observacionesClinicas: consulta.observaciones || "",
+              medicamentos: consulta.recetas || [],
+              examenes: consulta.examenes || [],
+            });
+          }
+        } catch (err) {
+          console.error("Error cargando consulta:", err);
+          setErrorValidacion("Error al cargar la consulta");
+        } finally {
+          setCargandoConsulta(false);
+        }
+      };
+
+      cargarConsulta();
+    }
+  }, [esVisualizacion, consultaIdActual, reset]);
 
   const {
     guardarConsulta,
@@ -64,6 +130,9 @@ export function ConsultaMedica({ onSuccess }) {
   } = useConsultaMedica(paciente?.dni || null, methods, onSuccess);
 
   const alEnviar = async (data) => {
+    // No permitir envío en modo visualización
+    if (esVisualizacion) return;
+
     setErrorValidacion("");
     const idExpediente = paciente?.expedientes?.idExpediente;
 
@@ -107,7 +176,28 @@ export function ConsultaMedica({ onSuccess }) {
       }
     }
 
-    await guardarConsulta(idExpediente, data);
+    try {
+      // Guardar consulta primero
+      const response = await guardarConsulta(idExpediente, data);
+      
+      // Si la consulta se guardó exitosamente, obtener el ID
+      if (response?.data?.id) {
+        const newConsultaId = response.data.id;
+        setNuevoConsultaId(newConsultaId);
+
+        // Si hay documentos pendientes, subirlos
+        if (documentosPendientes.length > 0) {
+          try {
+            await subirDocumentosPendientes(newConsultaId);
+          } catch (err) {
+            console.error("Error subiendo documentos:", err);
+            // Continuar aunque falle la carga de documentos
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error en alEnviar:", err);
+    }
   };
 
   const handleCambiarPaciente = () => {
@@ -168,13 +258,29 @@ export function ConsultaMedica({ onSuccess }) {
               onSubmit={handleSubmit(alEnviar)}
               className="space-y-6"
             >
-              <Alert className="bg-blue-50/50 border-blue-100 mb-6">
-                <Clock className="h-4 w-4 stroke-blue-600" />
-                <AlertDescription className="text-blue-700 font-medium">
-                  Atención iniciada el{" "}
-                  {new Date().toLocaleDateString()}
-                </AlertDescription>
-              </Alert>
+              {cargandoConsulta ? (
+                <Alert className="bg-blue-50/50 border-blue-100 mb-6 flex items-center justify-center h-24">
+                  <Loader2 className="h-6 w-6 stroke-blue-600 animate-spin mr-3" />
+                  <AlertDescription className="text-blue-700 font-medium">
+                    Cargando datos de la consulta...
+                  </AlertDescription>
+                </Alert>
+              ) : esVisualizacion ? (
+                <Alert className="bg-blue-50/50 border-blue-100 mb-6">
+                  <Eye className="h-4 w-4 stroke-blue-600" />
+                  <AlertDescription className="text-blue-700 font-medium">
+                    Consulta Médica en Modo de Visualización - CONS-{consultaIdActual}
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <Alert className="bg-blue-50/50 border-blue-100 mb-6">
+                  <Clock className="h-4 w-4 stroke-blue-600" />
+                  <AlertDescription className="text-blue-700 font-medium">
+                    Atención iniciada el{" "}
+                    {new Date().toLocaleDateString()}
+                  </AlertDescription>
+                </Alert>
+              )}
 
               {/* DIAGNÓSTICO */}
               <SeccionDiagnostico
@@ -182,6 +288,7 @@ export function ConsultaMedica({ onSuccess }) {
                 errors={errors}
                 tipoDiag={tipoDiag}
                 setValue={setValue}
+                disabled={esVisualizacion}
               />
 
               {/* NOTAS */}
@@ -191,7 +298,8 @@ export function ConsultaMedica({ onSuccess }) {
                     <Textarea
                       {...register("observacionesClinicas")}
                       placeholder="Notas de seguimiento..."
-                      className="border border-gray-300 min-h-[100px] focus-visible:ring-purple-500"
+                      disabled={esVisualizacion}
+                      className="border border-gray-300 min-h-[100px] focus-visible:ring-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </FormField>
                 </div>
@@ -202,6 +310,20 @@ export function ConsultaMedica({ onSuccess }) {
                 control={control}
                 setValue={setValue}
                 disponibles={examenesDisponibles}
+              />
+
+              {/* DOCUMENTOS ADJUNTOS */}
+              <SeccionDocumentos
+                documentosPendientes={documentosPendientes}
+                documentos={documentos}
+                subiendo={subiendo}
+                subiendoCount={subiendoCount}
+                cargando={cargandoDocumentos}
+                error={errorDocumentos}
+                onAgregarDocumento={agregarDocumento}
+                onRemoverDocumentoPendiente={removerDocumentoPendiente}
+                onEliminarDocumento={eliminarDoc}
+                disabled={esVisualizacion}
               />
 
               {/* MEDICAMENTOS */}
@@ -226,26 +348,48 @@ export function ConsultaMedica({ onSuccess }) {
 
               {/* BOTONES */}
               <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-100">
-                <Button
-                  type="submit"
-                  disabled={guardando}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700 h-12 text-lg font-semibold shadow-lg transition-all active:scale-95"
-                >
-                  {guardando ? (
-                    <Loader2 className="animate-spin mr-2" />
-                  ) : (
-                    <Save className="mr-2" />
-                  )}
-                  Finalizar Consulta
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => go("inicio")}
-                  className="h-12 px-8 text-gray-500 hover:text-red-600"
-                >
-                  Descartar cambios
-                </Button>
+                {esVisualizacion ? (
+                  <>
+                    <Button
+                      type="button"
+                      onClick={() => go("gestion-pacientes")}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 h-12 text-lg font-semibold shadow-lg transition-all active:scale-95"
+                    >
+                      <ArrowLeft className="mr-2" />
+                      Volver al Expediente
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      type="submit"
+                      disabled={guardando || subiendo}
+                      className="flex-1 bg-purple-600 hover:bg-purple-700 h-12 text-lg font-semibold shadow-lg transition-all active:scale-95"
+                      title={documentosPendientes.length > 0 ? `Guardará la consulta y subirá ${documentosPendientes.length} documento(s)` : ""}
+                    >
+                      {guardando || subiendo ? (
+                        <Loader2 className="animate-spin mr-2" />
+                      ) : (
+                        <Save className="mr-2" />
+                      )}
+                      {guardando ? "Registrando..." : subiendo ? "Subiendo documentos..." : "Finalizar Consulta"}
+                      {documentosPendientes.length > 0 && !guardando && !subiendo && (
+                        <span className="ml-2 text-xs bg-orange-200 text-orange-900 px-2 py-1 rounded-full">
+                          +{documentosPendientes.length} doc
+                        </span>
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => go("inicio")}
+                      disabled={guardando || subiendo}
+                      className="h-12 px-8 text-gray-500 hover:text-red-600"
+                    >
+                      Descartar cambios
+                    </Button>
+                  </>
+                )}
               </div>
             </form>
 
@@ -257,7 +401,12 @@ export function ConsultaMedica({ onSuccess }) {
                   setModal({ ...modal, open: false });
                   if (modal.result.success) {
                     limpiarBorrador();
-                    onSuccess?.();
+                    // Navegar a la consulta en modo visualización
+                    if (nuevoConsultaId) {
+                      go("ver-consulta", { consultaId: nuevoConsultaId });
+                    } else {
+                      onSuccess?.();
+                    }
                   }
                 }}
               />
