@@ -247,9 +247,9 @@ export function SeccionDocumentos({
                     <p className="text-sm font-medium text-gray-900 truncate">
                       {doc.nombre || doc.originalName || "Documento sin nombre"}
                     </p>
-                    {doc.fechaCreacion && (
+                    {(doc.createdAt || doc.fechaCreacion) && (
                       <p className="text-xs text-gray-500 mt-1">
-                        {formatearFechaHora(doc.fechaCreacion)}
+                        {formatearFechaHora(doc.createdAt || doc.fechaCreacion)}
                       </p>
                     )}
                   </div>
