@@ -105,6 +105,30 @@ class DocumentoService {
         }
     }
 
+    async obtenerDocumento(id) {
+        try {
+            return await this.documentoRepository.obtenerPorId(id);
+        } catch (error) {
+            throw new Error(`Error al obtener documento: ${error.message}`);
+        }
+    }
+
+    async descargarDocumento(blobName) {
+        try {
+            const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+            
+            // Obtener información del blob para saber su tamaño
+            const properties = await blockBlobClient.getProperties();
+            const buffer = Buffer.alloc(properties.contentLength);
+            
+            // Descargar el blob al buffer
+            await blockBlobClient.downloadToBuffer(buffer);
+            
+            return buffer;
+        } catch (error) {
+            throw new Error(`Error al descargar documento: ${error.message}`);
+        }
+    }
 
     async eliminarDocumento(documentoId, blobName) {
         try {

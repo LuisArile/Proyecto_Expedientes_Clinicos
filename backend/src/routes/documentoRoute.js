@@ -27,7 +27,7 @@ const documentoController = new DocumentoController(documentoService);
 router.use(validarToken);
 
 // Subir documento con estructura de directorios virtuales
-// Body: { expedienteId,consultaId }
+// Body: { consultaId }
 // File: multipart/form-data con campo "file"
 router.post('/upload', 
     (req, res, next) => {
@@ -48,6 +48,11 @@ router.post('/upload',
 // Obtener documentos de una consulta
 router.get('/consulta/:consultaId',
     (req, res, next) => documentoController.obtenerDocumentosPorConsulta(req, res, next)
+);
+
+// Descargar un documento (con proxy desde Azure) 
+router.get('/:id/descargar',
+    (req, res, next) => documentoController.descargarDocumento(req, res, next)
 );
 
 // Obtener un documento específico
