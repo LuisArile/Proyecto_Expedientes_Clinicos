@@ -253,33 +253,38 @@ describe('UsuarioService', () => {
     });
 
     describe('alternarEstado', () => {
-        test('debe cambiar estado correctamente', async () => {
-            const usuario = { id: 1, activo: true, nombreUsuario: "test" };
+    test('debe cambiar estado correctamente', async () => {
+        const usuario = { id: 1, activo: true, nombreUsuario: "test" };
 
-            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuario);
-            usuarioRepositoryMock.actualizar.mockResolvedValue({
-                ...usuario,
-                activo: false
-            });
-
-            const result = await usuarioService.alternarEstado(1);
-
-            expect(usuarioRepositoryMock.actualizar)
-                .toHaveBeenCalledWith(1, { activo: false });
-
-            expect(usuarioRepositoryMock.registrarAccionUsuario)
-                .toHaveBeenCalled();
-
-            expect(result.success).toBe(true);
+        usuarioRepositoryMock.obtenerPorId.mockResolvedValue(usuario);
+        usuarioRepositoryMock.actualizar.mockResolvedValue({
+            ...usuario,
+            activo: false
         });
 
-        test('debe fallar si no existe usuario', async () => {
-            usuarioRepositoryMock.obtenerPorId.mockResolvedValue(null);
+        const result = await usuarioService.alternarEstado(1, 1);
 
-            await expect(usuarioService.alternarEstado(1))
-                .rejects.toThrow(ErrorNoEncontrado);
-        });
+        expect(usuarioRepositoryMock.actualizar)
+            .toHaveBeenCalledWith(1, { activo: false });
+
+        expect(auditoriaServiceMock.registrar)
+            .toHaveBeenCalledWith(
+                1,
+                'ESTADO_USUARIO_CAMBIADO',
+                expect.stringContaining('Usuario test cambiado a INACTIVO')
+            );
+
+        expect(result.success).toBe(true);
     });
+
+    test('debe fallar si no existe usuario', async () => {
+        usuarioRepositoryMock.obtenerPorId.mockResolvedValue(null);
+
+    
+        await expect(usuarioService.alternarEstado(1, 1))
+            .rejects.toThrow(ErrorNoEncontrado);
+    });
+});
 
     describe('enviarCredenciales', () => {
         test('debe generar password y enviar email', async () => {
