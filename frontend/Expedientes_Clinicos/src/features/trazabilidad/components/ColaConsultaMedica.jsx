@@ -28,19 +28,27 @@ export function ColaConsulta() {
             setLoading(true);
             const data = await obtenerPacientesPorEstado('ESPERA_CONSULTA');
             
-            const pacientesTransformados = data.map(cita => ({
-                id: cita.idCita,
-                nombre: `${cita.paciente?.nombre || ''} ${cita.paciente?.apellido || ''}`.trim(),
-                identidad: cita.paciente?.dni || '',
-                prioridad: cita.prioridad === 'URGENTE' ? 'alta' : 
-                           cita.prioridad === 'EMERGENCIA' ? 'urgente' : 'normal',
-                tipoIngreso: cita.tipo === 'PROGRAMADA' ? 'Cita programada' : 'Registro del día',
-                motivoConsulta: cita.motivo,
-                horaRegistro: cita.horaCita,
-                citaId: cita.idCita,
-                idExpediente: cita.paciente?.expediente?.idExpediente || cita.paciente?.expedientes?.idExpedient,
-                resumenPreclinico: null
-            }));
+            const pacientesTransformados = data.map(cita => {
+                const idExp = cita.paciente?.expedientes?.idExpediente || 
+                            cita.paciente?.expediente?.idExpediente || 
+                            cita.paciente?.idPaciente;
+
+                return {
+                    id: cita.idCita,
+                    citaId: cita.idCita,
+                    nombre: cita.paciente?.nombre || '',
+                    apellido: cita.paciente?.apellido || '',
+                    identidad: cita.paciente?.dni || '',
+                    dni: cita.paciente?.dni || '', 
+                    prioridad: cita.prioridad === 'URGENTE' ? 'alta' : 
+                            cita.prioridad === 'EMERGENCIA' ? 'urgente' : 'normal',
+                    expedientes: {
+                        idExpediente: idExp,
+                        numeroExpediente: cita.paciente?.expedientes?.numeroExpediente || `EXP-${idExp}`
+                    },
+                    resumenPreclinico: cita.preclinica
+                };
+            });
             
             setPacientes(pacientesTransformados);
         } catch (error) {
@@ -58,10 +66,10 @@ export function ColaConsulta() {
         dialogo, setDialogo, procesando, pacienteSeleccionado, pacientesOrdenados, 
         abrirDialogoInicio, confirmarInicio, confirmarFinalizacion 
     } = useColaGestion({
-        pacientes, 
-        onSeleccionarPaciente: setSelectedPaciente,
+        pacientes,
         onNavigate: go, 
         setPacienteEnAtencion,
+        onSeleccionarPaciente: setSelectedPaciente,
         pacienteEnAtencion,
         tipoAtencion: "consulta-medica",
         mensajeExito: "Consulta",

@@ -38,10 +38,10 @@ export function registerDashboardViews() {
         metadata: { title: "Inicio", icon: "home" }
     });
 
-        viewRegistry.register("enviar-preclinica", {
+    viewRegistry.register("enviar-preclinica", {
         path: "/enviar-preclinica",
         component: EnviarPreclinica,
-        permissions: ["PRECLINICA"],
+        permissions: ["CITAS"],
         requiresPaciente: false,
         metadata: { title: "Enviar a Preclínica"}
     });
@@ -143,6 +143,15 @@ export function registerDashboardViews() {
         metadata: { title: "Consulta Médica" }
     });
 
+    viewRegistry.register("ver-consulta", {
+        path: "/consulta/ver",
+        component: ConsultaMedica,
+        parent: "gestion-pacientes",
+        permissions: ["CONSULTA_MEDICA"],
+        requiresPaciente: true,
+        metadata: { title: "Ver Consulta Médica" }
+    });
+
     viewRegistry.register("cola-preclinica", {
         path: "/preclinica/cola",
         component: ColaPreclinica,
@@ -197,7 +206,7 @@ export function registerDashboardViews() {
     viewRegistry.register("gestion-pacientes", {
         path: "/gestion/paciente",
         component: VerExpediente,
-        permissions: ["GESTION_PACIENTES"],
+        permissions: ["VER_EXPEDIENTE", "GESTION_PACIENTES"],
         requiresPaciente: true,
         metadata: { title: "Ver Expediente" }
     });

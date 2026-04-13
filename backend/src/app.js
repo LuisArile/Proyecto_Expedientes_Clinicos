@@ -16,6 +16,7 @@ const auditoriaRouters = require("./routes/auditoriaRoute");
 const examenRoutes = require("./routes/examenRoute");
 const medicamentoRouters = require("./routes/medicamentoRoute");
 const citaRouters=require("./routes/citaRoute");
+const documentoRouters = require("./routes/documentoRoute");
 
 const manejadorErrores = require("./middlewares/manejoErrores")
 
@@ -53,6 +54,9 @@ app.use(cors({
 // Middleware para parsear JSON
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+// Utiliza form-data para manejar archivos adjuntos en solicitudes POST/PUT
+app.use("/api/documentos", documentoRouters); //gestión de documentos
 
 app.use("/api/usuarios", usuarioRouters); //gestion de usuarios
 

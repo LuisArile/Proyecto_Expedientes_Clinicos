@@ -64,14 +64,6 @@ export function FormularioCita({ viewConfig }) {
     "alta": "URGENTE",
     "urgente": "EMERGENCIA"
   };
-
-  // Mapeo de prioridad , aqui se muestra
-  // const prioridadDisplay = {
-  //   "NORMAL": "normal",
-  //   "URGENTE": "alta",
-  //   "EMERGENCIA": "urgente"
-  // };
-
   
   const onSubmit = async (data) => {
     setLoading(true);

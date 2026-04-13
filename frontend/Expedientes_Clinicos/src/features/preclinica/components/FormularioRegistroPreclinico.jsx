@@ -1,8 +1,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Activity, Heart, Thermometer, Weight, Ruler, Search, Loader2 } from "lucide-react";
+import { Activity, Search, Loader2 } from "lucide-react";
 
-import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Textarea } from "@components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/card";
@@ -17,20 +16,30 @@ import { usePacienteSelection } from "@/features/dashboard/hooks/usePacienteSele
 import { SeccionSignosVitales } from "./SeccionSignosVitales";
 import { SeccionAntropometria } from "./SeccionAntropometria";
 
-export function FormularioRegistroPreclinico(onSuccess) {
+export function FormularioRegistroPreclinico({ onSuccess, paciente }) {
   const { go } = useSafeNavigation();
   const { selectedPaciente, setSelectedPaciente } = usePacienteSelection();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const { loading, modal, setModal, enviarRegistro } = useRegistroPreclinico(onSuccess);
 
-  if (!selectedPaciente) return null;
+  const pacienteParaUsar = paciente || selectedPaciente;
 
-  const nombreCompleto = selectedPaciente.nombrePaciente || `${selectedPaciente.nombre} ${selectedPaciente.apellido}`;
-  const numeroExpediente = selectedPaciente.numeroExpediente || selectedPaciente.expedientes?.numeroExpediente;
+  if (!pacienteParaUsar) return <p>Cargando datos del paciente...</p>;
+
+  const nombreCompleto = pacienteParaUsar.nombrePaciente || `${pacienteParaUsar.nombre} ${pacienteParaUsar.apellido}`;
+  const numeroExpediente = pacienteParaUsar.numeroExpediente || pacienteParaUsar.expedientes?.numeroExpediente;
 
   const onSubmit = (data) => {
-    const idExpediente = selectedPaciente.expedientes?.idExpediente || selectedPaciente.id;
-    enviarRegistro(idExpediente, data);
+    const idExpediente = 
+      pacienteParaUsar.expedienteId ||
+      pacienteParaUsar.expedientes?.idExpediente ||
+      pacienteParaUsar.id;
+
+    const citaId = 
+      pacienteParaUsar.citaId || 
+      pacienteParaUsar.idCita;
+
+    enviarRegistro(idExpediente, data, citaId);
   };
 
   const handleCambiarPaciente = () => {
@@ -78,7 +87,12 @@ export function FormularioRegistroPreclinico(onSuccess) {
             </CardHeader>
 
             <CardContent className="pt-6">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <form 
+                onSubmit={handleSubmit(
+                  (data) => onSubmit(data),
+                )} 
+                className="space-y-6"
+              >
                 
                 <SeccionSignosVitales register={register} errors={errors}/>
 
