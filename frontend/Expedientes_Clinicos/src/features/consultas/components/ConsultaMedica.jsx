@@ -134,11 +134,13 @@ export function ConsultaMedica({ onSuccess, viewConfig }) {
     if (esVisualizacion) return;
 
     setErrorValidacion("");
-    const idExpediente = paciente?.expedientes?.idExpediente;
-
+    
+    const idExpediente = paciente?.expedientes?.idExpediente || 
+                         paciente?.expediente?.idExpediente || 
+                         paciente?.idExpediente;
     if (!idExpediente) {
-      setErrorValidacion("No se pudo identificar el expediente");
-      return;
+        setErrorValidacion("No se pudo identificar el expediente del paciente.");
+        return;
     }
 
     if (data.tipoDiagnostico === "PRESUNTIVO") {
@@ -400,15 +402,21 @@ export function ConsultaMedica({ onSuccess, viewConfig }) {
                 isOpen={modal.open}
                 result={modal.result}
                 onClose={() => {
-                  setModal({ ...modal, open: false });
+                  setModal({ ...modal, open: false });  
                   if (modal.result.success) {
                     limpiarBorrador();
+
+                    onSuccess?.();
+                    setSelectedPaciente(null);
+                    go("inicio");
+
                     // Navegar a la consulta en modo visualización
                     if (nuevoConsultaId) {
                       go("ver-consulta", { consultaId: nuevoConsultaId });
                     } else {
                       onSuccess?.();
                     }
+
                   }
                 }}
               />

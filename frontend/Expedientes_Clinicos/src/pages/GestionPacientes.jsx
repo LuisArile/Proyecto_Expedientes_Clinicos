@@ -18,9 +18,6 @@ export function VerExpediente() {
     const VIEW_ID = "gestion-pacientes";
     
     const idParaCarga = pacienteContexto?.idPaciente
-               
-    console.log("Paciente en Contexto:", pacienteContexto);
-    console.log("ID detectado para carga:", idParaCarga);
 
     const { data, loading } = useExpediente(idParaCarga);
 

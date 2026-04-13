@@ -3,6 +3,7 @@ import { ConsultaContext } from "./ConsultaContext";
 export function ConsultaProvider({ children, pacienteEnAtencion, onSuccess, consultaId = null }) {
     
     const value = {
+        paciente: pacienteEnAtencion,
         pacienteEnAtencion,
         onSuccess,
         consultaId

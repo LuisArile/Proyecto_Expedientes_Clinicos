@@ -143,16 +143,18 @@ export function Dashboard() {
     }
 
     if (wrapperType === "preclinica") {
+      const handleSuccess = () => {
+        setPacienteEnAtencion(null);
+        setSelectedPaciente(null);
+        go("cola-preclinica");
+      };
+      
       return (
         <PreclinicaProvider 
           paciente={pacienteActual}
           setPacienteEnAtencion={setPacienteEnAtencion}
           setSelectedPaciente={setSelectedPaciente}
-          onSuccess={() => {
-            setPacienteEnAtencion(null);
-            setSelectedPaciente(null);
-            go("cola-preclinica");
-          }}
+          onSuccess={handleSuccess}
         >
           <Component 
             viewConfig={view}
@@ -160,6 +162,7 @@ export function Dashboard() {
             onNavigate={go}
             onVolver={() => go("inicio")}
             onSeleccionarPaciente={setSelectedPaciente}
+            onSuccess={handleSuccess} 
             setPacienteEnAtencion={(p) => {
               setPacienteEnAtencion(p);
               if(p) go("preclinica");

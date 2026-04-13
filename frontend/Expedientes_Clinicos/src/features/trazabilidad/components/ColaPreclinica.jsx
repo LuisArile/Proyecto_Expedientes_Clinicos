@@ -30,10 +30,9 @@ const cargarPacientes = async () => {
     try {
         setLoading(true);
         const data = await obtenerPacientesPorEstado('ESPERA_PRECLINICA');
-        console.log("🔍 Datos desde BD:", data); // ✅ Ver qué llega
         
         const pacientesTransformados = data.map(cita => ({
-            id: cita.idCita,
+            id: cita.idCita, 
             nombre: `${cita.paciente?.nombre || ''} ${cita.paciente?.apellido || ''}`.trim(),
             identidad: cita.paciente?.dni || '',
             prioridad: cita.prioridad === 'URGENTE' ? 'alta' : 
@@ -41,10 +40,9 @@ const cargarPacientes = async () => {
             tipoIngreso: cita.tipo === 'PROGRAMADA' ? 'Cita programada' : 'Registro del día',
             motivoConsulta: cita.motivo,
             horaRegistro: cita.horaCita,
-            citaId: cita.idCita
+            citaId: cita.idCita,
+            expedienteId: cita.paciente?.expedientes?.idExpediente
         }));
-        
-        console.log("🔄 Pacientes transformados:", pacientesTransformados); // ✅ Ver transformación
         
         setPacientes(pacientesTransformados);
     } catch (error) {

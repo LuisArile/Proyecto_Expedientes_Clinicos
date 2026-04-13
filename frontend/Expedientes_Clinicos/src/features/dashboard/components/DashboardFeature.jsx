@@ -130,7 +130,10 @@ export function DashboardFeature({ onNavigate }) {
                                     </CardHeader>
                                     <CardContent>
                                         <Button
-                                            onClick={() => onNavigate(item.action)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onNavigate(item.navigateTo); 
+                                            }}
                                             className={`w-full ${item.color} hover:opacity-90 text-white`}
                                             size="sm"
                                         >

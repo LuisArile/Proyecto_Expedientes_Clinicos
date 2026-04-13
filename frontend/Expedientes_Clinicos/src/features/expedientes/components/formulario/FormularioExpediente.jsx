@@ -42,7 +42,6 @@ export function FormularioExpediente({ viewConfig }) {
       const sexoDB = p.sexo ? String(p.sexo).trim().toLowerCase() : "";
       const sexoFinal = (sexoDB === "masculino" || sexoDB === "femenino") ? sexoDB : "";
 
-      console.log("Sincronizando formulario con:", p.nombre, "Sexo:", sexoFinal);
       reset({
         nombre: p.nombre || "",
         apellido: p.apellido || "",
@@ -204,7 +203,6 @@ export function FormularioExpediente({ viewConfig }) {
             onClose={() => {
               setModal(prev => ({ ...prev, open: false }));
               if (modal.result.success) {
-                console.log("Navegando de regreso a:", viewConfig.id);
                 goBack(viewConfig.id);
               }
             }} 

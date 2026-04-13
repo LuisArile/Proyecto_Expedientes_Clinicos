@@ -19,7 +19,7 @@ export function PacienteResumen({ paciente }) {
                             <User className="h-8 w-8 text-blue-600" />
                         </div>
                         <div>
-                            <CardTitle className="text-2xl text-blue-900">{paciente.nombre}</CardTitle>
+                            <CardTitle className="text-2xl text-blue-900">{paciente.nombre} {paciente.apellido}</CardTitle>
                             <CardDescription className="mt-1 flex items-center gap-4 text-base">
                                 <span className="flex items-center gap-1">
                                     <IdCard className="h-4 w-4" />

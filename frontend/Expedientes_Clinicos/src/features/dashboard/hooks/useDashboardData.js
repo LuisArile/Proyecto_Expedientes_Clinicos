@@ -19,7 +19,6 @@ export function useDashboardData(userRole) {
 
       try {
         const result = await dashboardService.obtenerResumen();
-        console.log("Datos recibidos del API:", result);
         if (isMounted) {
           setData({
             tarjetas: result.tarjetas || [],
@@ -49,7 +48,6 @@ export function useDashboardData(userRole) {
   const refrescar = async () => {
     try {
       const result = await dashboardService.obtenerResumen();
-      console.log("Datos recibidos del API:", result);
       setData({
         tarjetas: result.tarjetas || [],
         actividad: result.actividad || [],

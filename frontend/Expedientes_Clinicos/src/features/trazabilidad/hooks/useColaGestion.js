@@ -34,20 +34,12 @@ export function useColaGestion({
             onIniciarReal(pacienteSeleccionado)
                 .then(() => {
                     setPacienteEnAtencion(pacienteSeleccionado);
-                    
-                    const [nombre, ...apellido] = pacienteSeleccionado.nombre.split(" ");
-                    
                     onSeleccionarPaciente({
-                        nombre,
-                        apellido: apellido.join(" "),
-                        dni: pacienteSeleccionado.identidad,
-                        expedientes: {
-                            idExpediente: pacienteSeleccionado.idExpediente,
-                            numeroExpediente: pacienteSeleccionado.idExpediente,
-                        }
+                        ...pacienteSeleccionado,
                     });
                     
-                    onNavigate(tipoAtencion);
+                    onNavigate(tipoAtencion, { paciente: pacienteSeleccionado });
+
                     setDialogo(null);
                     toast.success(`${mensajeExito || tipoAtencion} iniciada`);
                 })

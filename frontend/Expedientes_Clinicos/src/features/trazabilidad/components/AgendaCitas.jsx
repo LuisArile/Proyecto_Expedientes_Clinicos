@@ -7,7 +7,7 @@ import { CardCita } from "@/features/trazabilidad/components/CardCita"
 import { useSafeNavigation } from "../../dashboard/hooks/useSafeNavigation"
 
 export function AgendaCitas() {
-    const { go, goBack } = useSafeNavigation();
+    const { go } = useSafeNavigation();
 
     const steps = [
         {
@@ -26,7 +26,7 @@ export function AgendaCitas() {
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-gray-50 pb-10">
             {/* Header */}
             <PageHeader title="Agenda y Registro de Pacientes" subtitle="Programe citas o registre pacientes para atención del día"
-                    Icon={CalendarIcon} onVolver={goBack}
+                    Icon={CalendarIcon} onVolver={() => go("inicio")}
             />
 
             <main className="min-h-screen bg-slate-50/50 p-6 space-y-6">

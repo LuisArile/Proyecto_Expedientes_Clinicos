@@ -38,10 +38,10 @@ export function registerDashboardViews() {
         metadata: { title: "Inicio", icon: "home" }
     });
 
-        viewRegistry.register("enviar-preclinica", {
+    viewRegistry.register("enviar-preclinica", {
         path: "/enviar-preclinica",
         component: EnviarPreclinica,
-        permissions: ["PRECLINICA"],
+        permissions: ["CITAS"],
         requiresPaciente: false,
         metadata: { title: "Enviar a Preclínica"}
     });

@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { registrarPreclinico } from "../services/registroPreclinicoService";
+import { finalizarPreclinica } from "../../trazabilidad/services/trazabilidadService";
 
 export function useRegistroPreclinico() {
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState({ open: false, result: {} });
 
-  const enviarRegistro = async (expedienteId, data) => {
+  const enviarRegistro = async (expedienteId, data, citaId) => {
     if (!expedienteId) {
       toast.error("Debe seleccionar un expediente");
       return;
@@ -26,6 +27,11 @@ export function useRegistroPreclinico() {
       const response = await registrarPreclinico(expedienteId, datos);
 
       if (response.success) {
+        
+        if (citaId) {
+          await finalizarPreclinica(citaId);
+        }
+
         setModal({
           open: true,
           result: {
