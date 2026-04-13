@@ -65,11 +65,13 @@ export function ConsultaMedica({ onSuccess }) {
 
   const alEnviar = async (data) => {
     setErrorValidacion("");
-    const idExpediente = paciente?.expedientes?.idExpediente;
-
+    
+    const idExpediente = paciente?.expedientes?.idExpediente || 
+                         paciente?.expediente?.idExpediente || 
+                         paciente?.idExpediente;
     if (!idExpediente) {
-      setErrorValidacion("No se pudo identificar el expediente");
-      return;
+        setErrorValidacion("No se pudo identificar el expediente del paciente.");
+        return;
     }
 
     if (data.tipoDiagnostico === "PRESUNTIVO") {

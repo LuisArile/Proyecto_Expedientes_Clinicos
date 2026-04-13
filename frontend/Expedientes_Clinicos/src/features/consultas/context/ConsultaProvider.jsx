@@ -3,7 +3,7 @@ import { ConsultaContext } from "./ConsultaContext";
 export function ConsultaProvider({ children, pacienteEnAtencion, onSuccess }) {
     
     const value = {
-        pacienteEnAtencion,
+        paciente: pacienteEnAtencion,
         onSuccess
     };
 

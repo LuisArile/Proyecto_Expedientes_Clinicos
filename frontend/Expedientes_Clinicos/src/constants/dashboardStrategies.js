@@ -1,4 +1,4 @@
-import { Shield, Stethoscope, Activity, Users, Clock, BarChart3, Pill, TestTube, Calendar, Kanban, ListChecks, User, UserPlus } from "lucide-react";
+import { Shield, Stethoscope, Activity, Users, Clock, BarChart3, Pill, TestTube, Calendar, Kanban, ListChecks, User, UserPlus, ArrowRightCircle } from "lucide-react";
 
 export const DASHBOARD_CONFIG = {
   ADMINISTRADOR: {
@@ -46,6 +46,11 @@ export const DASHBOARD_CONFIG = {
           bg: "from-white to-blue-50", navigateTo: "agenda-citas"
         },
         {
+          id: "enviar-preclinica", title: "Enviar a Preclínica", sub: "Triaje de hoy", icon: ListChecks,
+          color: "bg-indigo-600", border: "border-indigo-200", hoverBorder: "hover:border-indigo-400",
+          bg: "from-white to-indigo-50", navigateTo: "enviar-preclinica"
+        },
+        {
           id: "preclinica", title: "Preclínica", sub: "Cola de espera", icon: ListChecks, 
           color: "bg-green-600", border: "border-green-200", hoverBorder: "hover:border-green-400",
           bg: "from-white to-green-50", navigateTo: "cola-preclinica"
@@ -54,7 +59,7 @@ export const DASHBOARD_CONFIG = {
           id: "consulta", title: "Consulta", sub: "Cola de espera", icon: ListChecks, 
           color: "bg-purple-600", border: "border-purple-200", hoverBorder: "hover:border-purple-400",
           bg: "from-white to-purple-50", navigateTo: "cola-consulta"
-        }
+        },
       ]
     }
   },
@@ -148,7 +153,8 @@ export const DASHBOARD_CONFIG = {
     modulesTitle: "Atención al Público",
     modulesSubtitle: "Ingresos y agendamiento",
     modules: [
-       { id: 'citas', title: "Crear Expediente", sub: "Nuevo expediente", icon: UserPlus, color: "text-blue-600", path: "crear-expediente" },
+      { id: 'expediente', title: "Crear Expediente", sub: "Nuevo expediente", icon: UserPlus, color: "text-blue-600", path: "crear-expediente" },
+      { id: 'enviar-preclinica', title: "Enviar a Preclínica", sub: "Pacientes de hoy", icon: ArrowRightCircle, color: "text-indigo-600", path: "enviar-preclinica" },
     ],
     trazabilidad: {
       title: "Trazabilidad de la Preclinica",
@@ -163,6 +169,11 @@ export const DASHBOARD_CONFIG = {
           id: "agenda", title: "Agenda", sub: "Programar citas", icon: Calendar,
           color: "bg-blue-600", border: "border-blue-200", hoverBorder: "hover:border-blue-400",
           bg: "from-white to-blue-50", navigateTo: "agenda-citas"
+        },
+        {
+          id: "enviar-preclinica", title: "Enviar a Preclínica", sub: "Triaje de hoy", icon: ListChecks,
+          color: "bg-indigo-600", border: "border-indigo-200", hoverBorder: "hover:border-indigo-400",
+          bg: "from-white to-indigo-50", navigateTo: "enviar-preclinica"
         }
       ]
     }
