@@ -159,8 +159,8 @@ describe("AuditoriaService", () => {
             expect(mockRepository.crear).toHaveBeenCalledWith(
                 {
                     usuarioId: 1,
-                    accion: "Actualizacion de Paciente",
-                    detalles: "Actualizacion de paciente 15"
+                    accion: "ACTUALIZACION DE PACIENTE",
+                    detalles: "ACTUALIZACION DE PACIENTE 15"
                 },
                 null
             );

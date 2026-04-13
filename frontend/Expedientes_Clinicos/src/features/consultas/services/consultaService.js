@@ -74,3 +74,14 @@ export async function obtenerHistorialConsultas(expedienteId) {
         throw error;
     }
 }
+
+// OBTENER CONSULTA POR ID
+export async function obtenerConsultaPorId(consultaId) {
+    try {
+        const response = await consultaMedicaAPI.obtenerPorId(consultaId);
+        return response.success ? response.data : null;
+    } catch (error) {
+        console.error("Error al obtener consulta:", error);
+        throw error;
+    }
+}

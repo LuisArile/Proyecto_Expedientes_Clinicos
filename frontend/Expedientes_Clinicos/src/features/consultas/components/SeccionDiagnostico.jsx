@@ -6,7 +6,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
 } from "@components/ui/select";
 
-export function SeccionDiagnostico({ register, errors, tipoDiag, setValue }) {
+export function SeccionDiagnostico({ register, errors, tipoDiag, setValue, disabled = false }) {
   return (
     <FormSection title="Diagnóstico y Evaluación">
       {/* TIPO DE DIAGNÓSTICO */}
@@ -17,9 +17,10 @@ export function SeccionDiagnostico({ register, errors, tipoDiag, setValue }) {
       >
         <Select 
           value={tipoDiag} 
-          onValueChange={(val) => setValue("tipoDiagnostico", val)}
+          onValueChange={(val) => !disabled && setValue("tipoDiagnostico", val)}
+          disabled={disabled}
         >
-          <SelectTrigger className="w-full rounded-lg border-gray-300">
+          <SelectTrigger className={`w-full rounded-lg border-gray-300 ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}>
             <SelectValue placeholder="Seleccione..." />
           </SelectTrigger>
           <SelectContent>
@@ -46,7 +47,8 @@ export function SeccionDiagnostico({ register, errors, tipoDiag, setValue }) {
               },
             })}
             placeholder="Describa el estado del paciente..."
-            className="border border-gray-300 focus-visible:ring-purple-500 min-h-[120px]"
+            disabled={disabled}
+            className={`border border-gray-300 focus-visible:ring-purple-500 min-h-[120px] ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
           />
         </FormField>
       </div>

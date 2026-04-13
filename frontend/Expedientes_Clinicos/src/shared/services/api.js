@@ -295,3 +295,89 @@ export const citaAPI = {
   iniciarConsulta: (idCita) => apiCall(`/citas/${idCita}/iniciar-consulta`, { method: "PUT" }),
   finalizarConsulta: (idCita) => apiCall(`/citas/${idCita}/finalizar-consulta`, { method: "PUT" }),
 };
+
+/**
+ * Métodos para consumir endpoints de documentos
+ */
+export const documentoAPI = {
+  // Subir documento con FormData
+  subirDocumento: async (consultaId, archivo) => {
+    const token = sessionStorage.getItem("token");
+    const formData = new FormData();
+    formData.append("file", archivo);
+    formData.append("consultaId", String(consultaId));
+
+    const url = `${API_BASE_URL}/documentos/upload`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: formData,
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        const errorData = responseData;
+        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+      }
+
+      return responseData;
+    } catch (error) {
+      console.error("Error en subirDocumento:", error);
+      throw error;
+    }
+  },
+
+  // Obtener documentos de una consulta
+  obtenerDocumentosPorConsulta: async (consultaId) => {
+    const res = await apiCall(`/documentos/consulta/${consultaId}`, {
+      method: "GET",
+    });
+    return res.data || [];
+  },
+
+  // Obtener un documento específico
+  obtenerDocumento: async (id) => {
+    const res = await apiCall(`/documentos/${id}`, {
+      method: "GET",
+    });
+    return res.data;
+  },
+
+  // Descargar un documento (proxy desde backend)
+  descargarDocumento: async (id) => {
+    const token = sessionStorage.getItem("token");
+    const url = `${API_BASE_URL}/documentos/${id}/descargar`;
+
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      return response;
+    } catch (error) {
+      console.error("Error en descargarDocumento:", error);
+      throw error;
+    }
+  },
+
+  // Eliminar un documento
+  eliminarDocumento: async (id) => {
+    const res = await apiCall(`/documentos/${id}`, {
+      method: "DELETE",
+    });
+    return res;
+  },
+};
+

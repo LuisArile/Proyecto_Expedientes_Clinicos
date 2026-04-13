@@ -16,7 +16,7 @@ import { viewRegistry } from "@/shared/services/ViewRegistry";
 
 const WRAPPER_CONFIG = {
   expediente: ["gestion-pacientes", "crear-expediente", "editar-expediente", "formulario-agendar-cita", "formulario-registro-hoy"],
-  consulta: ["consulta-medica", "cola-consulta"],
+  consulta: ["consulta-medica", "cola-consulta", "ver-consulta"],
   preclinica: ["preclinica", "cola-preclinica"],
 };
 
@@ -39,6 +39,7 @@ export function Dashboard() {
   const cleanPath = location.pathname.replace("/sistema", "") || "/";
   const currentView = views.find(v => v.path === cleanPath);
   const pacienteActual = pacienteEnAtencion || selectedPaciente || location.state?.paciente;
+  const consultaId = location.state?.consultaId;
 
   useEffect(() => {
     if (user?.debeCambiarPassword && currentView?.id !== "changepassword") {
@@ -120,10 +121,11 @@ export function Dashboard() {
       return (
         <ConsultaProvider
           pacienteEnAtencion={pacienteActual}
+          consultaId={consultaId}
           onSuccess={() => {
             setPacienteEnAtencion(null);
             setSelectedPaciente(null);
-            go("cola-consulta");
+            go(view.id === "ver-consulta" ? "gestion-pacientes" : "cola-consulta");
           }}
         >
           <Component 

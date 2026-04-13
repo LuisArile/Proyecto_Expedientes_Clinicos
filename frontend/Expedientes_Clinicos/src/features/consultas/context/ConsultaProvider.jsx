@@ -1,10 +1,12 @@
 import { ConsultaContext } from "./ConsultaContext";
 
-export function ConsultaProvider({ children, pacienteEnAtencion, onSuccess }) {
+export function ConsultaProvider({ children, pacienteEnAtencion, onSuccess, consultaId = null }) {
     
     const value = {
         paciente: pacienteEnAtencion,
-        onSuccess
+        pacienteEnAtencion,
+        onSuccess,
+        consultaId
     };
 
     return (

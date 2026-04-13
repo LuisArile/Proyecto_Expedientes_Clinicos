@@ -6,7 +6,7 @@ import { FormField } from "@components/common/FormField";
 import { FormSection } from "@components/common/FormSection";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 
-export function SeccionTratamiento({ control, register, setValue, disponibles, errors }) {
+export function SeccionTratamiento({ control, register, setValue, disponibles, errors, disabled = false }) {
   // Hook para manejar el arreglo dinámico de medicamentos
   const { fields, append, remove } = useFieldArray({
     control,
@@ -42,7 +42,8 @@ export function SeccionTratamiento({ control, register, setValue, disponibles, e
                 duracion: "",
               })
             }
-            className="text-purple-600 border-purple-200 hover:bg-purple-50 cursor-pointer"
+            disabled={disabled}
+            className="text-purple-600 border-purple-200 hover:bg-purple-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="mr-1 h-4 w-4" /> Agregar Medicamento
           </Button>
@@ -67,6 +68,7 @@ export function SeccionTratamiento({ control, register, setValue, disponibles, e
                     onValueChange={(val) =>
                       setValue(`medicamentos.${index}.medicamentoId`, Number(val))
                     }
+                    disabled={disabled}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Seleccionar medicamento" />
@@ -96,6 +98,7 @@ export function SeccionTratamiento({ control, register, setValue, disponibles, e
                   error={errors?.medicamentos?.[index]?.dosis?.message}
                   placeholder="Ej: 500 mg"
                   type="dosis"
+                  disabled={disabled}
                 />
 
                 {/* Frecuencia */}
@@ -106,6 +109,7 @@ export function SeccionTratamiento({ control, register, setValue, disponibles, e
                   error={errors?.medicamentos?.[index]?.frecuencia?.message}
                   placeholder="Ej: cada 8 horas"
                   type="frecuencia"
+                  disabled={disabled}
                 />
 
                 {/* Duración */}
@@ -116,6 +120,7 @@ export function SeccionTratamiento({ control, register, setValue, disponibles, e
                   error={errors?.medicamentos?.[index]?.duracion?.message}
                   placeholder="Ej: 7 días"
                   type="duracion"
+                  disabled={disabled}
                 />
 
                 {/* Botón eliminar */}
@@ -125,7 +130,8 @@ export function SeccionTratamiento({ control, register, setValue, disponibles, e
                     variant="ghost"
                     size="icon"
                     onClick={() => remove(index)}
-                    className="text-red-400 hover:text-red-600"
+                    disabled={disabled}
+                    className="text-red-400 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Trash2 className="size-5" />
                   </Button>
