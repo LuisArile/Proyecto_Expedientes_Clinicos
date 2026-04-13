@@ -256,10 +256,12 @@ export function ConsultaMedica({ onSuccess }) {
                 isOpen={modal.open}
                 result={modal.result}
                 onClose={() => {
-                  setModal({ ...modal, open: false });
+                  setModal({ ...modal, open: false });  
                   if (modal.result.success) {
                     limpiarBorrador();
                     onSuccess?.();
+                    setSelectedPaciente(null);
+                    go("inicio");
                   }
                 }}
               />

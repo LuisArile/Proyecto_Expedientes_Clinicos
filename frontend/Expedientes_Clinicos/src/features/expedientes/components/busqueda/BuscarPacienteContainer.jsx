@@ -17,7 +17,6 @@ export function BuscarPacienteContainer({
     const cleanPath = location.pathname.replace("/sistema", "");
     const currentView = views.find(v => v.path === cleanPath);
     const modo = modoProp || location.state?.modo || dashboardController?.modo || currentView?.metadata?.modo;
-    console.log("Detección de modo:", { path: cleanPath, modo });
     
     const configControlador = {
         modo,

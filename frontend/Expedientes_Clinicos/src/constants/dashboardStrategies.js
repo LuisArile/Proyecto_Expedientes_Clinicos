@@ -128,7 +128,18 @@ export const DASHBOARD_CONFIG = {
     modulesSubtitle: "Gestión de pacientes en triaje",
     modules: [ 
       { id: 'triaje', title: "Triaje", sub: "Evaluar signos vitales", icon: Activity, color: "text-green-600", path: "cola-preclinica" },
-    ]
+    ],
+    trazabilidad: {
+      title: "Sistema de Trazabilidad",
+      subtitle: "Supervisión del flujo asistencial preclinica",
+      items: [
+        {
+          id: "consulta", title: "Consulta", sub: "Cola de espera", icon: ListChecks, 
+          color: "bg-purple-600", border: "border-purple-200", hoverBorder: "hover:border-purple-400",
+          bg: "from-white to-purple-50", navigateTo: "cola-consulta"
+        },
+      ]
+    }
   },
 
   RECEPCIONISTA: {

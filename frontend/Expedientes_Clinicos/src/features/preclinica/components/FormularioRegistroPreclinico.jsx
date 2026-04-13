@@ -89,8 +89,7 @@ export function FormularioRegistroPreclinico({ onSuccess, paciente }) {
             <CardContent className="pt-6">
               <form 
                 onSubmit={handleSubmit(
-                  (data) => onSubmit(data), 
-                  (errors) => console.log("Errores de validación:", errors)
+                  (data) => onSubmit(data),
                 )} 
                 className="space-y-6"
               >

@@ -30,7 +30,6 @@ const cargarPacientes = async () => {
     try {
         setLoading(true);
         const data = await obtenerPacientesPorEstado('ESPERA_PRECLINICA');
-        console.log("Datos desde BD:", data);
         
         const pacientesTransformados = data.map(cita => ({
             id: cita.idCita, 
@@ -44,8 +43,6 @@ const cargarPacientes = async () => {
             citaId: cita.idCita,
             expedienteId: cita.paciente?.expedientes?.idExpediente
         }));
-        
-        console.log("Pacientes transformados:", pacientesTransformados);
         
         setPacientes(pacientesTransformados);
     } catch (error) {
