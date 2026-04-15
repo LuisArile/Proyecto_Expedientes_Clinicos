@@ -89,7 +89,7 @@ jobs:
         run: |
           docker build \
             --target prod \
-            --build-arg VITE_API_URL=https://clinica-backend-c0eta2fhbmctdwc6.mexicocentral-01.azurewebsites.net \
+            --build-arg VITE_API_URL=https://clinica-backend-c0eta2fhbmctdwc6.mexicocentral-01.azurewebsites.net/api \
             -t clinicacontainerregistry.azurecr.io/frontend-clinica:${{ env.TAG }} \
             ./frontend
 
